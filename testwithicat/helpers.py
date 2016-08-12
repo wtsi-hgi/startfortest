@@ -8,7 +8,7 @@ from enum import Enum, unique
 from typing import List, Union
 from uuid import uuid4
 
-from hgicommon.collections import Metadata
+from testwithicat.models import Metadata
 from testwithicat.models import IrodsResource, IrodsUser, Version
 
 

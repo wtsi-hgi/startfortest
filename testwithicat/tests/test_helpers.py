@@ -2,7 +2,7 @@ import unittest
 from abc import ABCMeta
 
 import testwithicat
-from hgicommon.collections import Metadata
+from testwithicat.models import Metadata
 from testwithicat.helpers import SetupHelper, AccessLevel
 from testwithicat.irods_contoller import IrodsServerController
 from testwithicat.models import IrodsUser

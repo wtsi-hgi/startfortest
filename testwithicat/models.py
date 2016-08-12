@@ -1,12 +1,17 @@
 from typing import List
 
 import semantic_version
+
+import hgicommon
 from hgicommon.models import Model
 
 from hgicommon.docker.models import Container
 
 # Import from semantic version library
 Version = semantic_version.Version
+
+# Import from hgicommon library
+Metadata = hgicommon.collections.Metadata
 
 
 class IrodsUser(Model):

@@ -18,6 +18,10 @@ class _Irods4ServerController(IrodsServerController, metaclass=ABCMeta):
     """
     Controller for containerised iRODS 4 servers.
     """
+    USERS = [
+        IrodsUser("rods", "testZone", "irods123", admin=True)
+    ]
+
     def write_connection_settings(self, file_location: str, irods_server: IrodsServer):
         if os.path.isfile(file_location):
             raise ValueError("Settings cannot be written to a file that already exists")
@@ -49,14 +53,11 @@ class Irods4_1_8ServerController(_Irods4ServerController):
     Controller for containerised iRODS 4.1.8 servers.
     """
     IMAGE_NAME = "mercury/icat:4.1.8"
-    USERS = [
-        IrodsUser("rods", "testZone", "irods123", admin=True)
-    ]
     VERSION = Version("4.1.8")
 
     def start_server(self) -> ContainerisedIrodsServer:
         return self._start_server(Irods4_1_8ServerController.IMAGE_NAME, Irods4_1_8ServerController.VERSION,
-                                  Irods4_1_8ServerController.USERS)
+                                  _Irods4ServerController.USERS)
 
 
 class Irods4_1_9ServerController(_Irods4ServerController):
@@ -64,14 +65,11 @@ class Irods4_1_9ServerController(_Irods4ServerController):
     Controller for containerised iRODS 4.1.9 servers.
     """
     IMAGE_NAME = "mercury/icat:4.1.9"
-    USERS = [
-        IrodsUser("rods", "testZone", "irods123", admin=True)
-    ]
     VERSION = Version("4.1.9")
 
     def start_server(self) -> ContainerisedIrodsServer:
         return self._start_server(Irods4_1_9ServerController.IMAGE_NAME, Irods4_1_9ServerController.VERSION,
-                                  Irods4_1_9ServerController.USERS)
+                                  _Irods4ServerController.USERS)
 
 
 # Static iRODS server controllers, implemented (essentially) using singletons
