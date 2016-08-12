@@ -7,7 +7,7 @@ from typing import Sequence
 
 from hgicommon.docker.client import create_client
 from hgicommon.helpers import create_random_string
-from testwithicat.models import ContainerisedIrodsServer, IrodsServer, IrodsUser, Version
+from testwithirods.models import ContainerisedIrodsServer, IrodsServer, IrodsUser, Version
 
 
 class StaticIrodsServerController():

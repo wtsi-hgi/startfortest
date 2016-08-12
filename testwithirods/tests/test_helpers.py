@@ -1,13 +1,13 @@
 import unittest
 from abc import ABCMeta
 
-import testwithicat
-from testwithicat.models import Metadata
-from testwithicat.helpers import SetupHelper, AccessLevel
-from testwithicat.irods_contoller import IrodsServerController
-from testwithicat.models import IrodsUser
-from testwithicat.proxies import ICommandProxyController
-from testwithicat.tests._common import IcatTest, create_tests_for_all_icat_setups
+import testwithirods
+from testwithirods.models import Metadata
+from testwithirods.helpers import SetupHelper, AccessLevel
+from testwithirods.irods_contoller import IrodsServerController
+from testwithirods.models import IrodsUser
+from testwithirods.proxies import ICommandProxyController
+from testwithirods.tests._common import IcatTest, create_tests_for_all_icat_setups
 
 _METADATA = Metadata({
     "attribute_1": ["value_1", "value_2"],
@@ -154,7 +154,7 @@ class TestSetupHelper(IcatTest, metaclass=ABCMeta):
 
 # Setup tests for all iCAT setups
 create_tests_for_all_icat_setups(TestSetupHelper)
-for name, value in testwithicat.tests._common.__dict__.items():
+for name, value in testwithirods.tests._common.__dict__.items():
     if TestSetupHelper.__name__ in name:
         globals()[name] = value
 del TestSetupHelper

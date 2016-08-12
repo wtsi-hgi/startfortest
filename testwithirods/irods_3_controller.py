@@ -3,8 +3,8 @@ import os
 from abc import ABCMeta
 from time import sleep
 
-from testwithicat.irods_contoller import IrodsServerController, create_static_irods_server_controller
-from testwithicat.models import IrodsServer, ContainerisedIrodsServer, IrodsUser, Version
+from testwithirods.irods_contoller import IrodsServerController, create_static_irods_server_controller
+from testwithirods.models import IrodsServer, ContainerisedIrodsServer, IrodsUser, Version
 
 _IRODS_CONFIG_FILE_NAME = ".irodsEnv"
 

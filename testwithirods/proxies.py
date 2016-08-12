@@ -10,7 +10,7 @@ from docker.errors import NotFound
 
 from hgicommon.docker.client import create_client
 from hgicommon.helpers import create_random_string
-from testwithicat.models import IrodsServer, ContainerisedIrodsServer
+from testwithirods.models import IrodsServer, ContainerisedIrodsServer
 
 _SHEBANG = "#!/usr/bin/env bash"
 _FAIL_SETTINGS = "set -eu -o pipefail"

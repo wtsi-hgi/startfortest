@@ -1,8 +1,8 @@
 import unittest
 
-from testwithicat.api import IrodsVersion
-from testwithicat.api import get_static_irods_server_controller
-from testwithicat.models import Version
+from testwithirods.api import IrodsVersion
+from testwithirods.api import get_static_irods_server_controller
+from testwithirods.models import Version
 
 
 class TestGetStaticIrodsServerController(unittest.TestCase):

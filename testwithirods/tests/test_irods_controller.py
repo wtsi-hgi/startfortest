@@ -1,13 +1,13 @@
 import unittest
 from abc import ABCMeta
 
-import testwithicat
+import testwithirods
 from hgicommon.docker.client import create_client
-from testwithicat.helpers import SetupHelper
-from testwithicat.irods_contoller import IrodsServerController
-from testwithicat.models import ContainerisedIrodsServer
-from testwithicat.proxies import ICommandProxyController
-from testwithicat.tests._common import create_tests_for_all_icat_setups, IcatTest
+from testwithirods.helpers import SetupHelper
+from testwithirods.irods_contoller import IrodsServerController
+from testwithirods.models import ContainerisedIrodsServer
+from testwithirods.proxies import ICommandProxyController
+from testwithirods.tests._common import create_tests_for_all_icat_setups, IcatTest
 
 
 class TestIrodsServerController(IcatTest, metaclass=ABCMeta):
@@ -49,7 +49,7 @@ class TestIrodsServerController(IcatTest, metaclass=ABCMeta):
 
 # Setup tests for all iCAT setups
 create_tests_for_all_icat_setups(TestIrodsServerController)
-for name, value in testwithicat.tests._common.__dict__.items():
+for name, value in testwithirods.tests._common.__dict__.items():
     if TestIrodsServerController.__name__ in name:
         globals()[name] = value
 del TestIrodsServerController

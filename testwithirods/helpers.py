@@ -8,8 +8,8 @@ from enum import Enum, unique
 from typing import List, Union
 from uuid import uuid4
 
-from testwithicat.models import Metadata
-from testwithicat.models import IrodsResource, IrodsUser, Version
+from testwithirods.models import Metadata
+from testwithirods.models import IrodsResource, IrodsUser, Version
 
 
 @unique
