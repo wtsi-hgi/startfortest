@@ -22,7 +22,7 @@ install:
   - pip install -r test_requirements.txt
 
 script:
-  - nosetests -v --with-coverage --cover-package=icat --cover-inclusive
+  - nosetests -v --with-coverage --cover-package=testwithirods --cover-inclusive
 
 after_success:
   - codecov

@@ -1,20 +1,20 @@
-[![Build Status](https://travis-ci.org/wtsi-hgi/test-with-icat.svg)](https://travis-ci.org/wtsi-hgi/test-with-icat)
-[![codecov.io](https://codecov.io/github/wtsi-hgi/test-with-icat/coverage.svg?branch=master)](https://codecov.io/github/wtsi-hgi/test-with-icat?branch=master)
+[![Build Status](https://travis-ci.org/wtsi-hgi/test-with-irods.svg)](https://travis-ci.org/wtsi-hgi/test-with-irods)
+[![codecov.io](https://codecov.io/github/wtsi-hgi/test-with-irods/coverage.svg?branch=master)](https://codecov.io/github/wtsi-hgi/test-with-irods?branch=master)
 
-# Test with iCAT
-Test with iCAT exploits [Docker](http://docker.com) to simplify the testing of software that interacts with an iRODS 
-server (iCAT).
+# Test with iRODS
+Test with iRODS exploits [Docker](http://docker.com) to simplify the testing of software that interacts with an iRODS 
+(iCAT) server.
 
 
-## Using
+## Use
 TODO: add useful details here...
 
 
 ### Setup Helper
 To help with the setup of tests, a number of helper methods are available:
 ```python
-from testwithicat.helpers import SetupHelper, AccessLevel
-from testwithicat.models import IrodsResource, IrodsUser, Metadata
+from testwithirods.helpers import SetupHelper, AccessLevel
+from testwithirods.models import IrodsResource, IrodsUser, Metadata
 
 setup_helper = SetupHelper("icommands_location")
 setup_helper.create_data_object("name", contents="contents")   # type: str
@@ -60,7 +60,7 @@ $ nosetests -v
 
 To generate a test coverage report with nosetests:
 ```bash
-$ nosetests -v --with-coverage --cover-package=testwithicat --cover-inclusive
+$ nosetests -v --with-coverage --cover-package=testwithirods --cover-inclusive
 ```
 
 To limit testing to a specific version iRODS, set the environment variable `SINGLE_TEST_SETUP` to match 
