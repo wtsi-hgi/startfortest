@@ -25,7 +25,7 @@ class AccessLevel(Enum):
 
 class SetupHelper:
     """
-    Helper for setting up tests.
+    Helper for setting up tests using.
     """
     def __init__(self, icommands_location: str):
         """

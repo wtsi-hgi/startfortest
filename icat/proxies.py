@@ -47,7 +47,7 @@ class ProxyController(metaclass=ABCMeta):
         executed
         within
         """
-        self.cached_container_name = create_random_string(prefix="binary-container-%s")
+        self.cached_container_name = create_random_string(prefix="binary-container-")
         self._irods_test_server = irods_server
         self._docker_image = image_with_real_binaries
         self._temp_directories = set()     # type: Set[str]
