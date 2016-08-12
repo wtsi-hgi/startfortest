@@ -22,7 +22,7 @@ install:
   - pip install -r test_requirements.txt
 
 script:
-  - nosetests -v --with-coverage --cover-package=testwithirods --cover-inclusive
+  - nosetests -v --with-coverage --cover-package=testwithirods --cover-inclusive --exclude-dir-file=testwithirods/tests/_common.py
 
 after_success:
   - codecov

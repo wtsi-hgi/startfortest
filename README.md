@@ -55,12 +55,12 @@ $ pip3 install -q -r test_requirements.txt
 ### Testing
 Using nosetests, in the project directory, run:
 ```bash
-$ nosetests -v
+$ nosetests -v --exclude-dir-file=testwithirods/tests/_common.py
 ```
 
 To generate a test coverage report with nosetests:
 ```bash
-$ nosetests -v --with-coverage --cover-package=testwithirods --cover-inclusive
+$ nosetests -v --with-coverage --cover-package=testwithirods --cover-inclusive --exclude-dir-file=testwithirods/tests/_common.py
 ```
 
 To limit testing to a specific version iRODS, set the environment variable `SINGLE_TEST_SETUP` to match 
