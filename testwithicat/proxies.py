@@ -10,7 +10,7 @@ from docker.errors import NotFound
 
 from hgicommon.docker.client import create_client
 from hgicommon.helpers import create_random_string
-from icat.models import IrodsServer, ContainerisedIrodsServer
+from testwithicat.models import IrodsServer, ContainerisedIrodsServer
 
 _SHEBANG = "#!/usr/bin/env bash"
 _FAIL_SETTINGS = "set -eu -o pipefail"
@@ -44,8 +44,7 @@ class ProxyController(metaclass=ABCMeta):
         Constructor.
         :param irods_server: the iRODS server that the proxied binaries use
         :param image_with_real_binaries: the name (docker-py's "tag") of the Docker image that the proxied binaries are
-        executed
-        within
+        executed within
         """
         self.cached_container_name = create_random_string(prefix="binary-container-")
         self._irods_test_server = irods_server

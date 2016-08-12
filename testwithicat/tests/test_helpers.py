@@ -2,8 +2,11 @@ import unittest
 from abc import ABCMeta
 
 from hgicommon.collections import Metadata
-from icat.helpers import SetupHelper, AccessLevel
-from icat.models import IrodsUser
+from testwithicat.helpers import SetupHelper, AccessLevel
+from testwithicat.irods_3_controller import Irods3_3_1ServerController
+from testwithicat.irods_4_controller import Irods4_1_9ServerController, Irods4_1_8ServerController
+from testwithicat.models import IrodsUser
+from testwithicat.proxies import ICommandProxyController
 
 _METADATA = Metadata({
     "attribute_1": ["value_1", "value_2"],
@@ -17,15 +20,26 @@ class _TestSetupHelper(unittest.TestCase, metaclass=ABCMeta):
     """
     Tests for `SetupHelper`.
     """
+    def __init__(self, ServerController: type, compatible_baton_image: str, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._ServerController = ServerController
+        self._compatible_baton_image = compatible_baton_image
+
     def setUp(self):
-        self.setup_helper = SetupHelper(self.test_with_baton.icommands_location)
+        self._server_controller = self._ServerController()
+        self.irods_server = self._server_controller.start_server()
+
+        self._proxy_controller = ICommandProxyController(self.irods_server, self._compatible_baton_image)
+        icommands_location = self._proxy_controller.create_proxy_binaries()
+
+        self.setup_helper = SetupHelper(icommands_location)
 
     def tearDown(self):
-        self.test_with_baton.tear_down()
+        self._server_controller.stop_server(self.irods_server)
+        self._proxy_controller.create_proxy_binaries()
 
     def test_run_icommand(self):
         ils = self.setup_helper.run_icommand(["ils"])
-
         self.assertTrue(ils.startswith("/"))
         self.assertTrue(ils.endswith(":"))
 
@@ -78,7 +92,7 @@ class _TestSetupHelper(unittest.TestCase, metaclass=ABCMeta):
         resource = self.setup_helper.create_replica_storage()
         self.setup_helper.replicate_data_object(_DATA_OBJECT_NAME, resource)
 
-        expected_checksum = "900150983cd24fb0d6963f7d28e17f72" if self.test_with_baton.irods_server.version.major == 3 \
+        expected_checksum = "900150983cd24fb0d6963f7d28e17f72" if self.irods_server.version.major == 3 \
             else "sha2:ungWv48Bz+pBQUDeXa4iI7ADYaOWF3qctBD/YfIAFa0="
 
         # Asserting that checksum is not stored before now
@@ -90,7 +104,7 @@ class _TestSetupHelper(unittest.TestCase, metaclass=ABCMeta):
 
     def test_get_checksum(self):
         path = self.setup_helper.create_data_object(_DATA_OBJECT_NAME, "abc")
-        expected_checksum = "900150983cd24fb0d6963f7d28e17f72" if self.test_with_baton.irods_server.version.major == 3 \
+        expected_checksum = "900150983cd24fb0d6963f7d28e17f72" if self.irods_server.version.major == 3 \
             else "sha2:ungWv48Bz+pBQUDeXa4iI7ADYaOWF3qctBD/YfIAFa0="
         self.assertEquals(self.setup_helper.get_checksum(path), expected_checksum)
 
@@ -101,11 +115,11 @@ class _TestSetupHelper(unittest.TestCase, metaclass=ABCMeta):
         self.assertIn("resc_def_path: %s" % resource.location, resource_info)
 
     def test_create_user_with_existing_username(self):
-        existing_user = self.test_with_baton.irods_server.users[0]
+        existing_user = self.irods_server.users[0]
         self.assertRaises(ValueError, self.setup_helper.create_user, existing_user.username, existing_user.zone)
 
     def test_create_user(self):
-        required_user = IrodsUser("user_1", self.test_with_baton.irods_server.users[0].zone)
+        required_user = IrodsUser("user_1", self.irods_server.users[0].zone)
         user = self.setup_helper.create_user(required_user.username, required_user.zone)
         self.assertEqual(user, required_user)
         user_list = self.setup_helper.run_icommand(["iadmin", "lu"])
@@ -113,7 +127,7 @@ class _TestSetupHelper(unittest.TestCase, metaclass=ABCMeta):
 
     def test_set_access(self):
         path = self.setup_helper.create_data_object(_DATA_OBJECT_NAME)
-        zone = self.test_with_baton.irods_server.users[0].zone
+        zone = self.irods_server.users[0].zone
         user_1 = self.setup_helper.create_user("user_1", zone)
         user_2 = self.setup_helper.create_user("user_2", zone)
 
@@ -125,7 +139,7 @@ class _TestSetupHelper(unittest.TestCase, metaclass=ABCMeta):
         self.assertIn("%s#%s:modify object" % (user_2.username, zone), access_info)
 
     def test_get_icat_version(self):
-        self.assertEqual(self.setup_helper.get_icat_version(), self.test_with_baton.irods_server.version)
+        self.assertEqual(self.setup_helper.get_icat_version(), self.irods_server.version)
 
     def _assert_metadata_in_retrieved(self, metadata: Metadata, retrieved_metadata: str):
         """
@@ -142,7 +156,31 @@ class _TestSetupHelper(unittest.TestCase, metaclass=ABCMeta):
                 self.assertIn("attribute: %s\nvalue: %s" % (attribute, value), retrieved_metadata)
 
 
-# FIXME: Create tests for all icat versions
+class Irods3_3_1TestSetupHelper(_TestSetupHelper):
+    """
+    Setup helper tests with iRODS 3.3.1.
+    """
+    def __init__(self, *args, **kwargs):
+        super().__init__(Irods3_3_1ServerController, "mercury/baton:0.16.4-with-irods-3.3.1", *args, **kwargs)
+
+
+class Irods4_1_8TestSetupHelper(_TestSetupHelper):
+    """
+    Setup helper tests with iRODS 4.1.8.
+    """
+    def __init__(self, *args, **kwargs):
+        super().__init__(Irods4_1_8ServerController, "mercury/baton:0.16.4-with-irods-4.1.8", *args, **kwargs)
+
+
+class Irods4_1_9TestSetupHelper(_TestSetupHelper):
+    """
+    Setup helper tests with iRODS 4.1.9.
+    """
+    def __init__(self, *args, **kwargs):
+        super().__init__(Irods4_1_9ServerController, "mercury/baton:0.16.4-with-irods-4.1.9", *args, **kwargs)
+
+
+# Remove abstract base class to stop unittest from running it as a test
 del _TestSetupHelper
 
 

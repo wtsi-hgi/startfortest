@@ -2,12 +2,12 @@ import unittest
 from abc import ABCMeta, abstractmethod
 
 from hgicommon.docker.client import create_client
-from icat.irods_3_controller import Irods3_3_1ServerController
-from icat.helpers import SetupHelper
-from icat.irods_4_controller import Irods4_1_8ServerController, Irods4_1_9ServerController
-from icat.irods_contoller import IrodsServerController
-from icat.models import ContainerisedIrodsServer, Version
-from icat.proxies import ICommandProxyController
+from testwithicat.irods_3_controller import Irods3_3_1ServerController
+from testwithicat.helpers import SetupHelper
+from testwithicat.irods_4_controller import Irods4_1_8ServerController, Irods4_1_9ServerController
+from testwithicat.irods_contoller import IrodsServerController
+from testwithicat.models import ContainerisedIrodsServer, Version
+from testwithicat.proxies import ICommandProxyController
 
 
 class _TestIrodsServerController(unittest.TestCase, metaclass=ABCMeta):

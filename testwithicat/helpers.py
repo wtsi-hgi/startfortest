@@ -9,7 +9,7 @@ from typing import List, Union
 from uuid import uuid4
 
 from hgicommon.collections import Metadata
-from icat.models import IrodsResource, IrodsUser, Version
+from testwithicat.models import IrodsResource, IrodsUser, Version
 
 
 @unique

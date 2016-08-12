@@ -2,11 +2,11 @@ import os
 from enum import Enum, unique
 from typing import Union
 
-from icat.irods_3_controller import StaticIrods3_3_1ServerController
-from icat.irods_4_controller import StaticIrods4_1_8ServerController
-from icat.irods_4_controller import StaticIrods4_1_9ServerController
-from icat.irods_contoller import StaticIrodsServerController
-from icat.models import IrodsServer, IrodsUser
+from testwithicat.irods_3_controller import StaticIrods3_3_1ServerController
+from testwithicat.irods_4_controller import StaticIrods4_1_8ServerController
+from testwithicat.irods_4_controller import StaticIrods4_1_9ServerController
+from testwithicat.irods_contoller import StaticIrodsServerController
+from testwithicat.models import IrodsServer, IrodsUser
 
 
 @unique
