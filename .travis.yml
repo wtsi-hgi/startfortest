@@ -7,22 +7,19 @@ services:
   - docker
 
 env:
-  global:
-    - DOCKER_HOST="tcp://127.0.0.1:2375"
-    - DOCKER_TLS_VERIFY=""
-    - DOCKER_CERT_PATH=""
+  matrix:
+    - SINGLE_TEST_SETUP=Irods3_3_1ServerController
+    - SINGLE_TEST_SETUP=Irods4_1_8ServerController
+    - SINGLE_TEST_SETUP=Irods4_1_9ServerController
 
 before_install:
   - pip install codecov
-  - sudo apt-get update
-  - sudo apt-get install -y -o Dpkg::Options::=--force-confdef docker-engine
 
 install:
   - pip install -r requirements.txt
   - pip install -r test_requirements.txt
 
 script:
-  - nosetests -v --with-coverage --cover-package=testwithirods --cover-inclusive --exclude-dir-file=testwithirods/tests/_common.py
-
+  - nosetests -v --with-coverage --cover-package=testwithirods --cover-inclusive --exclude-test=testwithirods.tests._common.create_tests_for_all_icat_setups --exclude-test=testwithirods.tests._common.IcatTest
 after_success:
   - codecov
