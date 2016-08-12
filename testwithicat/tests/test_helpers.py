@@ -1,12 +1,13 @@
 import unittest
 from abc import ABCMeta
 
+import testwithicat
 from hgicommon.collections import Metadata
 from testwithicat.helpers import SetupHelper, AccessLevel
-from testwithicat.irods_3_controller import Irods3_3_1ServerController
-from testwithicat.irods_4_controller import Irods4_1_9ServerController, Irods4_1_8ServerController
+from testwithicat.irods_contoller import IrodsServerController
 from testwithicat.models import IrodsUser
 from testwithicat.proxies import ICommandProxyController
+from testwithicat.tests._common import IcatTest, create_tests_for_all_icat_setups
 
 _METADATA = Metadata({
     "attribute_1": ["value_1", "value_2"],
@@ -16,20 +17,15 @@ _METADATA = Metadata({
 _DATA_OBJECT_NAME = "data-object-name"
 
 
-class _TestSetupHelper(unittest.TestCase, metaclass=ABCMeta):
+class TestSetupHelper(IcatTest, metaclass=ABCMeta):
     """
     Tests for `SetupHelper`.
     """
-    def __init__(self, ServerController: type, compatible_baton_image: str, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self._ServerController = ServerController
-        self._compatible_baton_image = compatible_baton_image
-
     def setUp(self):
-        self._server_controller = self._ServerController()
+        self._server_controller = self.ServerController()   # type: IrodsServerController
         self.irods_server = self._server_controller.start_server()
 
-        self._proxy_controller = ICommandProxyController(self.irods_server, self._compatible_baton_image)
+        self._proxy_controller = ICommandProxyController(self.irods_server, self.compatible_baton_image)
         icommands_location = self._proxy_controller.create_proxy_binaries()
 
         self.setup_helper = SetupHelper(icommands_location)
@@ -156,32 +152,12 @@ class _TestSetupHelper(unittest.TestCase, metaclass=ABCMeta):
                 self.assertIn("attribute: %s\nvalue: %s" % (attribute, value), retrieved_metadata)
 
 
-class Irods3_3_1TestSetupHelper(_TestSetupHelper):
-    """
-    Setup helper tests with iRODS 3.3.1.
-    """
-    def __init__(self, *args, **kwargs):
-        super().__init__(Irods3_3_1ServerController, "mercury/baton:0.16.4-with-irods-3.3.1", *args, **kwargs)
-
-
-class Irods4_1_8TestSetupHelper(_TestSetupHelper):
-    """
-    Setup helper tests with iRODS 4.1.8.
-    """
-    def __init__(self, *args, **kwargs):
-        super().__init__(Irods4_1_8ServerController, "mercury/baton:0.16.4-with-irods-4.1.8", *args, **kwargs)
-
-
-class Irods4_1_9TestSetupHelper(_TestSetupHelper):
-    """
-    Setup helper tests with iRODS 4.1.9.
-    """
-    def __init__(self, *args, **kwargs):
-        super().__init__(Irods4_1_9ServerController, "mercury/baton:0.16.4-with-irods-4.1.9", *args, **kwargs)
-
-
-# Remove abstract base class to stop unittest from running it as a test
-del _TestSetupHelper
+# Setup tests for all iCAT setups
+create_tests_for_all_icat_setups(TestSetupHelper)
+for name, value in testwithicat.tests._common.__dict__.items():
+    if TestSetupHelper.__name__ in name:
+        globals()[name] = value
+del TestSetupHelper
 
 
 if __name__ == "__main__":

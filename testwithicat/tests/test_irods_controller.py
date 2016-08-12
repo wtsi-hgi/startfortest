@@ -1,16 +1,16 @@
 import unittest
-from abc import ABCMeta, abstractmethod
+from abc import ABCMeta
 
+import testwithicat
 from hgicommon.docker.client import create_client
-from testwithicat.irods_3_controller import Irods3_3_1ServerController
 from testwithicat.helpers import SetupHelper
-from testwithicat.irods_4_controller import Irods4_1_8ServerController, Irods4_1_9ServerController
 from testwithicat.irods_contoller import IrodsServerController
-from testwithicat.models import ContainerisedIrodsServer, Version
+from testwithicat.models import ContainerisedIrodsServer
 from testwithicat.proxies import ICommandProxyController
+from testwithicat.tests._common import create_tests_for_all_icat_setups, IcatTest
 
 
-class _TestIrodsServerController(unittest.TestCase, metaclass=ABCMeta):
+class TestIrodsServerController(IcatTest, metaclass=ABCMeta):
     """
     Tests for `IrodsServerController`.
     """
@@ -24,27 +24,8 @@ class _TestIrodsServerController(unittest.TestCase, metaclass=ABCMeta):
         docker_client = create_client()
         return docker_client.inspect_container(container.native_object)["State"]["Running"]
 
-    @abstractmethod
-    def create_controller(self) -> IrodsServerController:
-        """
-        Creates a concrete `IrodsServerController` instance.
-        :return: an iRODS server controller
-        """
-
-    def __init__(self, compatible_baton_image: str, irods_version: Version, *args, **kwargs):
-        """
-        Constructor.
-        :param compatible_baton_image: version of baton compatible with the version of iRODS that is controlled
-        :param irods_version: the iRODS version that the server controller deals with
-        :param args: used by `unittest.TestCase`
-        :param kwargs: used by `unittest.TestCase`
-        """
-        super().__init__(*args, **kwargs)
-        self.compatible_baton_image = compatible_baton_image
-        self.irods_version = irods_version
-
     def setUp(self):
-        self.irods_controller = self.create_controller()
+        self.irods_controller = self.ServerController()     # type: IrodsServerController
 
     def test_start_server(self):
         irods_server = self.irods_controller.start_server()
@@ -57,7 +38,7 @@ class _TestIrodsServerController(unittest.TestCase, metaclass=ABCMeta):
         icommand_binaries_location = proxy_controller.create_proxy_binaries()
         setup_helper = SetupHelper(icommand_binaries_location)
 
-        self.assertEqual(setup_helper.get_icat_version(), self.irods_version)
+        self.assertEqual(setup_helper.get_icat_version(), self.ServerController.VERSION)
 
     def test_stop_server(self):
         irods_container = self.irods_controller.start_server()
@@ -66,59 +47,12 @@ class _TestIrodsServerController(unittest.TestCase, metaclass=ABCMeta):
         self.assertFalse(self._is_container_running(irods_container))
 
 
-class TestIrods3_3_1ServerController(_TestIrodsServerController):
-    """
-    Tests for `Irods3_3_1ServerController`.
-    """
-    _BATON_IMAGE = "mercury/baton:0.16.3-with-irods-3.3.1"
-    _IRODS_VERSION = "3.3.1"
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(
-            TestIrods3_3_1ServerController._BATON_IMAGE,
-            Version(TestIrods3_3_1ServerController._IRODS_VERSION),
-            *args, **kwargs)
-
-    def create_controller(self) -> IrodsServerController:
-        return Irods3_3_1ServerController()
-
-
-class TestIrods4_1_8ServerController(_TestIrodsServerController):
-    """
-    Tests for `Irods4_1_8ServerController`.
-    """
-    _BATON_IMAGE = "mercury/baton:0.16.3-with-irods-4.1.8"
-    _IRODS_VERSION = "4.1.8"
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(
-            TestIrods4_1_8ServerController._BATON_IMAGE,
-            Version(TestIrods4_1_8ServerController._IRODS_VERSION),
-            *args, **kwargs)
-
-    def create_controller(self) -> IrodsServerController:
-        return Irods4_1_8ServerController()
-
-
-class TestIrods4_1_9ServerController(_TestIrodsServerController):
-    """
-    Tests for `Irods4_1_8ServerController`.
-    """
-    _BATON_IMAGE = "mercury/baton:0.16.4-with-irods-4.1.9"
-    _IRODS_VERSION = "4.1.9"
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(
-            TestIrods4_1_9ServerController._BATON_IMAGE,
-            Version(TestIrods4_1_9ServerController._IRODS_VERSION),
-            *args, **kwargs)
-
-    def create_controller(self) -> IrodsServerController:
-        return Irods4_1_9ServerController()
-
-
-# Required to stop unittest from running the abstract base class
-del _TestIrodsServerController
+# Setup tests for all iCAT setups
+create_tests_for_all_icat_setups(TestIrodsServerController)
+for name, value in testwithicat.tests._common.__dict__.items():
+    if TestIrodsServerController.__name__ in name:
+        globals()[name] = value
+del TestIrodsServerController
 
 
 if __name__ == "__main__":

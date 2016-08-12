@@ -19,7 +19,7 @@ class IrodsVersion(Enum):
     v4_1_9 = StaticIrods4_1_9ServerController
 
 
-def get_static_irods_server_controller(irods_version: IrodsVersion=IrodsVersion.v3_3_1) -> StaticIrodsServerController:
+def get_static_irods_server_controller(irods_version: IrodsVersion=IrodsVersion.v4_1_9) -> StaticIrodsServerController:
     """
     Gets a controller for the an iRODS server of the given version.
     :param irods_version: the iRODS version that the controller must work with
