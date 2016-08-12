@@ -5,8 +5,9 @@ import tempfile
 from abc import abstractmethod, ABCMeta
 from typing import Sequence
 
-from testwithbaton._common import create_unique_name, create_client
-from testwithbaton.models import ContainerisedIrodsServer, IrodsServer, IrodsUser, Version
+from hgicommon.docker.client import create_client
+from hgicommon.helpers import create_random_string
+from icat.models import ContainerisedIrodsServer, IrodsServer, IrodsUser, Version
 
 
 class StaticIrodsServerController():
@@ -69,7 +70,7 @@ class IrodsServerController(metaclass=ABCMeta):
         else:
             docker_image = docker_image[0]
 
-        container_name = create_unique_name("irods")
+        container_name = create_random_string("irods")
         logging.info("Creating iRODs server Docker container: %s" % container_name)
         container = IrodsServerController._DOCKER_CLIENT.create_container(
             image=docker_image, name=container_name, ports=[IrodsServerController._DEFAULT_IRODS_PORT])

@@ -1,0 +1,37 @@
+language: python
+
+python:
+  - 3.5
+
+services:
+  - docker
+
+env:
+  global:
+    - DOCKER_HOST="tcp://127.0.0.1:2375"
+    - DOCKER_TLS_VERIFY=""
+    - DOCKER_CERT_PATH=""
+  matrix:
+    - SINGLE_TEST_SETUP=v0_16_1_WITH_IRODS_3_3_1
+    - SINGLE_TEST_SETUP=v0_16_2_WITH_IRODS_3_3_1
+    - SINGLE_TEST_SETUP=v0_16_2_WITH_IRODS_4_1_8
+    - SINGLE_TEST_SETUP=v0_16_3_WITH_IRODS_3_3_1
+    - SINGLE_TEST_SETUP=v0_16_3_WITH_IRODS_4_1_8
+    - SINGLE_TEST_SETUP=v0_16_4_WITH_IRODS_3_3_1
+    - SINGLE_TEST_SETUP=v0_16_4_WITH_IRODS_4_1_8
+    - SINGLE_TEST_SETUP=v0_16_4_WITH_IRODS_4_1_9
+
+before_install:
+  - pip install codecov
+  - sudo apt-get update
+  - sudo apt-get install -y -o Dpkg::Options::=--force-confdef docker-engine
+
+install:
+  - pip install -r requirements.txt
+  - pip install -r test_requirements.txt
+
+script:
+  - nosetests -v --with-coverage --cover-package=icat --cover-inclusive
+
+after_success:
+  - codecov

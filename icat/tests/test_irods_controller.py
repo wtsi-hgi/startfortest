@@ -1,16 +1,16 @@
 import unittest
 from abc import ABCMeta, abstractmethod
 
-from testwithbaton._common import create_client
-from testwithbaton.proxies import ICommandProxyController
-from testwithbaton.helpers import SetupHelper
-from testwithbaton.irods._irods_3_controller import Irods3_3_1ServerController
-from testwithbaton.irods._irods_4_controller import Irods4_1_8ServerController, Irods4_1_9ServerController
-from testwithbaton.irods._irods_contoller import IrodsServerController
-from testwithbaton.models import ContainerisedIrodsServer, Version
+from hgicommon.docker.client import create_client
+from icat.irods_3_controller import Irods3_3_1ServerController
+from icat.helpers import SetupHelper
+from icat.irods_4_controller import Irods4_1_8ServerController, Irods4_1_9ServerController
+from icat.irods_contoller import IrodsServerController
+from icat.models import ContainerisedIrodsServer, Version
+from icat.proxies import ICommandProxyController
 
 
-class TestIrodsServerController(unittest.TestCase, metaclass=ABCMeta):
+class _TestIrodsServerController(unittest.TestCase, metaclass=ABCMeta):
     """
     Tests for `IrodsServerController`.
     """
@@ -66,7 +66,7 @@ class TestIrodsServerController(unittest.TestCase, metaclass=ABCMeta):
         self.assertFalse(self._is_container_running(irods_container))
 
 
-class TestIrods3_3_1ServerController(TestIrodsServerController):
+class TestIrods3_3_1ServerController(_TestIrodsServerController):
     """
     Tests for `Irods3_3_1ServerController`.
     """
@@ -83,7 +83,7 @@ class TestIrods3_3_1ServerController(TestIrodsServerController):
         return Irods3_3_1ServerController()
 
 
-class TestIrods4_1_8ServerController(TestIrodsServerController):
+class TestIrods4_1_8ServerController(_TestIrodsServerController):
     """
     Tests for `Irods4_1_8ServerController`.
     """
@@ -100,7 +100,7 @@ class TestIrods4_1_8ServerController(TestIrodsServerController):
         return Irods4_1_8ServerController()
 
 
-class TestIrods4_1_9ServerController(TestIrodsServerController):
+class TestIrods4_1_9ServerController(_TestIrodsServerController):
     """
     Tests for `Irods4_1_8ServerController`.
     """
@@ -118,7 +118,7 @@ class TestIrods4_1_9ServerController(TestIrodsServerController):
 
 
 # Required to stop unittest from running the abstract base class
-del TestIrodsServerController
+del _TestIrodsServerController
 
 
 if __name__ == "__main__":

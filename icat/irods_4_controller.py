@@ -3,8 +3,8 @@ import logging
 import os
 from abc import ABCMeta
 
-from testwithbaton.irods._irods_contoller import IrodsServerController, create_static_irods_server_controller
-from testwithbaton.models import IrodsServer, ContainerisedIrodsServer, IrodsUser, Version
+from icat.irods_contoller import IrodsServerController, create_static_irods_server_controller
+from icat.models import IrodsServer, ContainerisedIrodsServer, IrodsUser, Version
 
 _IRODS_CONFIG_FILE_NAME = "irods_environment.json"
 
