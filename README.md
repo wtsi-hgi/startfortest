@@ -7,13 +7,20 @@ Test with iRODS exploits [Docker](http://docker.com) to simplify the testing of 
 
 
 ## Use
-TODO: add useful details here...
+### Using an iCAT Server
 ```python
-get_static_irods_server_controller()
+from testwithirods.api import IrodsVersion
+from testwithirods.api import get_static_irods_server_controller
+
+# Controllers available for iRODS version: 3.3.1, 4.1.8, 4.1.9
+controller = get_static_irods_server_controller(irods_version=IrodsVersion.v4_1_9)
+irods_server = controller.start_server()
+# Do interesting things with iRODS...
+controller.stop_server(irods_server)
 ```
 
 
-### Setup Helper
+### Setup Helpers
 To help with the setup of tests, a number of helper methods are available:
 ```python
 from testwithirods.helpers import SetupHelper, AccessLevel
