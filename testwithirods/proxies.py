@@ -48,9 +48,14 @@ class ProxyController(metaclass=ABCMeta):
         """
         self.cached_container_name = create_random_string(prefix="binary-container-")
         self._irods_test_server = irods_server
-        self._docker_image = image_with_real_binaries
+        self._docker_image_with_binaries = image_with_real_binaries
         self._temp_directories = set()     # type: Set[str]
         atexit.register(self.tear_down)
+
+        # Ensure the image with the real binaries have been pulled to stop it polluting the output
+        docker_client = create_client()
+        for line in docker_client.pull(image_with_real_binaries, stream=True):
+            logging.debug(line)
 
     def tear_down(self):
         """
@@ -197,7 +202,7 @@ class ProxyController(metaclass=ABCMeta):
             "username": user.username,
             "password": user.password,
             "other": other,
-            "image": self._docker_image,
+            "image": self._docker_image_with_binaries,
             "command": command
         })
 

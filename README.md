@@ -8,6 +8,9 @@ Test with iRODS exploits [Docker](http://docker.com) to simplify the testing of 
 
 ## Use
 TODO: add useful details here...
+```python
+get_static_irods_server_controller()
+```
 
 
 ### Setup Helper
@@ -55,12 +58,12 @@ $ pip3 install -q -r test_requirements.txt
 ### Testing
 Using nosetests, in the project directory, run:
 ```bash
-$ nosetests -v --exclude-dir-file=testwithirods/tests/_common.py
+$ nosetests -v --exclude-test=testwithirods.tests._common.create_tests_for_all_icat_setups --exclude-test=testwithirods.tests._common.IcatTest
 ```
 
 To generate a test coverage report with nosetests:
 ```bash
-$ nosetests -v --with-coverage --cover-package=testwithirods --cover-inclusive --exclude-dir-file=testwithirods/tests/_common.py
+$ nosetests -v --with-coverage --cover-package=testwithirods --cover-inclusive --exclude-test=testwithirods.tests._common.create_tests_for_all_icat_setups --exclude-test=testwithirods.tests._common.IcatTest
 ```
 
 To limit testing to a specific version iRODS, set the environment variable `SINGLE_TEST_SETUP` to match 
