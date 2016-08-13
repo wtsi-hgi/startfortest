@@ -3,7 +3,8 @@ import logging
 import os
 from abc import ABCMeta
 
-from testwithirods.irods_contoller import IrodsServerController, create_static_irods_server_controller
+from testwithirods.irods_contoller import IrodsServerController, create_static_irods_server_controller, \
+    IrodsServerControllerClassBuilder
 from testwithirods.models import IrodsServer, ContainerisedIrodsServer, IrodsUser, Version
 
 _IRODS_CONFIG_FILE_NAME = "irods_environment.json"
@@ -48,29 +49,13 @@ class _Irods4ServerController(IrodsServerController, metaclass=ABCMeta):
                 return False
 
 
-class Irods4_1_8ServerController(_Irods4ServerController):
-    """
-    Controller for containerised iRODS 4.1.8 servers.
-    """
-    IMAGE_NAME = "mercury/icat:4.1.8"
-    VERSION = Version("4.1.8")
+# Controller for containerised iRODS 4.1.8 servers
+Irods4_1_8ServerController = IrodsServerControllerClassBuilder(
+    "mercury/icat:4.1.8", Version("4.1.8"), _Irods4ServerController.USERS, _Irods4ServerController).build()
 
-    def start_server(self) -> ContainerisedIrodsServer:
-        return self._start_server(Irods4_1_8ServerController.IMAGE_NAME, Irods4_1_8ServerController.VERSION,
-                                  _Irods4ServerController.USERS)
-
-
-class Irods4_1_9ServerController(_Irods4ServerController):
-    """
-    Controller for containerised iRODS 4.1.9 servers.
-    """
-    IMAGE_NAME = "mercury/icat:4.1.9"
-    VERSION = Version("4.1.9")
-
-    def start_server(self) -> ContainerisedIrodsServer:
-        return self._start_server(Irods4_1_9ServerController.IMAGE_NAME, Irods4_1_9ServerController.VERSION,
-                                  _Irods4ServerController.USERS)
-
+# Controller for containerised iRODS 4.1.9 servers.
+Irods4_1_9ServerController = IrodsServerControllerClassBuilder(
+    "mercury/icat:4.1.9", Version("4.1.9"),  _Irods4ServerController.USERS, _Irods4ServerController).build()
 
 # Static iRODS server controllers, implemented (essentially) using singletons
 StaticIrods4_1_8ServerController = create_static_irods_server_controller(Irods4_1_8ServerController())

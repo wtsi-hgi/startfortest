@@ -3,7 +3,8 @@ import os
 from abc import ABCMeta
 from time import sleep
 
-from testwithirods.irods_contoller import IrodsServerController, create_static_irods_server_controller
+from testwithirods.irods_contoller import IrodsServerController, create_static_irods_server_controller, \
+    IrodsServerControllerClassBuilder
 from testwithirods.models import IrodsServer, ContainerisedIrodsServer, IrodsUser, Version
 
 _IRODS_CONFIG_FILE_NAME = ".irodsEnv"
@@ -54,20 +55,13 @@ class _Irods3ServerController(IrodsServerController, metaclass=ABCMeta):
         return True
 
 
-class Irods3_3_1ServerController(_Irods3ServerController):
-    """
-    Controller for containerised iRODS 3.3.1 servers.
-    """
-    IMAGE_NAME = "mercury/icat:3.3.1"
-    USERS = [
-        IrodsUser("rods", "iplant", "rods", admin=True)
-    ]
-    VERSION = Version("3.3.1")
-
-    def start_server(self) -> ContainerisedIrodsServer:
-        return self._start_server(Irods3_3_1ServerController.IMAGE_NAME, Irods3_3_1ServerController.VERSION,
-                                  Irods3_3_1ServerController.USERS)
-
+# Controller for containerised iRODS 3.3.1 servers
+Irods3_3_1ServerController = IrodsServerControllerClassBuilder(
+    "mercury/icat:3.3.1",
+    Version("3.3.1"),
+    [IrodsUser("rods", "iplant", "rods", admin=True)],
+    _Irods3ServerController
+).build()
 
 # Static iRODS 3.3.1 server controller, implemented (essentially) using a `Irods3_3_1ServerController` singleton
 StaticIrods3_3_1ServerController = create_static_irods_server_controller(Irods3_3_1ServerController())

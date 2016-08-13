@@ -10,36 +10,6 @@ from hgicommon.helpers import create_random_string
 from testwithirods.models import ContainerisedIrodsServer, IrodsServer, IrodsUser, Version
 
 
-class StaticIrodsServerController():
-    """
-    Static iRODS server controller.
-    """
-    @staticmethod
-    @abstractmethod
-    def start_server() -> ContainerisedIrodsServer:
-        """
-        Starts a containerised iRODS server and blocks until it is ready to be used.
-        :return: the started containerised iRODS server
-        """
-
-    @staticmethod
-    @abstractmethod
-    def stop_server(container: ContainerisedIrodsServer):
-        """
-        Stops the given containerised iRODS server.
-        :param container: the containerised iRODS server to stop
-        """
-
-    @staticmethod
-    @abstractmethod
-    def write_connection_settings(file_location: str, irods_server: IrodsServer):
-        """
-        Writes the connection settings for the given iRODS server to the given location.
-        :param file_location: the location to write the settings to (file should not already exist)
-        :param irods_server: the iRODS server to create the connection settings for
-        """
-
-
 class IrodsServerController(metaclass=ABCMeta):
     """
     Controller for containerised iRODS servers.
@@ -181,6 +151,75 @@ class IrodsServerController(metaclass=ABCMeta):
         IrodsServerController._cache_started_container(container, image_name)
 
         return container
+
+
+class IrodsServerControllerClassBuilder:
+    """
+    Builder of iRODS server controller classes that extend `IrodsServerController` subclasses that have implemented
+    `write_connection_settings` and `_wait_for_start` with only `start_server` left to implement.
+    """
+    def __init__(self, image_name: str, version: Version, users: Sequence[IrodsUser], superclass: type):
+        """
+        Constructor.
+        :param image_name: the name of the docker image in which the iRODS server is ran
+        :param version: the version of the iRODS server
+        :param users: the users that can access the iRODS server
+        :param superclass: subclass of `IrodsServerController` that implements `write_connection_settings` and
+        `_wait_for_start`
+        """
+        self.image_name = image_name
+        self.version = version
+        self.superclass = superclass
+        self.users = users
+
+    def build(self) -> type:
+        """
+        Builds the new iRODS controller class.
+        :return: the built class
+        """
+        def start_server(controller: IrodsServerController) -> ContainerisedIrodsServer:
+            return controller._start_server(self.image_name, self.version, self.users)
+
+        return type(
+            "Irods%sServerController" % str(self.version).replace(".", "_"),
+            (self.superclass, ),
+            {
+                "VERSION": self.version,
+                "IMAGE_NAME": self.image_name,
+                "USERS": self.users,
+                "start_server": start_server
+            }
+        )
+
+
+class StaticIrodsServerController(metaclass=ABCMeta):
+    """
+    Static iRODS server controller.
+    """
+    @staticmethod
+    @abstractmethod
+    def start_server() -> ContainerisedIrodsServer:
+        """
+        Starts a containerised iRODS server and blocks until it is ready to be used.
+        :return: the started containerised iRODS server
+        """
+
+    @staticmethod
+    @abstractmethod
+    def stop_server(container: ContainerisedIrodsServer):
+        """
+        Stops the given containerised iRODS server.
+        :param container: the containerised iRODS server to stop
+        """
+
+    @staticmethod
+    @abstractmethod
+    def write_connection_settings(file_location: str, irods_server: IrodsServer):
+        """
+        Writes the connection settings for the given iRODS server to the given location.
+        :param file_location: the location to write the settings to (file should not already exist)
+        :param irods_server: the iRODS server to create the connection settings for
+        """
 
 
 def create_static_irods_server_controller(irods_server_controller: IrodsServerController) \
