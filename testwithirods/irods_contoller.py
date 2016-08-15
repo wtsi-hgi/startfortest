@@ -5,6 +5,8 @@ import tempfile
 from abc import abstractmethod, ABCMeta
 from typing import Sequence
 
+from docker.errors import APIError
+
 from hgicommon.docker.client import create_client
 from hgicommon.helpers import create_random_string
 from testwithirods.models import ContainerisedIrodsServer, IrodsServer, IrodsUser, Version
@@ -160,7 +162,11 @@ class IrodsServerController(metaclass=ABCMeta):
             started = self._wait_for_start(container)
             if not started:
                 logging.warning("iRODS server did not start correctly - restarting...")
-                IrodsServerController._DOCKER_CLIENT.kill(container.native_object)
+                try:
+                    IrodsServerController._DOCKER_CLIENT.kill(container.native_object)
+                except APIError as e:
+                    if " is not running" not in self.explanation:
+                        raise
         assert container is not None
 
         IrodsServerController._cache_started_container(container, image_name)
