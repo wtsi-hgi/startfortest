@@ -7,17 +7,27 @@ Test with iRODS exploits [Docker](http://docker.com) to simplify the testing of 
 
 
 ## Use
-### Using an iCAT Server
+### Basic Usage
 ```python
 from testwithirods.api import IrodsVersion
 from testwithirods.api import get_static_irods_server_controller
 
 # Controllers available for iRODS version: 3.3.1, 4.1.8, 4.1.9
-controller = get_static_irods_server_controller(irods_version=IrodsVersion.v4_1_9)
-irods_server = controller.start_server()
+Controller = get_static_irods_server_controller(irods_version=IrodsVersion.v4_1_9)
+
+# Start a server (any number can be started)
+irods_server = Controller.start_server()
+
 # Do interesting things with iRODS...
-controller.stop_server(irods_server)
+
+# Stop a single server
+Controller.stop_server(irods_server)
+# Or stop all servers that have been started
+Controller.tear_down()
 ```
+*Warning: ensure servers are stopped else they will keep running after your program exits! You may wish to exploit
+ [`try... finally` blocks](*https://docs.python.org/3/reference/compound_stmts.html#try) or Python's 
+ [atexit](https://docs.python.org/3/library/atexit.html) functionality to achieve this.*
 
 
 ### Setup Helpers

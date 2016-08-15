@@ -97,6 +97,19 @@ class IrodsServerController(metaclass=ABCMeta):
         :return: the started containerised iRODS server
         """
 
+    def __init__(self):
+        """
+        Constructor.
+        """
+        self.running_containers = []
+
+    def tear_down(self):
+        """
+        Stops all started servers.
+        """
+        while len(self.running_containers) > 0:
+            self.stop_server(self.running_containers.pop(0))
+
     def stop_server(self, container: ContainerisedIrodsServer):
         """
         Stops the given containerised iRODS server.
@@ -108,6 +121,8 @@ class IrodsServerController(metaclass=ABCMeta):
         except Exception:
             # TODO: Should not use such a general exception
             pass
+        if container in self.running_containers:
+            self.running_containers.remove(container)
 
     def create_connection_settings_volume(self, config_file_name: str, irods_server: IrodsServer) -> str:
         """
@@ -149,6 +164,8 @@ class IrodsServerController(metaclass=ABCMeta):
         assert container is not None
 
         IrodsServerController._cache_started_container(container, image_name)
+        self.running_containers.append(container)
+        atexit.unregister(self.stop_server)
 
         return container
 
@@ -214,6 +231,13 @@ class StaticIrodsServerController(metaclass=ABCMeta):
 
     @staticmethod
     @abstractmethod
+    def tear_down():
+        """
+        Stops all started servers
+        """
+
+    @staticmethod
+    @abstractmethod
     def write_connection_settings(file_location: str, irods_server: IrodsServer):
         """
         Writes the connection settings for the given iRODS server to the given location.
@@ -238,4 +262,5 @@ def create_static_irods_server_controller(irods_server_controller: IrodsServerCo
     static_controller.start_server = irods_server_controller.start_server
     static_controller.stop_server = irods_server_controller.stop_server
     static_controller.write_connection_settings = irods_server_controller.write_connection_settings
+    static_controller.tear_down = irods_server_controller.tear_down
     return static_controller

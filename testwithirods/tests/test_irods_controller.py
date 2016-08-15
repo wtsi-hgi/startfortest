@@ -29,7 +29,8 @@ class TestIrodsServerController(IcatTest, metaclass=ABCMeta):
 
     def test_start_server(self):
         irods_server = self.irods_controller.start_server()
-        self.assertTrue(self._is_container_running(irods_server))
+        self.assertTrue(type(self)._is_container_running(irods_server))
+        self.assertIn(irods_server, self.irods_controller.running_containers)
 
         repository, tag = self.compatible_baton_image.split(":")
         create_client().pull(repository, tag)
@@ -38,13 +39,21 @@ class TestIrodsServerController(IcatTest, metaclass=ABCMeta):
         icommand_binaries_location = proxy_controller.create_proxy_binaries()
         setup_helper = SetupHelper(icommand_binaries_location)
 
-        self.assertEqual(setup_helper.get_icat_version(), self.ServerController.VERSION)
+        self.assertEqual(setup_helper.get_icat_version(), irods_server.version)
 
     def test_stop_server(self):
-        irods_container = self.irods_controller.start_server()
-        assert self._is_container_running(irods_container)
-        self.irods_controller.stop_server(irods_container)
-        self.assertFalse(self._is_container_running(irods_container))
+        irods_server = self.irods_controller.start_server()
+        assert type(self)._is_container_running(irods_server)
+        assert irods_server in self.irods_controller.running_containers
+        self.irods_controller.stop_server(irods_server)
+        self.assertFalse(type(self)._is_container_running(irods_server))
+        self.assertNotIn(irods_server, self.irods_controller.running_containers)
+
+    def test_tear_down(self):
+        irods_servers = [self.irods_controller.start_server() for _ in range(3)]
+        self.irods_controller.tear_down()
+        for irods_server in irods_servers:
+            self.assertFalse(type(self)._is_container_running(irods_server))
 
 
 # Setup tests for all iCAT setups

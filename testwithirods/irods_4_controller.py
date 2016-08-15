@@ -15,7 +15,7 @@ _IRODS_USERNAME_PARAMETER_NAME = "irods_user_name"
 _IRODS_ZONE_PARAMETER_NAME = "irods_zone_name"
 
 
-class _Irods4ServerController(IrodsServerController, metaclass=ABCMeta):
+class Irods4ServerController(IrodsServerController, metaclass=ABCMeta):
     """
     Controller for containerised iRODS 4 servers.
     """
@@ -51,11 +51,11 @@ class _Irods4ServerController(IrodsServerController, metaclass=ABCMeta):
 
 # Controller for containerised iRODS 4.1.8 servers
 Irods4_1_8ServerController = IrodsServerControllerClassBuilder(
-    "mercury/icat:4.1.8", Version("4.1.8"), _Irods4ServerController.USERS, _Irods4ServerController).build()
+    "mercury/icat:4.1.8", Version("4.1.8"), Irods4ServerController.USERS, Irods4ServerController).build()
 
 # Controller for containerised iRODS 4.1.9 servers.
 Irods4_1_9ServerController = IrodsServerControllerClassBuilder(
-    "mercury/icat:4.1.9", Version("4.1.9"),  _Irods4ServerController.USERS, _Irods4ServerController).build()
+    "mercury/icat:4.1.9", Version("4.1.9"),  Irods4ServerController.USERS, Irods4ServerController).build()
 
 # Static iRODS server controllers, implemented (essentially) using singletons
 StaticIrods4_1_8ServerController = create_static_irods_server_controller(Irods4_1_8ServerController())

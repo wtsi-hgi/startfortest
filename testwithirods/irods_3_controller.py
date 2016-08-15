@@ -15,7 +15,7 @@ _IRODS_USERNAME_PARAMETER_NAME = "irodsUserName"
 _IRODS_ZONE_PARAMETER_NAME = "irodsZone"
 
 
-class _Irods3ServerController(IrodsServerController, metaclass=ABCMeta):
+class Irods3ServerController(IrodsServerController, metaclass=ABCMeta):
     """
     Controller for containerised iRODS 3 servers.
     """
@@ -60,7 +60,7 @@ Irods3_3_1ServerController = IrodsServerControllerClassBuilder(
     "mercury/icat:3.3.1",
     Version("3.3.1"),
     [IrodsUser("rods", "iplant", "rods", admin=True)],
-    _Irods3ServerController
+    Irods3ServerController
 ).build()
 
 # Static iRODS 3.3.1 server controller, implemented (essentially) using a `Irods3_3_1ServerController` singleton
