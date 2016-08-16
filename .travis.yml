@@ -20,6 +20,6 @@ install:
   - pip install -r test_requirements.txt
 
 script:
-  - nosetests -v --with-coverage --cover-package=testwithirods --cover-inclusive --exclude-test=testwithirods.tests._common.create_tests_for_all_irods_setups --exclude-test=testwithirods.tests._common.IcatTest
+  - nosetests -v --with-coverage --cover-package=testwithirods --cover-inclusive --exclude-test=testwithirods.tests._common.create_tests_for_all_irods_setups --exclude-test=testwithirods.tests._common.IcatTest --nologcapture
 after_success:
   - codecov

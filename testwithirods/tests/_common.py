@@ -1,3 +1,4 @@
+import logging
 import os
 import unittest
 from abc import ABCMeta, abstractmethod
@@ -65,3 +66,7 @@ def create_tests_for_all_irods_setups(test_superclass: type):
     else:
         for controller_type, compatible_baton_image in icat_setups.items():
             _create_test_for_baton_setup(controller_type, compatible_baton_image, test_superclass)
+
+
+# Turn on logging by default to better get to the bottom of Travis CI timeout issues
+logging.root.setLevel(logging.DEBUG)
