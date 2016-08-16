@@ -27,6 +27,9 @@ class TestIrodsServerController(IcatTest, metaclass=ABCMeta):
     def setUp(self):
         self.irods_controller = self.ServerController()     # type: IrodsServerController
 
+    def tearDown(self):
+        self.irods_controller.tear_down()
+
     def test_start_server(self):
         irods_server = self.irods_controller.start_server()
         self.assertTrue(type(self)._is_container_running(irods_server))
