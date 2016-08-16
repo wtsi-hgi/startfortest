@@ -7,7 +7,7 @@ from testwithirods.helpers import SetupHelper
 from testwithirods.irods_contoller import IrodsServerController
 from testwithirods.models import ContainerisedIrodsServer
 from testwithirods.proxies import ICommandProxyController
-from testwithirods.tests._common import create_tests_for_all_icat_setups, IcatTest
+from testwithirods.tests._common import create_tests_for_all_irods_setups, IcatTest
 
 
 class TestIrodsServerController(IcatTest, metaclass=ABCMeta):
@@ -57,7 +57,7 @@ class TestIrodsServerController(IcatTest, metaclass=ABCMeta):
 
 
 # Setup tests for all iCAT setups
-create_tests_for_all_icat_setups(TestIrodsServerController)
+create_tests_for_all_irods_setups(TestIrodsServerController)
 for name, value in testwithirods.tests._common.__dict__.items():
     if TestIrodsServerController.__name__ in name:
         globals()[name] = value

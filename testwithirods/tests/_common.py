@@ -5,6 +5,7 @@ from abc import ABCMeta, abstractmethod
 from testwithirods.irods_3_controller import Irods3_3_1ServerController
 from testwithirods.irods_4_controller import Irods4_1_8ServerController, Irods4_1_9ServerController
 
+# TODO: The reliance here on baton is not great
 icat_setups = {
     Irods3_3_1ServerController: "mercury/baton:0.16.4-with-irods-3.3.1",
     Irods4_1_8ServerController: "mercury/baton:0.16.4-with-irods-4.1.8",
@@ -51,7 +52,7 @@ def _create_test_for_baton_setup(controller_type: type, compatible_baton_image: 
     )
 
 
-def create_tests_for_all_icat_setups(test_superclass: type):
+def create_tests_for_all_irods_setups(test_superclass: type):
     """
     Creates tests for all icat setups, where tests should be made to inherit from the given test superclass.
     :param test_superclass: test superclass, which must inherit from `IcatTest`
