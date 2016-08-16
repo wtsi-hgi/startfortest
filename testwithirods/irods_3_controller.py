@@ -36,7 +36,7 @@ class Irods3ServerController(IrodsServerController, metaclass=ABCMeta):
 
     def _wait_for_start(self, container: ContainerisedIrodsServer) -> bool:
         logging.info("Waiting for iRODS server to have setup")
-        for line in IrodsServerController._DOCKER_CLIENT.logs(container.native_object, stream=True):
+        for line in IrodsServerController._DOCKER_CLIENT.logs(container.native_object, stream=True, follow=True):
             logging.debug(line)
             if "exited: irods" in str(line):
                 if "not expected" in str(line):
