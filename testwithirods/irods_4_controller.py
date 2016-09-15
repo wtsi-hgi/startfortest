@@ -40,12 +40,16 @@ class Irods4ServerController(IrodsServerController, metaclass=ABCMeta):
             settings_file.write(config_as_json)
 
     def _wait_for_start(self, container: ContainerisedIrodsServer) -> bool:
-        logging.info("Waiting for iRODS server to have setup")
+        logging.info("Waiting for iRODS server to setup")
         for line in IrodsServerController._DOCKER_CLIENT.logs(container.native_object, stream=True):
+            line = str(line)
             logging.debug(line)
-            if "iRODS server started successfully!" in str(line):
+            if "iRODS server started successfully!" in line:
                 return True
-            elif "iRODS server failed to start." in str(line):
+            elif "iRODS server failed to start." in line:
+                return False
+            elif "RuntimeError:" in line:
+                # iRODS schema validation has been observed to randomly fail before
                 return False
 
 
