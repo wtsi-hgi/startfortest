@@ -38,6 +38,8 @@ class Irods3ServerController(IrodsServerController, metaclass=ABCMeta):
         logging.info("Waiting for iRODS server to have setup")
         for line in IrodsServerController._DOCKER_CLIENT.logs(container.native_object, stream=True, follow=True):
             logging.debug(line)
+            if "failed to start" in str(line):
+                return False
             if "exited: irods" in str(line):
                 if "not expected" in str(line):
                     return False
