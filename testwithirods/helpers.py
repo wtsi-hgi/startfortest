@@ -1,10 +1,12 @@
 import atexit
 import logging
 import os
+import platform
 import re
 import shutil
 import subprocess
 from enum import Enum, unique
+from tempfile import mkdtemp
 from typing import List, Union
 from uuid import uuid4
 
@@ -50,12 +52,14 @@ class SetupHelper:
                 except OSError:
                     pass
 
-        # XXX: Using the default setup of Docker, the temp directory that Python uses cannot be mounted on Mac.
-        # As a work around, mounting in the directory in which the test is running in.
-        accessible_directory = os.path.dirname(os.path.realpath(__file__))
-        temp_directory_path = os.path.join(accessible_directory, ".iput-%s" % str(uuid4()))
+        temp_root = None
+        if platform.system() == "Darwin":
+            # The temp directory on a Mac machine is somewhere that cannot be bind mounted by Docker using default
+            # settings. /tmp can however
+            temp_root = "/tmp"
+
+        temp_directory_path = mkdtemp(dir=temp_root)
         atexit.register(remove_temp_folder, temp_directory_path)
-        os.mkdir(temp_directory_path)
 
         temp_file_path = os.path.join(temp_directory_path, name)
         os.chmod(temp_directory_path, 0o770)
