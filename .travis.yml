@@ -11,6 +11,7 @@ env:
     - SINGLE_TEST_SETUP=Irods3_3_1ServerController
     - SINGLE_TEST_SETUP=Irods4_1_8ServerController
     - SINGLE_TEST_SETUP=Irods4_1_9ServerController
+    - SINGLE_TEST_SETUP=Irods4_1_10ServerController
 
 before_install:
   - pip install codecov
