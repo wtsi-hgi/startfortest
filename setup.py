@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="test-with-irods",
-    version="0.0.0",
+    version="0.0.1",
     author="Colin Nolan",
     author_email="colin.nolan@sanger.ac.uk",
     packages=find_packages(exclude=["tests"]),

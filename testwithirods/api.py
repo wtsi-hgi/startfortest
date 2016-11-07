@@ -3,7 +3,8 @@ from enum import Enum, unique
 from typing import Union
 
 from testwithirods.irods_3_controller import StaticIrods3_3_1ServerController
-from testwithirods.irods_4_controller import StaticIrods4_1_8ServerController, StaticIrods4_1_9ServerController
+from testwithirods.irods_4_controller import StaticIrods4_1_8ServerController, StaticIrods4_1_9ServerController, \
+    StaticIrods4_1_10ServerController
 from testwithirods.irods_contoller import StaticIrodsServerController
 from testwithirods.models import IrodsServer, IrodsUser
 
@@ -16,9 +17,10 @@ class IrodsVersion(Enum):
     v3_3_1 = StaticIrods3_3_1ServerController
     v4_1_8 = StaticIrods4_1_8ServerController
     v4_1_9 = StaticIrods4_1_9ServerController
+    v4_1_10 = StaticIrods4_1_10ServerController
 
 
-def get_static_irods_server_controller(irods_version: IrodsVersion=IrodsVersion.v4_1_9) -> StaticIrodsServerController:
+def get_static_irods_server_controller(irods_version: IrodsVersion=IrodsVersion.v4_1_10) -> StaticIrodsServerController:
     """
     Gets a controller for the an iRODS server of the given version.
     :param irods_version: the iRODS version that the controller must work with

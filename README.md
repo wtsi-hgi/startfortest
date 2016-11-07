@@ -12,8 +12,8 @@ Test with iRODS exploits [Docker](http://docker.com) to simplify the testing of 
 from testwithirods.api import IrodsVersion
 from testwithirods.api import get_static_irods_server_controller
 
-# Controllers available for iRODS version: 3.3.1, 4.1.8, 4.1.9
-Controller = get_static_irods_server_controller(irods_version=IrodsVersion.v4_1_9)
+# Controllers available for iRODS version: 3.3.1, 4.1.8, 4.1.9, 4.1.10
+Controller = get_static_irods_server_controller(irods_version=IrodsVersion.v4_1_10)
 
 # Start a server (any number can be started)
 irods_server = Controller.start_server()

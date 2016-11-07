@@ -61,6 +61,11 @@ Irods4_1_8ServerController = IrodsServerControllerClassBuilder(
 Irods4_1_9ServerController = IrodsServerControllerClassBuilder(
     "mercury/icat:4.1.9", Version("4.1.9"),  Irods4ServerController.USERS, Irods4ServerController).build()
 
+# Controller for containerised iRODS 4.1.10 servers.
+Irods4_1_10ServerController = IrodsServerControllerClassBuilder(
+    "mercury/icat:4.1.10", Version("4.1.10"),  Irods4ServerController.USERS, Irods4ServerController).build()
+
 # Static iRODS server controllers, implemented (essentially) using singletons
 StaticIrods4_1_8ServerController = create_static_irods_server_controller(Irods4_1_8ServerController())
 StaticIrods4_1_9ServerController = create_static_irods_server_controller(Irods4_1_9ServerController())
+StaticIrods4_1_10ServerController = create_static_irods_server_controller(Irods4_1_10ServerController())
