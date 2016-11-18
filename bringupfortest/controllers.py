@@ -2,8 +2,8 @@ import atexit
 import logging
 import math
 from abc import ABCMeta, abstractmethod
-from threading import Lock, Thread, Event
-from typing import Dict, Iterator, Optional, List
+from threading import Thread, Event
+from typing import Dict, Iterator, Optional, List, Callable
 
 from docker.errors import APIError
 
@@ -20,26 +20,27 @@ class Controller(metaclass=ABCMeta):
     TODO
     """
     @abstractmethod
-    def read_next_log_line(self, container: Container) -> str:
-        """
-        TODO
-        :param container:
-        :return:
-        """
-
-    @abstractmethod
     def _start(self) -> Container:
         """
         TODO
         """
 
     @abstractmethod
-    def _stop(self):
+    def _stop(self, container: Container):
         """
         TODO
         """
 
-    def __init__(self, start_timeout: int=math.inf, start_retries: int=math.inf, stop_on_exit: bool=True):
+    @abstractmethod
+    def _wait_until_started(self, container: Container, started: Event):
+        """
+        TODO
+        :param container:
+        :param started:
+        :return:
+        """
+
+    def __init__(self, start_timeout: float=math.inf, start_retries: int=math.inf, stop_on_exit: bool=True):
         self.start_timeout = start_timeout
         self.start_retries = start_retries
         self.stop_on_exit = stop_on_exit
@@ -57,8 +58,8 @@ class Controller(metaclass=ABCMeta):
                 raise ContainerStartException()
             container = self._start()
             # FIXME: Thread needs to stop safely!
-            Thread(target=self._wait_until_started).start()
-            started.wait(timeout=self.start_timeout)
+            Thread(target=self._wait_until_started, args=(container, started)).start()
+            started.wait(timeout=self.start_timeout if self.start_timeout < math.inf else None)
             tries += 1
         assert container is not None
         return container
@@ -68,18 +69,7 @@ class Controller(metaclass=ABCMeta):
         TODO
         :return:
         """
-
-    def _wait_until_started(self, container: Container, wait_lock: Lock):
-        """
-        TODO
-        :param container:
-        """
-        while not self._stop_wait_check:
-            line = self.read_next_log_line(container)
-            logging.debug(line)
-            if self.specification.started_detection(line):
-                break
-        wait_lock.release()
+        self._stop(container)
 
 
 class DockerController(Controller, metaclass=ABCMeta):
@@ -97,48 +87,53 @@ class DockerController(Controller, metaclass=ABCMeta):
         identifiers = DockerController._docker_client.images("%s:%s" % (repository, tag), quiet=True)
         return identifiers[0] if len(identifiers) > 0 else None
 
-    def __init__(self, repository: str, tag: str, exposed_ports: List[int], start_timeout: int=math.inf,
-                 start_retries: int=math.inf):
+    def __init__(self, repository: str, tag: str, ports: List[int], start_detector: Callable[[str], bool],
+                 start_timeout: int=math.inf, start_retries: int=math.inf):
         super().__init__(start_timeout, start_retries)
         self.repository = repository
         self.tag = tag
-        self.exposed_ports = exposed_ports
-        # TODO: Memory leak here as iterators aren't removed
+        self.ports = ports
+        self.start_detector = start_detector
         self._log_iterator = dict()     # type: Dict[Container, Iterator]
-
-    def read_next_log_line(self, container: Container) -> str:
-        if container not in self._log_iterator:
-            self._log_iterator[container] = iter(
-                DockerController._docker_client.logs(container.native_object, stream=True))
-        return str(next(self._log_iterator[container]))
 
     def _start(self):
         _docker_client = DockerController._docker_client
 
-        if self._get_docker_image(self.docker_repository, self.docker_tag) is None:
+        if self._get_docker_image(self.repository, self.tag) is None:
             # Docker image doesn't exist locally: getting from DockerHub
-            _docker_client.pull(self.docker_repository, self.docker_tag)
+            _docker_client.pull(self.repository, self.tag)
 
         container = Container()
-        container.name = create_random_string(prefix="%s-" % self.specification.docker_repository)
-        container.internal_ports_map_to = {(port, get_open_port()) for port in self.specification.exposed_ports}
+        container.name = create_random_string(prefix="%s-" % self.repository)
+        container.ports = {port: get_open_port() for port in self.ports}
         container.native_object = _docker_client.create_container(
-            image=self._get_docker_image(self.specification.docker_repository, self.specification.docker_tag),
-            name=container.name, ports=container.internal_ports_map_to.values(),
-            host_config=_docker_client.create_host_config(port_bindings=container.internal_ports_map_to))
+            image=self._get_docker_image(self.repository, self.tag),
+            name=container.name,
+            ports=list(container.ports.values()),
+            host_config=_docker_client.create_host_config(port_bindings=container.ports))
 
         if self.stop_on_exit:
-            atexit.register(self._stop, container)
+            atexit.register(self.stop, container)
         _docker_client.start(container.native_object)
 
         return container
 
-    def _stop(self):
+    def _stop(self, container: Container):
+        if container in self._log_iterator:
+            del self._log_iterator[container]
         try:
-            DockerController._docker_client.kill(self.container.native_object)
+            DockerController._docker_client.kill(container.native_object)
         except Exception as e:
             ignore = False
             if isinstance(e, APIError):
                 ignore = "is not running" in str(e.explanation)
             if not ignore:
                 raise e
+
+    def _wait_until_started(self, container: Container, started: Event):
+        for line in DockerController._docker_client.logs(container.native_object, stream=True):
+            line = str(line)
+            logging.debug(line)
+            if self.start_detector(line):
+                started.set()
+                break
