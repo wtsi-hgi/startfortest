@@ -23,15 +23,15 @@ class TestDockerControllerSubclass(TestCase, metaclass=ABCMeta):
 
     def test_stop(self):
         controller = type(self)._get_controller_type()()
-        container = controller.start()
+        container = controller.start_service()
         assert self._docker_client.inspect_container(container.native_object)["State"]["Status"] == "running"
-        controller.stop(container)
+        controller.stop_service(container)
         self.assertEqual("exited", self._docker_client.inspect_container(container.native_object)["State"]["Status"])
 
     def test_stop_when_not_started(self):
         controller = type(self)._get_controller_type()()
         container = Container()
-        controller.stop(container)
+        controller.stop_service(container)
 
 
 def create_tests(superclass: type, types: Iterable[type]) -> Dict[str, TestCase]:

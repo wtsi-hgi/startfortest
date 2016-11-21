@@ -1,5 +1,3 @@
-from copy import copy
-
 from startfortest._builder import DockerControllerBuilder
 
 _repository = "mongo"
@@ -19,9 +17,11 @@ Mongo3DockerController = DockerControllerBuilder(
     tag="3",
     **_common_setup).build()   # type: type
 
-MongoLatestDockerController = DockerControllerBuilder(
+MongoDockerController = DockerControllerBuilder(
     name="MongoLatestDockerController",
     tag="latest",
     **_common_setup).build()   # type: type
 
-MongoDockerController = copy(MongoLatestDockerController)
+
+Mongo3Controller = Mongo3DockerController
+MongoController = MongoDockerController

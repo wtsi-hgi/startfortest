@@ -3,7 +3,7 @@ from abc import ABCMeta
 
 from couchdb import Server
 
-from startfortest.service.couchdb import CouchDBLatestDockerController, CouchDBDockerController, CouchDB1_6Controller
+from startfortest.service.couchdb import CouchDBDockerController, CouchDB1_6DockerController
 from startfortest.tests.service._common import TestDockerControllerSubclass, create_tests
 
 
@@ -13,7 +13,7 @@ class _TestCouchDBDockerController(TestDockerControllerSubclass,  metaclass=ABCM
     """
     def test_start(self):
         controller = type(self)._get_controller_type()()
-        container = controller.start()
+        container = controller.start_service()
         couch = Server("http://%s:%d" % (container.host, container.port))
         database = couch.create("test-database")
         posted = {"this": "value"}
@@ -22,7 +22,7 @@ class _TestCouchDBDockerController(TestDockerControllerSubclass,  metaclass=ABCM
 
 
 # Setup tests
-CLASSES_TO_TEST = {CouchDB1_6Controller, CouchDBLatestDockerController, CouchDBDockerController}
+CLASSES_TO_TEST = {CouchDB1_6DockerController, CouchDBDockerController}
 globals().update(create_tests(_TestCouchDBDockerController, CLASSES_TO_TEST))
 
 

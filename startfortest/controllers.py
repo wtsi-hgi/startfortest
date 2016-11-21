@@ -5,10 +5,9 @@ from abc import ABCMeta, abstractmethod
 from typing import Dict, Iterator, Optional, List, Callable
 
 from docker.errors import APIError
-from stopit import ThreadingTimeout
-from stopit import TimeoutException
+from stopit import ThreadingTimeout, TimeoutException
 
-from startfortest._helpers import is_docker_container_running
+from startfortest._docker_helpers import is_docker_container_running
 from startfortest.exceptions import ContainerStartException, TransientContainerStartException, \
     PersistentContainerStartException
 from startfortest.models import Container
@@ -57,7 +56,7 @@ class Controller(metaclass=ABCMeta):
         self.start_tries = start_tries
         self.stop_on_exit = stop_on_exit
 
-    def start(self) -> Container:
+    def start_service(self) -> Container:
         """
         Starts a container.
         :raises ContainerStartException: container could not be started (see logs for more information)
@@ -65,7 +64,7 @@ class Controller(metaclass=ABCMeta):
         """
         container = Container()
         if self.stop_on_exit:
-            atexit.register(self.stop, container)
+            atexit.register(self.stop_service, container)
 
         started = False
         tries = 0
@@ -88,7 +87,7 @@ class Controller(metaclass=ABCMeta):
         assert container is not None
         return container
 
-    def stop(self, container: Container):
+    def stop_service(self, container: Container):
         """
         Stops the given container.
         :param container: the container to stop
@@ -100,8 +99,6 @@ class DockerController(Controller, metaclass=ABCMeta):
     """
     Controller of Docker containers running service brought up for testing.
     """
-    _docker_client = create_client()
-
     @staticmethod
     def _get_docker_image(repository: str, tag: str) -> Optional[str]:
         """
@@ -110,7 +107,7 @@ class DockerController(Controller, metaclass=ABCMeta):
         :param tag: the image tag
         :return: image identifier or `None` if it has not been pulled
         """
-        identifiers = DockerController._docker_client.images("%s:%s" % (repository, tag), quiet=True)
+        identifiers = create_client().images("%s:%s" % (repository, tag), quiet=True)
         return identifiers[0] if len(identifiers) > 0 else None
 
     def __init__(self, repository: str, tag: str, ports: List[int], start_detector: Callable[[str], bool],
@@ -139,7 +136,7 @@ class DockerController(Controller, metaclass=ABCMeta):
         self._log_iterator = dict()     # type: Dict[Container, Iterator]
 
     def _start(self, container: Container):
-        _docker_client = DockerController._docker_client
+        _docker_client = create_client()
 
         if self._get_docker_image(self.repository, self.tag) is None:
             # Docker image doesn't exist locally: getting from DockerHub
@@ -160,7 +157,7 @@ class DockerController(Controller, metaclass=ABCMeta):
             del self._log_iterator[container]
         if container.native_object:
             try:
-                DockerController._docker_client.kill(container.native_object)
+                create_client().kill(container.native_object)
             except Exception as e:
                 ignore = False
                 if isinstance(e, APIError):
@@ -169,7 +166,7 @@ class DockerController(Controller, metaclass=ABCMeta):
                     raise e
 
     def _wait_until_started(self, container: Container) -> bool:
-        for line in DockerController._docker_client.logs(container.native_object, stream=True):
+        for line in create_client().logs(container.native_object, stream=True):
             line = str(line)
             logging.debug(line)
             if self.start_detector(line):

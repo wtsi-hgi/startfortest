@@ -3,7 +3,7 @@ from abc import ABCMeta
 
 from pymongo import MongoClient
 
-from startfortest.service.mongo import Mongo3DockerController, MongoLatestDockerController, MongoDockerController
+from startfortest.service.mongo import Mongo3DockerController, MongoDockerController
 from startfortest.tests.service._common import TestDockerControllerSubclass, create_tests
 
 
@@ -13,7 +13,7 @@ class _TestMongoDockerController(TestDockerControllerSubclass, metaclass=ABCMeta
     """
     def test_start(self):
         controller = type(self)._get_controller_type()()
-        container = controller.start()
+        container = controller.start_service()
         client = MongoClient(container.host, container.port)
         database = client["test-database"]
         posted = {"this": "value"}
@@ -23,7 +23,7 @@ class _TestMongoDockerController(TestDockerControllerSubclass, metaclass=ABCMeta
 
 
 # Setup tests
-CLASSES_TO_TEST = {Mongo3DockerController, MongoLatestDockerController, MongoDockerController}
+CLASSES_TO_TEST = {Mongo3DockerController, MongoDockerController}
 globals().update(create_tests(_TestMongoDockerController, CLASSES_TO_TEST))
 
 

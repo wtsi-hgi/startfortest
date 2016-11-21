@@ -1,5 +1,3 @@
-from copy import copy
-
 from startfortest._builder import DockerControllerBuilder
 
 _repository = "couchdb"
@@ -12,14 +10,16 @@ _common_setup = {
     "ports": _ports
 }
 
-CouchDB1_6Controller = DockerControllerBuilder(
+CouchDB1_6DockerController = DockerControllerBuilder(
     name="CouchDB1_6Controller",
     tag="1.6",
     **_common_setup).build()   # type: type
 
-CouchDBLatestDockerController = DockerControllerBuilder(
+CouchDBDockerController = DockerControllerBuilder(
     name="CouchDBLatestDockerController",
     tag="latest",
     **_common_setup).build()   # type: type
 
-CouchDBDockerController = copy(CouchDBLatestDockerController)
+
+CouchDB1_6Controller = CouchDB1_6DockerController
+CouchDBController = CouchDBDockerController
