@@ -1,6 +1,6 @@
 from copy import copy
 
-from bringupfortest._builder import DockerControllerBuilder
+from startfortest._builder import DockerControllerBuilder
 
 _repository = "mongo"
 _ports = [27017]

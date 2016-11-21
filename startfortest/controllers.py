@@ -4,15 +4,14 @@ import math
 from abc import ABCMeta, abstractmethod
 from typing import Dict, Iterator, Optional, List, Callable
 
-import time
 from docker.errors import APIError
 from stopit import ThreadingTimeout
 from stopit import TimeoutException
 
-from bringupfortest._helpers import is_docker_container_running
-from bringupfortest.exceptions import ContainerStartException, TransientContainerStartException, \
+from startfortest._helpers import is_docker_container_running
+from startfortest.exceptions import ContainerStartException, TransientContainerStartException, \
     PersistentContainerStartException
-from bringupfortest.models import Container
+from startfortest.models import Container
 from hgicommon.docker.client import create_client
 from hgicommon.helpers import create_random_string, get_open_port
 
@@ -21,38 +20,48 @@ _logger = logging.getLogger(__name__)
 
 class Controller(metaclass=ABCMeta):
     """
-    TODO
+    Controller of containers running service brought up for testing.
     """
     @abstractmethod
     def _start(self, container: Container):
         """
         Starts a container.
+        :param container: the container to start
         """
 
     @abstractmethod
     def _stop(self, container: Container):
         """
-        TODO
+        Stops the given container.
+        :param container: the container to stop
         """
 
     @abstractmethod
     def _wait_until_started(self, container: Container) -> bool:
         """
-        TODO
-        :param container:
-        :param started:
+        Blocks until the given container has started.
+        :raises ContainerStartException: raised if container canot be started
+        :param container: the container
         :return: `True` if the container has started successfully
         """
 
-    def __init__(self, start_timeout: float=math.inf, start_retries: int=math.inf, stop_on_exit: bool=True):
+    def __init__(self, start_timeout: float=math.inf, start_tries: int=math.inf, stop_on_exit: bool=True):
+        """
+        Constructor.
+        :param start_timeout: timeout before for container start
+        :param start_tries: number of times to try to start the container before giving up (will only try once if a
+        `PersistentContainerStartException` is raised
+        :param stop_on_exit: whether to stop all started containers on exit
+        """
         self.start_timeout = start_timeout
-        self.start_retries = start_retries
+        self.start_tries = start_tries
         self.stop_on_exit = stop_on_exit
 
     def start(self) -> Container:
         """
-        TODO
-        :return:
+        Starts a container.
+        :raises ContainerStartException: container could not be started (see logs for more information)
+        :return: the started container
         """
         container = Container()
         if self.stop_on_exit:
@@ -61,7 +70,7 @@ class Controller(metaclass=ABCMeta):
         started = False
         tries = 0
         while not started:
-            if tries >= self.start_retries:
+            if tries >= self.start_tries:
                 raise ContainerStartException()
             self._start(container)
             try:
@@ -81,23 +90,25 @@ class Controller(metaclass=ABCMeta):
 
     def stop(self, container: Container):
         """
-        TODO
-        :return:
+        Stops the given container.
+        :param container: the container to stop
         """
         self._stop(container)
 
 
 class DockerController(Controller, metaclass=ABCMeta):
     """
-    TODO
+    Controller of Docker containers running service brought up for testing.
     """
     _docker_client = create_client()
 
     @staticmethod
     def _get_docker_image(repository: str, tag: str) -> Optional[str]:
         """
-        TODO
-        :return: image identifier or `None` if it hasn't been pulled
+        Gets the identifier of the docker image from the given repository with the given tag.
+        :param repository: the Dockerhub repository
+        :param tag: the image tag
+        :return: image identifier or `None` if it has not been pulled
         """
         identifiers = DockerController._docker_client.images("%s:%s" % (repository, tag), quiet=True)
         return identifiers[0] if len(identifiers) > 0 else None
@@ -105,8 +116,20 @@ class DockerController(Controller, metaclass=ABCMeta):
     def __init__(self, repository: str, tag: str, ports: List[int], start_detector: Callable[[str], bool],
                  persistent_error_detector: Callable[[str], bool]=None,
                  transient_error_detector: Callable[[str], bool]=None,
-                 start_timeout: int=math.inf, start_retries: int=math.inf):
-        super().__init__(start_timeout, start_retries)
+                 start_timeout: int=math.inf, start_tries: int=math.inf):
+        """
+        Constructor.
+        :param repository: the Dockerhub repository of the service to start
+        :param tag: the Dockerhub repository tag of the service to start
+        :param ports: the ports the service exposes
+        :param start_detector: function that detects if the service is ready to use from the logs
+        :param persistent_error_detector: function that detects if the service is unable to start
+        :param transient_error_detector: function that detects if the service encountered a transient error when
+        starting
+        :param start_timeout: timeout for starting containers
+        :param start_tries: number of times to try starting the containerised service
+        """
+        super().__init__(start_timeout, start_tries)
         self.repository = repository
         self.tag = tag
         self.ports = ports

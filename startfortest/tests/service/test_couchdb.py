@@ -3,8 +3,8 @@ from abc import ABCMeta
 
 from couchdb import Server
 
-from bringupfortest.flavours.couchdb import CouchDBLatestDockerController, CouchDBDockerController, CouchDB1_6Controller
-from bringupfortest.tests.flavours._common import TestDockerControllerSubclass, create_tests
+from startfortest.service.couchdb import CouchDBLatestDockerController, CouchDBDockerController, CouchDB1_6Controller
+from startfortest.tests.service._common import TestDockerControllerSubclass, create_tests
 
 
 class _TestCouchDBDockerController(TestDockerControllerSubclass,  metaclass=ABCMeta):

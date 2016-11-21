@@ -1,6 +1,6 @@
 from copy import copy
 
-from bringupfortest._builder import DockerControllerBuilder
+from startfortest._builder import DockerControllerBuilder
 
 _repository = "couchdb"
 _ports = [5984]

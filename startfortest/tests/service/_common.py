@@ -1,22 +1,21 @@
-import unittest
 from abc import ABCMeta, abstractmethod
-from typing import Dict
+from typing import Dict, Iterable
 from unittest import TestCase
 
-from bringupfortest.models import Container
+from startfortest.models import Container
 from hgicommon.docker.client import create_client
 
 
 class TestDockerControllerSubclass(TestCase, metaclass=ABCMeta):
     """
-    TODO
+    Superclass for `DockerController` tests.
     """
     @staticmethod
     @abstractmethod
     def _get_controller_type() -> type:
         """
-        TODO
-        :return:
+        Gets the controller type under test.
+        :return: the controller type
         """
 
     def setUp(self):
@@ -35,12 +34,12 @@ class TestDockerControllerSubclass(TestCase, metaclass=ABCMeta):
         controller.stop(container)
 
 
-def create_tests(superclass, types) -> Dict[str, TestCase]:
+def create_tests(superclass: type, types: Iterable[type]) -> Dict[str, TestCase]:
     """
-    TODO
-    :param superclass:
-    :param types:
-    :return:
+    Creates tests for controller types.
+    :param superclass: the test superclass (must be a subclass of `TestDockerControllerSubclass`)
+    :param types: the controller type to be tested
+    :return: dictionary with the names of the tests as keys and the tests as values
     """
     tests = dict()      # type: Dict[str, TestCase]
     for test_type in types:
