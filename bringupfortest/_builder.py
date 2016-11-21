@@ -1,5 +1,3 @@
-from typing import Callable, List
-
 from bringupfortest.controllers import DockerController
 
 
@@ -7,13 +5,11 @@ class DockerControllerBuilder:
     """
     TODO
     """
-    def __init__(self, name: str, repository: str, tag: str, started_detection: Callable[[str], bool],
-                 ports: List[int]):
+    def __init__(self, name: str, *args, superclass: type=DockerController, **kwargs):
         self.name = name
-        self.repository = repository
-        self.tag = tag
-        self.started_detection = started_detection
-        self.ports = ports
+        self.superclass = superclass
+        self.args = args
+        self.kwargs = kwargs
 
     def build(self) -> type:
         """
@@ -22,12 +18,10 @@ class DockerControllerBuilder:
         """
         def init(controller_self, *args, **kwargs):
             super(type(controller_self), controller_self).__init__(
-                self.repository, self.tag, self.ports, self.started_detection, *args, **kwargs)
+                *self.args, *args, **{**self.kwargs, **kwargs})
 
         return type(
             self.name,
-            (DockerController, ),
-            {
-                "__init__": init
-            }
+            (self.superclass, ),
+            {"__init__": init}
         )
