@@ -74,6 +74,14 @@ class SetupHelper:
 
         return "%s/%s" % (self.run_icommand(["ipwd"]), name)
 
+    def read_data_object(self, path: str) -> str:
+        """
+        TODO
+        :param path:
+        :return:
+        """
+        return self.run_icommand(["iget", path, "-"])
+
     def replicate_data_object(self, path: str, replicate_to: Union[str, IrodsResource]):
         """
         Replicates the data object in the given path to the given resource.

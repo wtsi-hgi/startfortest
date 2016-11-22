@@ -47,7 +47,11 @@ class TestSetupHelper(IcatTest, metaclass=ABCMeta):
         path = self.setup_helper.create_data_object(_DATA_OBJECT_NAME, contents=contents)
         self.setup_helper.run_icommand(["icd", path.rsplit('/', 1)[-1]])
         self.assertIn(_DATA_OBJECT_NAME, self.setup_helper.run_icommand(["ils"]))
-        # FIXME: Not testing for contents
+
+    def test_get_data_object(self):
+        contents = "Test contents"
+        path = self.setup_helper.create_data_object(_DATA_OBJECT_NAME, contents=contents)
+        self.assertEqual(contents, self.setup_helper.read_data_object(path))
 
     def test_replicate_data_object(self):
         data_object_location = self.setup_helper.create_data_object(_DATA_OBJECT_NAME)
@@ -96,13 +100,13 @@ class TestSetupHelper(IcatTest, metaclass=ABCMeta):
         self.setup_helper.update_checksums(path)
 
         ils = self.setup_helper.run_icommand(["ils", "-L", path])
-        self.assertEquals(ils.count(expected_checksum), 2)
+        self.assertEqual(2, ils.count(expected_checksum))
 
     def test_get_checksum(self):
         path = self.setup_helper.create_data_object(_DATA_OBJECT_NAME, "abc")
         expected_checksum = "900150983cd24fb0d6963f7d28e17f72" if self.irods_server.version.major == 3 \
             else "sha2:ungWv48Bz+pBQUDeXa4iI7ADYaOWF3qctBD/YfIAFa0="
-        self.assertEquals(self.setup_helper.get_checksum(path), expected_checksum)
+        self.assertEqual(expected_checksum, self.setup_helper.get_checksum(path))
 
     def test_create_replica_storage(self):
         resource = self.setup_helper.create_replica_storage()
@@ -115,11 +119,11 @@ class TestSetupHelper(IcatTest, metaclass=ABCMeta):
         self.assertRaises(ValueError, self.setup_helper.create_user, existing_user.username, existing_user.zone)
 
     def test_create_user(self):
-        required_user = IrodsUser("user_1", self.irods_server.users[0].zone)
-        user = self.setup_helper.create_user(required_user.username, required_user.zone)
-        self.assertEqual(user, required_user)
+        expected_user = IrodsUser("user_1", self.irods_server.users[0].zone)
+        user = self.setup_helper.create_user(expected_user.username, expected_user.zone)
+        self.assertEqual(expected_user, user)
         user_list = self.setup_helper.run_icommand(["iadmin", "lu"])
-        self.assertIn("%s#%s" % (required_user.username, required_user.zone), user_list)
+        self.assertIn("%s#%s" % (expected_user.username, expected_user.zone), user_list)
 
     def test_set_access(self):
         path = self.setup_helper.create_data_object(_DATA_OBJECT_NAME)
@@ -135,7 +139,7 @@ class TestSetupHelper(IcatTest, metaclass=ABCMeta):
         self.assertIn("%s#%s:modify object" % (user_2.username, zone), access_info)
 
     def test_get_icat_version(self):
-        self.assertEqual(self.setup_helper.get_icat_version(), self.irods_server.version)
+        self.assertEqual(self.irods_server.version, self.setup_helper.get_icat_version())
 
     def _assert_metadata_in_retrieved(self, metadata: Metadata, retrieved_metadata: str):
         """
