@@ -7,7 +7,8 @@ from testwithirods.helpers import SetupHelper
 from testwithirods.irods_contoller import IrodsServerController
 from testwithirods.models import ContainerisedIrodsServer
 from testwithirods.proxies import ICommandProxyController
-from testwithirods.tests._common import create_tests_for_all_irods_setups, IcatTest
+from testwithirods.tests._common import create_tests_for_all_irods_setups, IcatTest, \
+    get_image_with_compatible_icat_binaries
 
 
 class TestIrodsServerController(IcatTest, metaclass=ABCMeta):
@@ -35,10 +36,8 @@ class TestIrodsServerController(IcatTest, metaclass=ABCMeta):
         self.assertTrue(type(self)._is_container_running(irods_server))
         self.assertIn(irods_server, self.irods_controller.running_containers)
 
-        repository, tag = self.compatible_baton_image.split(":")
-        create_client().pull(repository, tag)
-
-        proxy_controller = ICommandProxyController(irods_server, self.compatible_baton_image)
+        proxy_controller = ICommandProxyController(
+            self.irods_server, get_image_with_compatible_icat_binaries(self.irods_server))
         icommand_binaries_location = proxy_controller.create_proxy_binaries()
         setup_helper = SetupHelper(icommand_binaries_location)
 

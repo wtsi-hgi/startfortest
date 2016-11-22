@@ -3,7 +3,7 @@ import logging
 import os
 import tempfile
 from abc import abstractmethod, ABCMeta
-from typing import Sequence
+from typing import Sequence, Type
 
 from docker.errors import APIError
 
@@ -253,7 +253,7 @@ class StaticIrodsServerController(metaclass=ABCMeta):
 
 
 def create_static_irods_server_controller(irods_server_controller: IrodsServerController) \
-        -> StaticIrodsServerController:
+        -> Type[StaticIrodsServerController]:
     """
     Creates a static iRODS server controller from the given iRODS server controller. This essentially makes the given
     controller a singleton in a (static) sheep's clothing.

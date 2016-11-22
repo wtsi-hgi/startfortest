@@ -7,7 +7,8 @@ from testwithirods.helpers import SetupHelper, AccessLevel
 from testwithirods.irods_contoller import IrodsServerController
 from testwithirods.models import IrodsUser
 from testwithirods.proxies import ICommandProxyController
-from testwithirods.tests._common import IcatTest, create_tests_for_all_irods_setups
+from testwithirods.tests._common import IcatTest, create_tests_for_all_irods_setups, \
+    get_image_with_compatible_icat_binaries
 
 _METADATA = Metadata({
     "attribute_1": ["value_1", "value_2"],
@@ -25,7 +26,8 @@ class TestSetupHelper(IcatTest, metaclass=ABCMeta):
         self._server_controller = self.ServerController()   # type: IrodsServerController
         self.irods_server = self._server_controller.start_server()
 
-        self._proxy_controller = ICommandProxyController(self.irods_server, self.compatible_baton_image)
+        self._proxy_controller = ICommandProxyController(
+            self.irods_server, get_image_with_compatible_icat_binaries(self.irods_server))
         icommands_location = self._proxy_controller.create_proxy_binaries()
 
         self.setup_helper = SetupHelper(icommands_location)
