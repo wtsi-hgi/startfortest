@@ -42,6 +42,7 @@ class TestIrodsServerController(IcatTest, metaclass=ABCMeta):
         setup_helper = SetupHelper(icommand_binaries_location)
 
         self.assertEqual(setup_helper.get_icat_version(), irods_server.version)
+        proxy_controller.tear_down()
 
     def test_stop_server(self):
         irods_server = self.irods_controller.start_server()

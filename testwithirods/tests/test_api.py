@@ -1,7 +1,6 @@
 import unittest
 
-from testwithirods.api import IrodsVersion
-from testwithirods.api import get_static_irods_server_controller
+from testwithirods.api import IrodsVersion, get_static_irods_server_controller
 from testwithirods.models import Version
 
 

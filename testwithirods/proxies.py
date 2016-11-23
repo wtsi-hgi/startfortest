@@ -104,7 +104,7 @@ class ProxyController(metaclass=ABCMeta):
                 file.write("%s\n" % self._create_proxy_commands(binary_to_execute_in_docker))
         os.chmod(file_path, 0o770)
 
-    def _create_proxy_commands(self, binary_to_execute_in_docker: str, arguments: str= "\"$@\"", flags: str= "") -> str:
+    def _create_proxy_commands(self, binary_to_execute_in_docker: str, arguments: str="\"$@\"", flags: str="") -> str:
         """
         Creates the commands that the proxy binary should contain to transparently run the given binary inside Docker.
         :param binary_to_execute_in_docker: the binary that is to be run inside Docker

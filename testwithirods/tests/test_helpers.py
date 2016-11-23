@@ -2,10 +2,10 @@ import unittest
 from abc import ABCMeta
 
 import testwithirods
-from testwithirods.models import Metadata
 from testwithirods.helpers import SetupHelper, AccessLevel
 from testwithirods.irods_contoller import IrodsServerController
 from testwithirods.models import IrodsUser
+from testwithirods.models import Metadata
 from testwithirods.proxies import ICommandProxyController
 from testwithirods.tests._common import IcatTest, create_tests_for_all_irods_setups, \
     get_image_with_compatible_icat_binaries
@@ -34,7 +34,7 @@ class TestSetupHelper(IcatTest, metaclass=ABCMeta):
 
     def tearDown(self):
         self._server_controller.stop_server(self.irods_server)
-        self._proxy_controller.create_proxy_binaries()
+        self._proxy_controller.tear_down()
 
     def test_run_icommand(self):
         ils = self.setup_helper.run_icommand(["ils"])
