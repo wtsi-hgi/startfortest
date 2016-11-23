@@ -74,3 +74,4 @@ def _build_irods_service_controller_type(irods_version: IrodsVersion) -> Type[Ir
 
 
 Irods4_1_10Controller = _build_irods_service_controller_type(IrodsVersion.v4_1_10)
+IrodsController = Irods4_1_10Controller

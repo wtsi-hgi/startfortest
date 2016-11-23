@@ -58,10 +58,16 @@ controller.stop_service(service)
 
 #### Available Services
 ##### Mongo
+In the `startfortest.service.mongo` module:
 - `MongoController`: Latest version of Mongo available.
 - `Mongo3Controller`: Mongo version 3.
 
 ##### CouchDB:
+In the `startfortest.service.couchdb` module:
 - `CouchDBController`: Latest version of CouchDB available.
 - `CouchDB1_6Controller`: CouchDB version 1.6.
 
+##### iRODS
+In the `startfortest.service.irods` module:
+- `IrodsController`: Latest version of iRODS available.  
+- `Irods4_1_10Controller`: iRODS version 4.1.10.
