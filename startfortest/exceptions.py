@@ -1,17 +1,20 @@
-class ContainerStartException(Exception):
+class ServiceStartException(Exception):
     """
-    Exception for when a container has failed to start.
-    """
-
-class TransientContainerStartException(ContainerStartException):
-    """
-    Exception for when a container has failed to start due to a (suspected) transient issue.
+    Exception for when a service has failed to start.
     """
 
-class PersistentContainerStartException(ContainerStartException):
+
+class TransientServiceStartException(ServiceStartException):
     """
-    Exception for when a container has failed to start due to a (suspected) persistent issue.
+    Exception for when a service has failed to start due to a (suspected) transient issue.
     """
+
+
+class PersistentServiceStartException(ServiceStartException):
+    """
+    Exception for when a service has failed to start due to a (suspected) persistent issue.
+    """
+
 
 class UnexpectedNumberOfPortsException(Exception):
     """

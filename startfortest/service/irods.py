@@ -1,7 +1,7 @@
 from abc import ABCMeta
 from typing import Type
 
-from startfortest.controllers import ServerController
+from startfortest.controllers import ServiceController
 from startfortest.models import DockerisedService
 from testwithirods.api import IrodsVersion, get_static_irods_server_controller
 from testwithirods.models import ContainerisedIrodsServer
@@ -27,9 +27,9 @@ class IrodsDockerisedService(ContainerisedIrodsServer, DockerisedService):
         self.ports[1247] = value
 
 
-class IrodsServiceController(ServerController, metaclass=ABCMeta):
+class IrodsServiceController(ServiceController, metaclass=ABCMeta):
     """
-    TOOD
+    iRODS service controller.
     """
     def __init__(self, irods_version: IrodsVersion):
         """
@@ -59,9 +59,9 @@ class IrodsServiceController(ServerController, metaclass=ABCMeta):
 
 def _build_irods_service_controller_type(irods_version: IrodsVersion) -> Type[IrodsServiceController]:
     """
-    TODO
-    :param irods_version:
-    :return:
+    Builds an iRODS service controller type for the version of iRODs given.
+    :param irods_version: version of iRODS that the controller is for
+    :return: the build controller type
     """
     def init(self: IrodsServiceController):
         super(type(self), self).__init__(irods_version)

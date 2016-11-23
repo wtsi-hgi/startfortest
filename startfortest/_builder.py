@@ -7,7 +7,7 @@ from startfortest.models import Service, DockerisedService
 DockerControllerType = TypeVar("DockerControllerType", bound=DockerisedServiceController)
 
 
-class ServerControllerTypeBuilder(metaclass=ABCMeta):
+class ServiceControllerTypeBuilder(metaclass=ABCMeta):
     """
     Builder for controllers with particular setups (e.g. repositories and tags).
     """
@@ -43,7 +43,7 @@ class ServerControllerTypeBuilder(metaclass=ABCMeta):
         )
 
 
-class DockerisedServerControllerTypeBuilder(ServerControllerTypeBuilder):
+class DockerisedServiceControllerTypeBuilder(ServiceControllerTypeBuilder):
     """
     Builder for Docker controllers with particular setups (e.g. repositories and tags).
     """

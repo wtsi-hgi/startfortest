@@ -11,8 +11,8 @@ from hgicommon.docker.client import create_client
 from hgicommon.docker.models import Container
 from hgicommon.helpers import create_random_string, get_open_port
 from startfortest._docker_helpers import is_docker_container_running
-from startfortest.exceptions import ContainerStartException, TransientContainerStartException, \
-    PersistentContainerStartException
+from startfortest.exceptions import ServiceStartException, TransientServiceStartException, \
+    PersistentServiceStartException
 from startfortest.models import Service, DockerisedService
 
 _logger = logging.getLogger(__name__)
@@ -21,9 +21,9 @@ ServiceModel = TypeVar("ServiceModel", bound=Service)
 DockerisedServiceModel = TypeVar("DockerisedServiceModel", bound=DockerisedService)
 
 
-class ServerController(Generic[ServiceModel], metaclass=ABCMeta):
+class ServiceController(Generic[ServiceModel], metaclass=ABCMeta):
     """
-    Server controller.
+    Service controller.
     """
     def __init__(self, service_model: Type[ServiceModel]):
         """
@@ -36,44 +36,44 @@ class ServerController(Generic[ServiceModel], metaclass=ABCMeta):
     @abstractmethod
     def start_service(self) -> ServiceModel:
         """
-        Starts a container.
-        :raises ContainerStartException: container could not be started (see logs for more information)
-        :return: the started container
+        Starts a service.
+        :raises ServiceStartException: service could not be started (see logs for more information)
+        :return: model of the started service
         """
 
     @abstractmethod
     def stop_service(self, service: ServiceModel):
         """
-        Stops the given container.
-        :param service: the container to stop
+        Stops the given service.
+        :param service: model of the service to stop
         """
 
 
-class ContainerServerController(ServerController[ServiceModel], metaclass=ABCMeta):
+class ContainerisedServiceController(ServiceController[ServiceModel], metaclass=ABCMeta):
     """
-    ServerController of containers running a service brought up for testing.
+    Controller of containers running a service brought up for testing.
     """
     @abstractmethod
-    def _start(self, container: Container):
+    def _start(self, service: Service):
         """
         Starts a container.
-        :param container: the container to start
+        :param service: model of the service to start
         """
 
     @abstractmethod
-    def _stop(self, container: Container):
+    def _stop(self, service: Service):
         """
         Stops the given container.
-        :param container: the container to stop
+        :param service: model of the service to stop
         """
 
     @abstractmethod
-    def _wait_until_started(self, container: Service) -> bool:
+    def _wait_until_started(self, service: Service) -> bool:
         """
         Blocks until the given container has started.
-        :raises ContainerStartException: raised if container cannot be started
-        :param container: the container
-        :return: `True` if the container has started successfully
+        :raises ServiceStartException: raised if service cannot be started
+        :param service: the service
+        :return: `True` if the service has started successfully
         """
 
     def __init__(self, service_model: Type[ServiceModel], start_timeout: float=math.inf, start_tries: int=math.inf,
@@ -83,7 +83,7 @@ class ContainerServerController(ServerController[ServiceModel], metaclass=ABCMet
         :param stop_on_exit: see `Container.__init__`
         :param start_timeout: timeout before for container start
         :param start_tries: number of times to try to start the container before giving up (will only try once if a
-        `PersistentContainerStartException` is raised
+        `PersistentServiceStartException` is raised
         :param stop_on_exit: whether to stop all started containers on exit
         """
         super().__init__(service_model)
@@ -100,7 +100,7 @@ class ContainerServerController(ServerController[ServiceModel], metaclass=ABCMet
         tries = 0
         while not started:
             if tries >= self.start_tries:
-                raise ContainerStartException()
+                raise ServiceStartException()
             self._start(service)
             try:
                 if self.start_timeout is not math.inf:
@@ -110,7 +110,7 @@ class ContainerServerController(ServerController[ServiceModel], metaclass=ABCMet
                     started = self._wait_until_started(service)
             except TimeoutException as e:
                 _logger.warning(e)
-            except TransientContainerStartException as e:
+            except TransientServiceStartException as e:
                 _logger.warning(e)
 
             tries += 1
@@ -121,9 +121,9 @@ class ContainerServerController(ServerController[ServiceModel], metaclass=ABCMet
         self._stop(service)
 
 
-class DockerisedServiceController(ContainerServerController[ServiceModel], metaclass=ABCMeta):
+class DockerisedServiceController(ContainerisedServiceController[ServiceModel], metaclass=ABCMeta):
     """
-    ServerController of Docker containers running a service brought up for testing.
+    Controller of Docker containers running a service brought up for testing.
     """
     @staticmethod
     def _get_docker_image(repository: str, tag: str) -> Optional[str]:
@@ -143,7 +143,7 @@ class DockerisedServiceController(ContainerServerController[ServiceModel], metac
                  start_timeout: int=math.inf, start_tries: int=math.inf):
         """
         Constructor.
-        :param service_model: see `ServerController.__init__`
+        :param service_model: see `ServiceController.__init__`
         :param repository: the Dockerhub repository of the service to start
         :param tag: the Dockerhub repository tag of the service to start
         :param ports: the ports the service exposes
@@ -163,22 +163,22 @@ class DockerisedServiceController(ContainerServerController[ServiceModel], metac
         self.transient_error_detector = transient_error_detector
         self._log_iterator = dict()     # type: Dict[Service, Iterator]
 
-    def _start(self, container: DockerisedService):
+    def _start(self, service: DockerisedService):
         _docker_client = create_client()
 
         if self._get_docker_image(self.repository, self.tag) is None:
             # Docker image doesn't exist locally: getting from DockerHub
             _docker_client.pull(self.repository, self.tag)
 
-        container.name = create_random_string(prefix="%s-" % self.repository)
-        container.ports = {port: get_open_port() for port in self.ports}
-        container.container = _docker_client.create_container(
+        service.name = create_random_string(prefix="%s-" % self.repository)
+        service.ports = {port: get_open_port() for port in self.ports}
+        service.container = _docker_client.create_container(
             image=self._get_docker_image(self.repository, self.tag),
-            name=container.name,
-            ports=list(container.ports.values()),
-            host_config=_docker_client.create_host_config(port_bindings=container.ports))
+            name=service.name,
+            ports=list(service.ports.values()),
+            host_config=_docker_client.create_host_config(port_bindings=service.ports))
 
-        _docker_client.start(container.container)
+        _docker_client.start(service.container)
 
     def _stop(self, service: DockerisedService):
         if service in self._log_iterator:
@@ -200,9 +200,9 @@ class DockerisedServiceController(ContainerServerController[ServiceModel], metac
             if self.start_detector(line):
                 return True
             elif self.persistent_error_detector is not None and self.persistent_error_detector(line):
-                raise PersistentContainerStartException(line)
+                raise PersistentServiceStartException(line)
             elif self.transient_error_detector is not None and self.transient_error_detector(line):
-                raise TransientContainerStartException(line)
+                raise TransientServiceStartException(line)
 
         assert not is_docker_container_running(service)
-        raise TransientContainerStartException("No error detected in logs but the container has stopped")
+        raise TransientServiceStartException("No error detected in logs but the container has stopped")
