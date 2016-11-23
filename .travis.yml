@@ -1,0 +1,21 @@
+language: python
+
+python:
+  - 3.5.2
+
+services:
+  - docker
+
+before_install:
+  - pip install nose
+  - pip install codecov
+
+install:
+  - pip install -r requirements.txt
+  - pip install -r test_requirements.txt
+
+script:
+  - nosetests -v --with-coverage --cover-package=startfortest --cover-inclusive
+
+after_success:
+  - codecov
