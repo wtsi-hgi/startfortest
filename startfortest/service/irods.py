@@ -1,10 +1,11 @@
 from abc import ABCMeta
 from typing import Type
 
+from hgicommon.helpers import get_open_port
 from startfortest.controllers import ServiceController
 from startfortest.models import DockerisedService
 from testwithirods.api import IrodsVersion, get_static_irods_server_controller
-from testwithirods.models import ContainerisedIrodsServer
+from testwithirods.models import ContainerisedIrodsServer, IrodsServer
 
 
 class IrodsDockerisedService(ContainerisedIrodsServer, DockerisedService):
@@ -24,7 +25,8 @@ class IrodsDockerisedService(ContainerisedIrodsServer, DockerisedService):
 
     @DockerisedService.port.setter
     def port(self, value: int):
-        self.ports[1247] = value
+        if value is not None:
+            self.ports[value] = value
 
 
 class IrodsServiceController(ServiceController, metaclass=ABCMeta):
@@ -46,11 +48,13 @@ class IrodsServiceController(ServiceController, metaclass=ABCMeta):
             """ Constructor not completed """
 
     def start_service(self) -> IrodsDockerisedService:
-        test_with_irods_server = self.irods_server_controller.start_server()
+        mapped_port = get_open_port()
+        test_with_irods_server = self.irods_server_controller.start_server(mapped_port)
         service = IrodsDockerisedService()
         # Rather hacky model conversion
         for property, value in vars(test_with_irods_server).items():
             setattr(service, property, value)
+        service.ports[1247] = mapped_port
         return service
 
     def stop_service(self, service: IrodsDockerisedService):

@@ -8,7 +8,6 @@ from docker.errors import APIError
 from stopit import ThreadingTimeout, TimeoutException
 
 from hgicommon.docker.client import create_client
-from hgicommon.docker.models import Container
 from hgicommon.helpers import create_random_string, get_open_port
 from startfortest._docker_helpers import is_docker_container_running
 from startfortest.exceptions import ServiceStartException, TransientServiceStartException, \
