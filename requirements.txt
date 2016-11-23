@@ -1,5 +1,5 @@
-git+https://github.com/wtsi-hgi/python-common.git@5e137b726da1c6259a32cd116981209d62ccb3cb#egg=hgicommon
-git+https://github.com/wtsi-hgi/test-with-irods@da257cd36d04244a1ef244da5e98cb4fa2b7c598#testwithirods
-bidict==0.12.0.post1
+git+https://github.com/wtsi-hgi/python-common.git@3a51e3486516d554b1fc69578c9e5293c7b84d19#egg=hgicommon
+git+https://github.com/wtsi-hgi/test-with-irods@622bb03da767468cd39db905b0dfa135ea9df6d0#testwithirods
+bidict==0.11.0
 docker-py==1.10.6
 stopit==1.1.1
