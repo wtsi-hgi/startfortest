@@ -1,14 +1,16 @@
+[![Build Status](https://travis-ci.org/wtsi-hgi/startfortest.svg)](https://travis-ci.org/wtsi-hgi/startfortest)
+[![codecov.io](https://codecov.io/gh/wtsi-hgi/startfortest/graph/badge.svg)](https://codecov.io/github/wtsi-hgi/startfortest)
 # Start For Test 
 *I don't care how it's done, just start one of those so I can test my application with it!*
 
 ## Introduction
 ### Key Features
-- Simple way of running services (e.g. Mongo, Couchdb, iRODS).
+- Simple way of running services (e.g. Mongo, CouchDB, iRODS).
 - No knowledge of containers required.
-- No knowledge of service required (its setup, when it's ready to use, etc.).
-- Does not require the installation of anything on your local machine, aside from the container software (only Docker 
-currently supported).
-- Easy to test against multiple versions of the same service.
+- No knowledge of service required (how to install it, when it's ready to use, etc.).
+- Does not require the installation of anything on your local machine, aside from Docker.
+- Makes it simple to test against multiple versions of the same service.
+- Easy to achieve test isolation.
 
 ### Why use this library?
 Software no longer works in isolation; with the trend towards microservices over monoliths, modern day applications 
@@ -37,7 +39,7 @@ to those used in production.
 ### Installation
 Bleeding edge versions can be installed directly from GitHub:
 ```bash
-$pip3 install https://github.com/wtsi-hgi/startfortest@499e848bb3e90c19734b9850085b36b6ffd45c5a#startfortest
+$pip3 install https://github.com/wtsi-hgi/startfortest@master#startfortest
 ```
 
 ### Use
