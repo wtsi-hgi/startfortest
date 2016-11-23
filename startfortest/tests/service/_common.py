@@ -28,6 +28,10 @@ class TestDockerisedServiceControllerSubclass(Generic[ControllerType], TestCase,
         self._docker_client = create_client()
         self.controller = type(self)._get_controller_type()()
 
+    def tearDown(self):
+        for service in self._started:
+            self.controller.stop_service(service)
+
     def test_stop(self):
         service = self._start_service()
         assert is_docker_container_running(service)
