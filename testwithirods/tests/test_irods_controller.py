@@ -37,7 +37,7 @@ class TestIrodsServerController(IcatTest, metaclass=ABCMeta):
         self.assertIn(irods_server, self.irods_controller.running_containers)
 
         proxy_controller = ICommandProxyController(
-            self.irods_server, get_image_with_compatible_icat_binaries(self.irods_server))
+            irods_server, get_image_with_compatible_icat_binaries(irods_server))
         icommand_binaries_location = proxy_controller.create_proxy_binaries()
         setup_helper = SetupHelper(icommand_binaries_location)
 
