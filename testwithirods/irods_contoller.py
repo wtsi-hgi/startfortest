@@ -8,7 +8,7 @@ from typing import Sequence, Type
 from docker.errors import APIError
 
 from hgicommon.docker.client import create_client
-from hgicommon.helpers import create_random_string
+from hgicommon.helpers import create_random_string, get_open_port
 from testwithirods.models import ContainerisedIrodsServer, IrodsServer, IrodsUser, Version
 
 
@@ -20,13 +20,14 @@ class IrodsServerController(metaclass=ABCMeta):
     _DEFAULT_IRODS_PORT = 1247
 
     @staticmethod
-    def _create_container(image_name: str, irods_version: Version, users: Sequence[IrodsUser]) \
+    def _create_container(image_name: str, irods_version: Version, users: Sequence[IrodsUser], mapped_port: int=None) \
             -> ContainerisedIrodsServer:
         """
         Creates a iRODS server container running the given image.
         :param image_name: the image to run
         :param irods_version: version of iRODS
         :param users: the iRODS users
+        :param mapped_port: map iRODS port to this port on the Docker host machine
         :return: the containerised iRODS server
         """
         docker_image = IrodsServerController._DOCKER_CLIENT.images(image_name, quiet=True)
@@ -42,9 +43,11 @@ class IrodsServerController(metaclass=ABCMeta):
             docker_image = docker_image[0]
 
         container_name = create_random_string("irods")
+        port_mappings = None if mapped_port is None else {IrodsServerController._DEFAULT_IRODS_PORT: mapped_port}
         logging.info("Creating iRODs server Docker container: %s" % container_name)
         container = IrodsServerController._DOCKER_CLIENT.create_container(
-            image=docker_image, name=container_name, ports=[IrodsServerController._DEFAULT_IRODS_PORT])
+            image=docker_image, name=container_name, ports=[IrodsServerController._DEFAULT_IRODS_PORT],
+            host_config=IrodsServerController._DOCKER_CLIENT.create_host_config(port_bindings=port_mappings))
 
         irods_server = ContainerisedIrodsServer()
         irods_server.native_object = container
@@ -53,6 +56,8 @@ class IrodsServerController(metaclass=ABCMeta):
         irods_server.version = irods_version
         irods_server.users = users
         irods_server.port = IrodsServerController._DEFAULT_IRODS_PORT
+        if mapped_port is not None:
+            irods_server.mapped_port = port_mappings[IrodsServerController._DEFAULT_IRODS_PORT]
         return irods_server
 
     @abstractmethod
@@ -71,9 +76,10 @@ class IrodsServerController(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def start_server(self) -> ContainerisedIrodsServer:
+    def start_server(self, mapped_port: int=None) -> ContainerisedIrodsServer:
         """
         Starts a containerised iRODS server and blocks until it is ready to be used.
+        :param mapped_port: map iRODS's connection port to this port on the machine running docker
         :return: the started containerised iRODS server
         """
 
@@ -119,13 +125,14 @@ class IrodsServerController(metaclass=ABCMeta):
 
         return temp_directory
 
-    def _start_server(self, image_name: str, irods_version: Version, users: Sequence[IrodsUser]) \
-            -> ContainerisedIrodsServer:
+    def _start_server(self, image_name: str, irods_version: Version, users: Sequence[IrodsUser],
+                      mapped_port: int=None) -> ContainerisedIrodsServer:
         """
         Starts a containerised iRODS server and blocks until it is ready to be used.
         :param image_name: the name of the iRODS server to start
         :param irods_version: the version of iRODS that is being started
         :param users: the users that have access to the started iRODS service
+        :param mapped_port: port to map iRODS to Docker host machine
         :return: the started containerised iRODS server
         """
         logging.info("Starting iRODS server in Docker container")
@@ -133,7 +140,7 @@ class IrodsServerController(metaclass=ABCMeta):
         started = False
 
         while not started:
-            container = IrodsServerController._create_container(image_name, irods_version, users)
+            container = IrodsServerController._create_container(image_name, irods_version, users, mapped_port)
             atexit.register(self.stop_server, container)
             IrodsServerController._DOCKER_CLIENT.start(container.native_object)
 
@@ -169,16 +176,16 @@ class IrodsServerControllerClassBuilder:
         """
         self.image_name = image_name
         self.version = version
-        self.superclass = superclass
         self.users = users
+        self.superclass = superclass
 
     def build(self) -> type:
         """
         Builds the new iRODS controller class.
         :return: the built class
         """
-        def start_server(controller: IrodsServerController) -> ContainerisedIrodsServer:
-            return controller._start_server(self.image_name, self.version, self.users)
+        def start_server(controller: IrodsServerController, mapped_port: int=None) -> ContainerisedIrodsServer:
+            return controller._start_server(self.image_name, self.version, self.users, mapped_port)
 
         return type(
             "Irods%sServerController" % str(self.version).replace(".", "_"),
@@ -198,9 +205,10 @@ class StaticIrodsServerController(metaclass=ABCMeta):
     """
     @staticmethod
     @abstractmethod
-    def start_server() -> ContainerisedIrodsServer:
+    def start_server(mapped_port: int=None) -> ContainerisedIrodsServer:
         """
         Starts a containerised iRODS server and blocks until it is ready to be used.
+        :param mapped_port: map iRODS's connection port to this port on the machine running docker
         :return: the started containerised iRODS server
         """
 

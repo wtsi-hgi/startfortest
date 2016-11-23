@@ -18,7 +18,8 @@ class IrodsUser(Model):
     """
     Model of an iRODS user.
     """
-    def __init__(self, username: str, zone: str, password: str=None, admin=False):
+    def __init__(self, username: str, zone: str, password: str = None, admin=False):
+        super().__init__()
         self.username = username
         self.password = password
         self.zone = zone
@@ -29,12 +30,14 @@ class IrodsServer(Model):
     """
     Model of an iRODS server.
     """
-    def __init__(self, host: str=None, port: int=None, users: List[IrodsUser]=None, version: Version=None):
+    def __init__(self, host: str=None, port: int=None, users: List[IrodsUser]=None, version: Version=None,
+                 mapped_port: int=None):
         super().__init__()
         self.host = host
         self.port = port
         self.users = [] if users is None else users     # type: List[IrodsUser]
         self.version = version
+        self.mapped_port = mapped_port
 
 
 class ContainerisedIrodsServer(IrodsServer, Container):
