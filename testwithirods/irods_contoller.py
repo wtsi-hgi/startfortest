@@ -23,14 +23,13 @@ class IrodsServerController(metaclass=ABCMeta):
     def _create_container(image_name: str, irods_version: Version, users: Sequence[IrodsUser]) \
             -> ContainerisedIrodsServer:
         """
-        Creates a iRODS server container running the given image. Will used a cached version of the image if available.
+        Creates a iRODS server container running the given image.
         :param image_name: the image to run
         :param irods_version: version of iRODS
         :param users: the iRODS users
         :return: the containerised iRODS server
         """
-        cached_image_name = IrodsServerController._cached_image_name(image_name)
-        docker_image = IrodsServerController._DOCKER_CLIENT.images(cached_image_name, quiet=True)
+        docker_image = IrodsServerController._DOCKER_CLIENT.images(image_name, quiet=True)
 
         if len(docker_image) == 0:
             docker_image = image_name
@@ -55,27 +54,6 @@ class IrodsServerController(metaclass=ABCMeta):
         irods_server.users = users
         irods_server.port = IrodsServerController._DEFAULT_IRODS_PORT
         return irods_server
-
-    @staticmethod
-    def _cached_image_name(image_name: str) -> str:
-        """
-        Gets the corresponding image name for a cached version of an image with the given name.
-        :param image_name: the image name to find corresponding cached image name for
-        :return: the cached image name
-        """
-        return "%s-cached" % image_name
-
-    @staticmethod
-    def _cache_started_container(container: ContainerisedIrodsServer, image_name: str):
-        """
-        Caches the started container.
-        :param container: the container to created cached image for
-        :param image_name: the name of the image that is to be cached
-        """
-        cached_image_name = IrodsServerController._cached_image_name(image_name)
-        if len(IrodsServerController._DOCKER_CLIENT.images(cached_image_name, quiet=True)) == 0:
-            repository, tag = cached_image_name.split(":")
-            IrodsServerController._DOCKER_CLIENT.commit(container.native_object["Id"], repository=repository, tag=tag)
 
     @abstractmethod
     def write_connection_settings(self, file_location: str, irods_server: IrodsServer):
@@ -169,7 +147,6 @@ class IrodsServerController(metaclass=ABCMeta):
                         raise
         assert container is not None
 
-        IrodsServerController._cache_started_container(container, image_name)
         self.running_containers.append(container)
         atexit.unregister(self.stop_server)
 
