@@ -1,12 +1,11 @@
 from bidict import bidict
 
 from startfortest.exceptions import UnexpectedNumberOfPortsException
-from hgicommon.docker.models import Container as HgiCommonContainer
 
 
-class Container(HgiCommonContainer):
+class Service:
     """
-    Model of a container.
+    Model of a service.
     """
     def __init__(self):
         """
@@ -34,3 +33,13 @@ class Container(HgiCommonContainer):
         :return: the port outside that maps to that in the container
         """
         return self.ports.inv[port]
+
+
+class DockerisedService(Service):
+    """
+    Model of a service running in a Docker container.
+    """
+    def __init__(self):
+        super().__init__()
+        self.name = None
+        self.container = None

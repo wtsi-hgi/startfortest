@@ -1,4 +1,4 @@
-from startfortest._builder import DockerControllerBuilder
+from startfortest._builder import DockerisedServerControllerTypeBuilder
 
 _repository = "couchdb"
 _ports = [5984]
@@ -10,16 +10,16 @@ _common_setup = {
     "ports": _ports
 }
 
-CouchDB1_6DockerController = DockerControllerBuilder(
+CouchDB1_6DockerisedServiceController = DockerisedServerControllerTypeBuilder(
     name="CouchDB1_6Controller",
     tag="1.6",
     **_common_setup).build()   # type: type
 
-CouchDBDockerController = DockerControllerBuilder(
+CouchDBDockerisedServiceController = DockerisedServerControllerTypeBuilder(
     name="CouchDBLatestDockerController",
     tag="latest",
     **_common_setup).build()   # type: type
 
 
-CouchDB1_6Controller = CouchDB1_6DockerController
-CouchDBController = CouchDBDockerController
+CouchDB1_6Controller = CouchDB1_6DockerisedServiceController
+CouchDBController = CouchDBDockerisedServiceController

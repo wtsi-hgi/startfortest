@@ -1,5 +1,5 @@
 # Start For Test 
-*I don't care how it's done, just start one of these so I can test my application with it!*
+*I don't care how it's done, just start one of those so I can test my application with it!*
 
 ## Introduction
 ### Key Features
@@ -31,7 +31,7 @@ to those used in production.
 
 ## How to use?
 ### Prerequisites
-- Python >= 3.5
+- Python >= 3.5.2
 - Docker >= 1.12.3 (must be running)
 
 ### Installation
@@ -48,11 +48,11 @@ from startfortest.service.mongo import MongoController
 # Starts a containerised version of Mongo
 controller = MongoController()              
 # Blocks until container running the service has started
-service_container = controller.start_service()      
+service = controller.start_service()      
 # Use service in test
-run_my_test(my_application, service_container.host, service_container.port)
+run_my_test(my_application, service.host, service.port)
 # Stops the container running the service
-controller.stop_service(service_container)                                 
+controller.stop_service(service)                                 
 ```
 
 

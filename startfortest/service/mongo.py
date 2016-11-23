@@ -1,4 +1,4 @@
-from startfortest._builder import DockerControllerBuilder
+from startfortest._builder import DockerisedServerControllerTypeBuilder
 
 _repository = "mongo"
 _ports = [27017]
@@ -12,16 +12,16 @@ _common_setup = {
     "ports": _ports
 }
 
-Mongo3DockerController = DockerControllerBuilder(
+Mongo3DockerisedServiceController = DockerisedServerControllerTypeBuilder(
     name="Mongo3DockerController",
     tag="3",
     **_common_setup).build()   # type: type
 
-MongoDockerController = DockerControllerBuilder(
+MongoDockerisedServiceController = DockerisedServerControllerTypeBuilder(
     name="MongoLatestDockerController",
     tag="latest",
     **_common_setup).build()   # type: type
 
 
-Mongo3Controller = Mongo3DockerController
-MongoController = MongoDockerController
+Mongo3Controller = Mongo3DockerisedServiceController
+MongoController = MongoDockerisedServiceController

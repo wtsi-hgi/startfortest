@@ -1,20 +1,19 @@
-from startfortest.models import Container
 from hgicommon.docker.client import create_client
+from startfortest.models import DockerisedService
 
-docker_running = False
 try:
     _docker_client = create_client()
     docker_running = isinstance(_docker_client.info(), dict)
 except Exception:
-    pass
+    docker_running = False
 
 
-def is_docker_container_running(container: Container) -> bool:
+def is_docker_container_running(service: DockerisedService) -> bool:
     """
     Returns whether the Docker container, referenced by the given container, is running.
-    :param container: the container model
+    :param service: the service model
     :return: whether the container is running
     """
-    return _docker_client.inspect_container(container.native_object)["State"]["Status"] == "running"
+    return _docker_client.inspect_container(service.container)["State"]["Status"] == "running"
 
 

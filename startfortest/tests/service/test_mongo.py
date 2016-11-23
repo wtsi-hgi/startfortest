@@ -3,18 +3,17 @@ from abc import ABCMeta
 
 from pymongo import MongoClient
 
-from startfortest.service.mongo import Mongo3DockerController, MongoDockerController
-from startfortest.tests.service._common import TestDockerControllerSubclass, create_tests
+from startfortest.service.mongo import Mongo3DockerisedServiceController, MongoDockerisedServiceController
+from startfortest.tests.service._common import TestDockerisedServiceControllerSubclass, create_tests, ControllerType
 
 
-class _TestMongoDockerController(TestDockerControllerSubclass, metaclass=ABCMeta):
+class _TestMongoDockerisedServiceController(TestDockerisedServiceControllerSubclass[ControllerType], metaclass=ABCMeta):
     """
-    Tests for Mongo Docker images
+    Tests for dockerised Mongo service controller.
     """
     def test_start(self):
-        controller = type(self)._get_controller_type()()
-        container = controller.start_service()
-        client = MongoClient(container.host, container.port)
+        service = self._start_service()
+        client = MongoClient(service.host, service.port)
         database = client["test-database"]
         posted = {"this": "value"}
         post_id = database.posts.insert_one(posted).inserted_id
@@ -23,13 +22,13 @@ class _TestMongoDockerController(TestDockerControllerSubclass, metaclass=ABCMeta
 
 
 # Setup tests
-CLASSES_TO_TEST = {Mongo3DockerController, MongoDockerController}
-globals().update(create_tests(_TestMongoDockerController, CLASSES_TO_TEST))
+CLASSES_TO_TEST = {Mongo3DockerisedServiceController, MongoDockerisedServiceController}
+globals().update(create_tests(_TestMongoDockerisedServiceController, CLASSES_TO_TEST))
 
 
 # Fix for unittest
-del _TestMongoDockerController
-del TestDockerControllerSubclass
+del _TestMongoDockerisedServiceController
+del TestDockerisedServiceControllerSubclass
 
 
 if __name__ == "__main__":
