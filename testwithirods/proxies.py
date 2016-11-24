@@ -229,14 +229,15 @@ class ICommandProxyController(ProxyController):
         Creates proxy binary for `iput`.
         :param container_directory: the icommand proxy binary container
         """
-        # FIXME: allow other flags, handle no $1 given
-        # FIXME: Issue mounting temp directory leads to use of current directory, which is not good!
-        docker_run_command = self._create_proxy_commands("iput", arguments="\"/tmp/input/$fileName\"",
+        # TODO: Issue mounting temp directory leads to use of current directory, which is not good!
+        docker_run_command = self._create_proxy_commands("iput", arguments="$otherArguments \"/tmp/input/$fileName\"",
                                                          flags="-v \"$mountDirectory\":/tmp/input:ro -i")
         commands = ProxyController._reduce_whitespace("""
-            cd $(dirname "$1")
+            filePath=$BASH_ARGV
+            otherArguments="${@:1:$(($#-1))}"
+            cd $(dirname "$filePath")
             mountDirectory=$PWD
-            fileName=$(basename "$1")
+            fileName=$(basename "$filePath")
             %s
         """ % docker_run_command)
 
