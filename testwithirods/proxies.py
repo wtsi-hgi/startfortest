@@ -230,14 +230,26 @@ class ICommandProxyController(ProxyController):
         :param container_directory: the icommand proxy binary container
         """
         # TODO: Issue mounting temp directory leads to use of current directory, which is not good!
-        docker_run_command = self._create_proxy_commands("iput", arguments="$otherArguments \"/tmp/input/$fileName\"",
-                                                         flags="-v \"$mountDirectory\":/tmp/input:ro -i")
+        docker_run_command = self._create_proxy_commands("iput", flags="-v \"$mountDirectory\":/tmp/input:ro -i")
         commands = ProxyController._reduce_whitespace("""
-            filePath=$BASH_ARGV
-            otherArguments="${@:1:$(($#-1))}"
-            cd $(dirname "$filePath")
-            mountDirectory=$PWD
-            fileName=$(basename "$filePath")
+            # Find where the first non-option argument is (i.e. the file that gets uploaded
+            i=1
+            while [[ $i -le $# && "${!i}" = \-* ]]
+            do
+                i=$((i+1))
+            done
+            if [ $i -ne $(($#+1)) ]
+            then
+                # Setup to work after file is bind mounted in
+                filePath=${!i}
+                cd $(dirname "$filePath")
+                mountDirectory=$PWD
+                fileName=$(basename "$filePath")
+                set -- "${@:1:$((i-1))}" "/tmp/input/$fileName" "${@:$((i+1))}"
+            else
+                # XXX: Hack to ensure flags still work
+                mountDirectory=/tmp
+            fi
             %s
         """ % docker_run_command)
 
