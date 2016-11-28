@@ -27,7 +27,7 @@ class ServiceController(Generic[ServiceModel], metaclass=ABCMeta):
     def __init__(self, service_model: Type[ServiceModel]):
         """
         Constructor.
-        :param service_model: the type of model for the services this controller handles
+        :param service_model: the type of model for the service this controller handles
         """
         # TODO: It would nice to do `ServiceModel()` but I don't think this is possible in Python
         self._service_model = service_model

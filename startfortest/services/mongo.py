@@ -1,4 +1,4 @@
-from startfortest._builder import DockerisedServiceControllerTypeBuilder
+from startfortest._builders import DockerisedServiceControllerTypeBuilder
 
 _repository = "mongo"
 _ports = [27017]

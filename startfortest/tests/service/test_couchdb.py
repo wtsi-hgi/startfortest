@@ -3,7 +3,7 @@ from abc import ABCMeta
 
 from couchdb import Server
 
-from startfortest.service.couchdb import CouchDBDockerisedServiceController, CouchDB1_6DockerisedServiceController
+from startfortest.services.couchdb import CouchDBDockerisedServiceController, CouchDB1_6DockerisedServiceController
 from startfortest.tests.service._common import TestDockerisedServiceControllerSubclass, create_tests, ControllerType
 
 

@@ -45,15 +45,12 @@ $pip3 install https://github.com/wtsi-hgi/startfortest@master#startfortest
 ### Use
 #### Overview
 ```python
-from startfortest.service.mongo import MongoController
+from startfortest.services.mongo import MongoController
 
 # Starts a containerised version of Mongo
 controller = MongoController()              
-# Blocks until container running the service has started
 service = controller.start_service()      
-# Use service in test
 run_my_test(my_application, service.host, service.port)
-# Stops the container running the service
 controller.stop_service(service)                                 
 ```
 
