@@ -14,20 +14,38 @@ from testwithirods.api import get_static_irods_server_controller
 
 # Controllers available for iRODS version: 3.3.1, 4.1.8, 4.1.9, 4.1.10
 Controller = get_static_irods_server_controller(irods_version=IrodsVersion.v4_1_10)
-
-# Start a server (any number can be started)
-irods_server = Controller.start_server()
-
-# Do interesting things with iRODS...
-
-# Stop a single server
-Controller.stop_server(irods_server)
-# Or stop all servers that have been started
-Controller.tear_down()
+try:
+    # Start a server (any number can be started)
+    irods_server = Controller.start_server()
+    
+    # Do interesting things with iRODS...
+    
+    # Stop a single server
+    Controller.stop_server(irods_server)
+finally:
+    # Ensure all servers are stopped
+    Controller.tear_down()
 ```
 *Warning: ensure servers are stopped else they will keep running after your program exits! You may wish to exploit
  [`try... finally` blocks](*https://docs.python.org/3/reference/compound_stmts.html#try) or Python's 
  [atexit](https://docs.python.org/3/library/atexit.html) functionality to achieve this.*
+ 
+ 
+## iCommands
+This library provides the ability to create a temporary set of icommand-like executables on the host machine. The 
+executables use icommands inside of a Docker instance linked to the iCAT server to produce the same results as they 
+would if the icommands were installed on the host machine.
+```python
+from testwithirods.proxies import ICommandProxyController
+
+proxy_controller = ICommandProxyController(irods_server, "mercury/icat:%s" % irods_server.version)
+try:
+    icommands_location = proxy_controller.create_proxy_binaries()
+    
+    # Do interesting things with icommands, linked to the iRODS server
+finally:
+    proxy_controller.tear_down()
+ ```
 
 
 ### Setup Helpers
