@@ -11,31 +11,15 @@ from hgicommon.docker.client import create_client
 from hgicommon.helpers import create_random_string
 from startfortest._common import reduce_whitespace
 from startfortest.executables.builders import CommandsBuilder
-from startfortest.executables.common import CLI_ARGUMENTS
+from startfortest.executables.common import CLI_ARGUMENTS, write_commands, pull_docker_image
 from startfortest.executables.models import Executable
-
-_SHEBANG = "#!/usr/bin/env bash"
-_FAIL_SETTINGS = "set -eu -o pipefail"
 
 
 class ExecutablesController:
     """
     Controller for proxy executables that execute commands in a transparent Docker container.
     """
-    @staticmethod
-    def _write_commands(location: str, commands: str):
-        """
-        Writes the commands to a file at the given location. Will overwrite any pre-existing file.
-        :param location: the location to write the commands to
-        :param commands: the commands to write
-        """
-        with open(location, "w") as file:
-            file.write("%s\n" % _SHEBANG)
-            file.write("%s\n" % _FAIL_SETTINGS)
-            file.write(commands)
-        os.chmod(location, 0o700)
-
-    def __init__(self, image_with_real_binaries: str, run_container_command_builder: Optional[CommandsBuilder]=None):
+    def __init__(self, run_container_command_builder: Optional[CommandsBuilder]=None):
         """
         Constructor.
         :param image_with_real_binaries: the name (docker-py's "tag") of the Docker image that the proxied binaries are
@@ -44,35 +28,29 @@ class ExecutablesController:
         which comamnds should be run (can lead to much better performance because new container is not brought up each
         time)
         """
-        self.docker_image_with_binaries = image_with_real_binaries
         self.run_container_command_builder = run_container_command_builder
 
-        self._cached_container_name = create_random_string(prefix="execution-container-")
-        self.run_container_command_builder.name = self._cached_container_name
-        self.run_container_command_builder.detached = True
-
-        # Ensure the image with the real binaries have been pulled to stop it polluting the output
-        if ":" in image_with_real_binaries:
-            repository, tag = image_with_real_binaries.split(":")
-        else:
-            repository, tag = image_with_real_binaries, None
-        docker_client = create_client()
-        docker_image = docker_client.images("%s:%s" % (repository, tag), quiet=True)
-        if len(docker_image) == 0:
-            for line in docker_client.pull(image_with_real_binaries, stream=True):
-                logging.debug(line)
+        if run_container_command_builder is not None:
+            if run_container_command_builder.image is None:
+                raise ValueError("Run container command builder must define the image the container is to use")
+            pull_docker_image(run_container_command_builder.image)
+            self._cached_container_name = create_random_string(prefix="execution-container-")
+            self.run_container_command_builder.name = self._cached_container_name
+            self.run_container_command_builder.detached = True
 
         atexit.register(self.tear_down)
+
 
     def tear_down(self):
         """
         Tears down the controller.
         """
-        docker_client = create_client()
-        try:
-            docker_client.remove_container(self._cached_container_name, force=True)
-        except NotFound:
-            """ Not concerned if the container had not yet been created """
+        if self.run_container_command_builder is not None:
+            docker_client = create_client()
+            try:
+                docker_client.remove_container(self._cached_container_name, force=True)
+            except NotFound:
+                """ Not concerned if the container had not yet been created """
 
     def create_executable_commands(self, executable: Executable) -> str:
         """
@@ -128,6 +106,7 @@ class ExecutablesController:
                 "to_execute": executable.commands_builder.build()
             })
         else:
+            pull_docker_image(executable.commands_builder.image)
             return executable.commands_builder.build()
 
     def create_simple_executable_commands(self, containerised_executable: str, executable_arguments=CLI_ARGUMENTS) -> str:
@@ -170,12 +149,13 @@ class DefinedExecutablesController(ExecutablesController):
         :return: the directory containing the executables
         """
         if location is None:
-            location = tempfile.mkdtemp(prefix="executables-", dir="/tmp")
+            # TODO: fix /tmp default
+            _, location = tempfile.mkdtemp(prefix="executables-", dir="/tmp")
             self._temp_directories.add(location)
 
         for name, executable in self.named_executables.items():
             executable_location = os.path.join(location, name)
             commands = self.create_executable_commands(executable)
-            ExecutablesController._write_commands(executable_location, commands)
+            write_commands(executable_location, commands)
 
         return location

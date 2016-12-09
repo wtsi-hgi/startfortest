@@ -1,10 +1,10 @@
 import os
 import sys
-from typing import List, Iterable, Dict
+from typing import List, Iterable, Dict, Set
 
 from startfortest.executables.common import CLI_ARGUMENTS
 
-_PROJECT_DIRECTORY = os.path.dirname(os.path.abspath(__file__))
+_PROJECT_DIRECTORY = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../")
 _ARGUMENTS_TO_MOUNT_SCRIPT = os.path.join(_PROJECT_DIRECTORY, "executables", "paths_to_mount.py")
 
 
@@ -13,7 +13,7 @@ class CommandsBuilder:
     Builds commands to run an executable in Docker.
     """
     def __init__(self, executable: str, container: str=None, image: str=None, executable_arguments: List[str]=None,
-                 named_path_arguments_to_mount: Iterable[str]=None, positional_path_arguments_to_mount: List[int]=None,
+                 named_path_arguments_to_mount: Iterable[str]=None, positional_path_arguments_to_mount: Set[int]=None,
                  ports: Dict[int, int]=None, mounts: Dict[str, str]=None, variables: Iterable[str]=None, name: str=None,
                  detached: bool=False, other_docker: str=""):
         self.executable = executable
@@ -65,7 +65,7 @@ class CommandsBuilder:
                 "python_arguments_script": _ARGUMENTS_TO_MOUNT_SCRIPT,
                 "named_mounts": named_path_arguments_to_mount,
                 "positional_mounts": positional_path_arguments_to_mount,
-                "cli_arguments": CLI_ARGUMENTS
+                "cli_arguments": executable_arguments
             }).strip()
         else:
             calculate_additional_mounts = ""
