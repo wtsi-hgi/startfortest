@@ -1,5 +1,4 @@
 import atexit
-import logging
 import os
 import shutil
 import tempfile
@@ -19,27 +18,26 @@ class ExecutablesController:
     """
     Controller for proxy executables that execute commands in a transparent Docker container.
     """
-    def __init__(self, run_container_command_builder: Optional[CommandsBuilder]=None):
+    def __init__(self, run_container_commands_builder: Optional[CommandsBuilder]=None):
         """
         Constructor.
         :param image_with_real_binaries: the name (docker-py's "tag") of the Docker image that the proxied binaries are
         executed within
-        :param run_container_command_builder: (optional) builder for commands used to start up persistent container in
+        :param run_container_commands_builder: (optional) builder for commands used to start up persistent container in
         which comamnds should be run (can lead to much better performance because new container is not brought up each
         time)
         """
-        self.run_container_command_builder = run_container_command_builder
+        self.run_container_command_builder = run_container_commands_builder
 
-        if run_container_command_builder is not None:
-            if run_container_command_builder.image is None:
+        if run_container_commands_builder is not None:
+            if run_container_commands_builder.image is None:
                 raise ValueError("Run container command builder must define the image the container is to use")
-            pull_docker_image(run_container_command_builder.image)
+            pull_docker_image(run_container_commands_builder.image)
             self._cached_container_name = create_random_string(prefix="execution-container-")
             self.run_container_command_builder.name = self._cached_container_name
             self.run_container_command_builder.detached = True
 
         atexit.register(self.tear_down)
-
 
     def tear_down(self):
         """
@@ -126,10 +124,10 @@ class DefinedExecutablesController(ExecutablesController):
     """
     TODO
     """
-    def __init__(self, *args, named_executables: Dict[str, Executable], **kwargs):
+    def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._temp_directories = set()  # type: Set[str]
-        self.named_executables = named_executables
+        self.named_executables = dict()     # type: Dict[str, Executable]
 
     def tear_down(self):
         """
@@ -150,7 +148,7 @@ class DefinedExecutablesController(ExecutablesController):
         """
         if location is None:
             # TODO: fix /tmp default
-            _, location = tempfile.mkdtemp(prefix="executables-", dir="/tmp")
+            location = tempfile.mkdtemp(prefix="executables-", dir="/tmp")
             self._temp_directories.add(location)
 
         for name, executable in self.named_executables.items():

@@ -22,54 +22,51 @@ class TestExecutablesController(unittest.TestCase):
     """
     def setUp(self):
         self._temp_files = set()    # type: Set[str]
+        self.controller = ExecutablesController()
+        self.persistent_run_controller = ExecutablesController(get_builder_for_commands_to_run_persistent_ubuntu())
 
     def tearDown(self):
+        self.controller.tear_down()
+        self.persistent_run_controller.tear_down()
         while len(self._temp_files) > 0:
             directory = self._temp_files.pop()
             shutil.rmtree(directory, ignore_errors=True)
 
     def test_create_executable_commands_with_no_running_container(self):
-        controller = ExecutablesController()
         commands_builder = CommandsBuilder("echo", image=UBUNTU_IMAGE_TO_TEST_WITH, executable_arguments=[_CONTENT])
-        commands = controller.create_executable_commands(Executable(commands_builder, False))
+        commands = self.controller.create_executable_commands(Executable(commands_builder, False))
         out, error = self._run_commands(commands)
         self.assertEqual(_CONTENT, out)
 
     def test_create_executable_commands_with_positional_parameter_needing_mounting_for_read(self):
-        controller = ExecutablesController()
-
         read_file = self._create_mountable_temp_file()
         with open(read_file, "w") as file:
             file.write(_CONTENT)
 
         commands_builder = CommandsBuilder("cat", image=UBUNTU_IMAGE_TO_TEST_WITH,
                                            positional_path_arguments_to_mount={1})
-        commands = controller.create_executable_commands(Executable(commands_builder, False))
+        commands = self.controller.create_executable_commands(Executable(commands_builder, False))
         out, error = self._run_commands(commands, [read_file])
         self.assertEqual(_CONTENT, out)
 
     def test_create_executable_commands_with_positional_parameter_needing_mounting_for_write(self):
-        controller = ExecutablesController()
-
         with tempfile.TemporaryDirectory(dir=MOUNTABLE_TEMP_DIRECTORY) as temp_directory:
             file_locations = [os.path.join(temp_directory, create_random_string()) for _ in range(5)]
             commands_builder = CommandsBuilder(
                 "touch", image=UBUNTU_IMAGE_TO_TEST_WITH,
                 positional_path_arguments_to_mount={i + 1 for i in range(len(file_locations))})
-            commands = controller.create_executable_commands(Executable(commands_builder, False))
+            commands = self.controller.create_executable_commands(Executable(commands_builder, False))
             self._run_commands(commands, file_locations)
 
             for location in file_locations:
                 self.assertTrue(os.path.exists(location))
 
     def test_create_executable_commands_with_named_parameters_needing_mounting(self):
-        controller = ExecutablesController(get_builder_for_commands_to_run_persistent_ubuntu())
-
         with tempfile.TemporaryDirectory(dir=MOUNTABLE_TEMP_DIRECTORY) as temp_directory:
             commands_builder = CommandsBuilder("touch", image=UBUNTU_IMAGE_TO_TEST_WITH,
                                                named_path_arguments_to_mount={"r"},
                                                mounts={temp_directory: temp_directory})
-            commands = controller.create_executable_commands(Executable(commands_builder, False))
+            commands = self.persistent_run_controller.create_executable_commands(Executable(commands_builder, False))
 
             test_file = os.path.join(temp_directory, "test-file")
             reference = self._create_mountable_temp_file()
@@ -78,29 +75,25 @@ class TestExecutablesController(unittest.TestCase):
             self.assertEqual(0.0, os.path.getmtime(test_file))
 
     def test_create_simple_executable_commands_that_raises_exception(self):
-        controller = ExecutablesController(get_builder_for_commands_to_run_persistent_ubuntu())
-        commands = controller.create_simple_executable_commands("cat", "/does-not-exist")
+        commands = self.persistent_run_controller.create_simple_executable_commands("cat", "/does-not-exist")
         out, error = self._run_commands(commands, raise_if_stderr=False)
         self.assertNotEqual("", error)
         self.assertEqual("", out)
 
     def test_create_simple_executable_commands_execute_in_same_container(self):
-        controller = ExecutablesController(get_builder_for_commands_to_run_persistent_ubuntu())
         test_file_location = "/test-file"
-        self._run_commands(controller.create_simple_executable_commands("touch", test_file_location))
-        out, error = self._run_commands(controller.create_simple_executable_commands("ls", test_file_location))
+        self._run_commands(self.persistent_run_controller.create_simple_executable_commands("touch", test_file_location))
+        out, error = self._run_commands(self.persistent_run_controller.create_simple_executable_commands("ls", test_file_location))
         self.assertEqual(test_file_location, out)
 
     def test_create_simple_executable_commands_without_parameters(self):
-        controller = ExecutablesController(get_builder_for_commands_to_run_persistent_ubuntu())
-        commands = controller.create_simple_executable_commands("cat", "/etc/lsb-release")
+        commands = self.persistent_run_controller.create_simple_executable_commands("cat", "/etc/lsb-release")
         out, error = self._run_commands(commands)
         key_values = {line.split("=")[0]: line.split("=")[1] for line in out.split("\n")}
         self.assertEqual("Ubuntu", key_values["DISTRIB_ID"])
 
     def test_create_simple_executable_commands_with_parameters(self):
-        controller = ExecutablesController(get_builder_for_commands_to_run_persistent_ubuntu())
-        commands = controller.create_simple_executable_commands("echo")
+        commands = self.persistent_run_controller.create_simple_executable_commands("echo")
         out, error = self._run_commands(commands, [_CONTENT])
         self.assertEqual(out, _CONTENT)
 
@@ -125,7 +118,7 @@ class TestExecutablesController(unittest.TestCase):
         out = out.decode("utf-8").rstrip("\n")
         error = error.decode("utf-8")
 
-        if raise_if_stderr:
+        if raise_if_stderr and len(error) > 0:
             raise ValueError("Unexpected output on standard out: %s" % error)
 
         return out, error

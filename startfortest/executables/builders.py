@@ -1,6 +1,6 @@
 import os
 import sys
-from typing import List, Iterable, Dict, Set
+from typing import List, Iterable, Dict, Set, Type
 
 from startfortest.executables.common import CLI_ARGUMENTS
 
@@ -12,7 +12,7 @@ class CommandsBuilder:
     """
     Builds commands to run an executable in Docker.
     """
-    def __init__(self, executable: str, container: str=None, image: str=None, executable_arguments: List[str]=None,
+    def __init__(self, executable: str=None, container: str=None, image: str=None, executable_arguments: List[str]=None,
                  named_path_arguments_to_mount: Iterable[str]=None, positional_path_arguments_to_mount: Set[int]=None,
                  ports: Dict[int, int]=None, mounts: Dict[str, str]=None, variables: Iterable[str]=None, name: str=None,
                  detached: bool=False, other_docker: str=""):
@@ -93,3 +93,47 @@ class CommandsBuilder:
             "executable": self.executable,
             "executable_arguments": executable_arguments
         }
+
+
+from startfortest.executables.controllers import DefinedExecutablesController
+from startfortest.executables.models import Executable
+
+
+class DefinedExecutablesControllerTypeBuilder:
+    """
+    TODO
+    """
+    def __init__(self, type_name: str, named_executables: Dict[str, Executable]):
+        """
+        TODO
+        :param type_name:
+        :param named_executables:
+        """
+        self.type_name = type_name
+        self.named_executables = named_executables
+
+    def build(self) -> Type[DefinedExecutablesController]:
+        """
+        TODO
+        :return:
+        """
+        return type(
+            self.type_name,
+            (DefinedExecutablesController, ),
+            {"named_executables": self.named_executables}
+        )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
