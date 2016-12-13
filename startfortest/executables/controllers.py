@@ -124,10 +124,11 @@ class DefinedExecutablesController(ExecutablesController):
     """
     TODO
     """
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, run_container_commands_builder: Optional[CommandsBuilder]=None,
+                 named_executables: Dict[str, Executable]=None):
+        super().__init__(run_container_commands_builder)
         self._temp_directories = set()  # type: Set[str]
-        self.named_executables = dict()     # type: Dict[str, Executable]
+        self.named_executables = named_executables if named_executables is not None else dict()
 
     def tear_down(self):
         """

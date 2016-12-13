@@ -169,8 +169,13 @@ class DefinedExecutablesControllerTypeBuilder:
         TODO
         :return:
         """
+        named_executables = deepcopy(self.named_executables)
+
+        def init(controller: DefinedExecutablesController, *args, **kwargs):
+            super(type(controller), controller).__init__(*args, named_executables=named_executables, **kwargs)
+
         return type(
             self.type_name,
             (DefinedExecutablesController, ),
-            {"named_executables": self.named_executables}
+            {"__init__": init}
         )
