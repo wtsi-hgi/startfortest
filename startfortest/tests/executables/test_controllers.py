@@ -6,7 +6,7 @@ import unittest
 from typing import Set, List, Tuple
 
 from hgicommon.helpers import create_random_string
-from startfortest.executables.builders import CommandsBuilder
+from startfortest.executables.builders import CommandsBuilder, MountedArgumentParser
 from startfortest.executables.common import write_commands
 from startfortest.executables.controllers import ExecutablesController
 from startfortest.executables.models import Executable
@@ -14,6 +14,10 @@ from startfortest.tests.executables._common import MOUNTABLE_TEMP_DIRECTORY, MAX
     get_builder_for_commands_to_run_persistent_ubuntu, UBUNTU_IMAGE_TO_TEST_WITH
 
 _CONTENT = "Hello World!"
+_CAT_MOUNTED_ARGUMENT_PARSER = MountedArgumentParser(
+    positional_arguments=MountedArgumentParser.ALL_POSITIONAL_ARGUMENTS).build()
+_TOUCH_MOUNTED_ARGUMENT_PARSER = MountedArgumentParser(
+    named_arguments={"-r"}, positional_arguments=MountedArgumentParser.ALL_POSITIONAL_ARGUMENTS).build()
 
 
 class TestExecutablesController(unittest.TestCase):
@@ -43,8 +47,8 @@ class TestExecutablesController(unittest.TestCase):
         with open(read_file, "w") as file:
             file.write(_CONTENT)
 
-        commands_builder = CommandsBuilder("cat", image=UBUNTU_IMAGE_TO_TEST_WITH,
-                                           positional_path_arguments_to_mount={1})
+        commands_builder = CommandsBuilder(
+            "cat", image=UBUNTU_IMAGE_TO_TEST_WITH, get_path_arguments_to_mount=_CAT_MOUNTED_ARGUMENT_PARSER)
         commands = self.controller.create_executable_commands(Executable(commands_builder, False))
         out, error = self._run_commands(commands, [read_file])
         self.assertEqual(_CONTENT, out)
@@ -53,8 +57,7 @@ class TestExecutablesController(unittest.TestCase):
         with tempfile.TemporaryDirectory(dir=MOUNTABLE_TEMP_DIRECTORY) as temp_directory:
             file_locations = [os.path.join(temp_directory, create_random_string()) for _ in range(5)]
             commands_builder = CommandsBuilder(
-                "touch", image=UBUNTU_IMAGE_TO_TEST_WITH,
-                positional_path_arguments_to_mount={i + 1 for i in range(len(file_locations))})
+                "touch", image=UBUNTU_IMAGE_TO_TEST_WITH, get_path_arguments_to_mount=_TOUCH_MOUNTED_ARGUMENT_PARSER)
             commands = self.controller.create_executable_commands(Executable(commands_builder, False))
             self._run_commands(commands, file_locations)
 
@@ -63,9 +66,9 @@ class TestExecutablesController(unittest.TestCase):
 
     def test_create_executable_commands_with_named_parameters_needing_mounting(self):
         with tempfile.TemporaryDirectory(dir=MOUNTABLE_TEMP_DIRECTORY) as temp_directory:
-            commands_builder = CommandsBuilder("touch", image=UBUNTU_IMAGE_TO_TEST_WITH,
-                                               named_path_arguments_to_mount={"r"},
-                                               mounts={temp_directory: temp_directory})
+            commands_builder = CommandsBuilder(
+                "touch", image=UBUNTU_IMAGE_TO_TEST_WITH, get_path_arguments_to_mount=_TOUCH_MOUNTED_ARGUMENT_PARSER,
+                mounts={temp_directory: temp_directory})
             commands = self.persistent_run_controller.create_executable_commands(Executable(commands_builder, False))
 
             test_file = os.path.join(temp_directory, "test-file")
@@ -119,7 +122,7 @@ class TestExecutablesController(unittest.TestCase):
         error = error.decode("utf-8")
 
         if raise_if_stderr and len(error) > 0:
-            raise ValueError("Unexpected output on standard out: %s" % error)
+            raise ValueError("Unexpected output on standard error:\n%s" % error)
 
         return out, error
 

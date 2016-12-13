@@ -1,8 +1,14 @@
+import argparse
+import base64
 import os
 import sys
-from typing import List, Iterable, Dict, Set, Type
+from typing import List, Iterable, Dict, Set, Type, Callable, Any, Union
+
+from copy import deepcopy
+from dill import dill
 
 from startfortest.executables.common import CLI_ARGUMENTS
+
 
 _PROJECT_DIRECTORY = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../")
 _ARGUMENTS_TO_MOUNT_SCRIPT = os.path.join(_PROJECT_DIRECTORY, "executables", "paths_to_mount.py")
@@ -13,17 +19,15 @@ class CommandsBuilder:
     Builds commands to run an executable in Docker.
     """
     def __init__(self, executable: str=None, container: str=None, image: str=None, executable_arguments: List[str]=None,
-                 named_path_arguments_to_mount: Iterable[str]=None, positional_path_arguments_to_mount: Set[int]=None,
+                 get_path_arguments_to_mount: Callable[[List[Any]], Set[str]]=None,
                  ports: Dict[int, int]=None, mounts: Dict[str, str]=None, variables: Iterable[str]=None, name: str=None,
                  detached: bool=False, other_docker: str=""):
         self.executable = executable
         self.container = container
         self.image = image
         self.executable_arguments = executable_arguments
-        self.named_path_arguments_to_mount = named_path_arguments_to_mount \
-            if named_path_arguments_to_mount is not None else {}
-        self.positional_path_arguments_to_mount = positional_path_arguments_to_mount \
-            if positional_path_arguments_to_mount is not None else {}
+        self.get_path_arguments_to_mount = get_path_arguments_to_mount \
+            if get_path_arguments_to_mount is not None else lambda arguments: set()
         self.ports = ports if ports is not None else dict()
         self.mounts = mounts if mounts is not None else dict()
         self.variables = variables if variables is not None else {}
@@ -55,16 +59,15 @@ class CommandsBuilder:
 
         executable_arguments = " ".join(self.executable_arguments) if self.executable_arguments is not None else CLI_ARGUMENTS
 
-        if len(self.named_path_arguments_to_mount) > 0 or len(self.positional_path_arguments_to_mount) > 0:
-            named_path_arguments_to_mount = " ".join(["-n %s" % name for name in self.named_path_arguments_to_mount])
-            positional_path_arguments_to_mount = " ".join(["-p %s" % position for position in self.positional_path_arguments_to_mount])
+        if self.get_path_arguments_to_mount is not None:
+            serialised_arguments_parser = base64.b64encode(dill.dumps(self.get_path_arguments_to_mount)).decode("utf-8")
+
             calculate_additional_mounts = ("""
-                $("%(python_interpreter)s" "%(python_arguments_script)s" %(named_mounts)s %(positional_mounts)s -- %(cli_arguments)s)
+                $("%(python_interpreter)s" "%(python_arguments_script)s" "%(serialised_arguments_parser)s" %(cli_arguments)s)
             """ % {
                 "python_interpreter": sys.executable,
                 "python_arguments_script": _ARGUMENTS_TO_MOUNT_SCRIPT,
-                "named_mounts": named_path_arguments_to_mount,
-                "positional_mounts": positional_path_arguments_to_mount,
+                "serialised_arguments_parser": serialised_arguments_parser,
                 "cli_arguments": executable_arguments
             }).strip()
         else:
@@ -95,6 +98,55 @@ class CommandsBuilder:
         }
 
 
+class MountedArgumentParser:
+    """
+    TODO
+    """
+    ALL_POSITIONAL_ARGUMENTS = "*"
+
+    def __init__(self, named_arguments: Set[str]=None, positional_arguments: Union[Set[int], str]=None):
+        """
+        TODO
+        :param named_arguments:
+        :param positional_arguments:
+        """
+        self.named_arguments = named_arguments if named_arguments is not None else set()
+        self.positional_arguments = positional_arguments if positional_arguments is not None else set()
+
+    def build(self) -> Callable[[List[Any]], Set[str]]:
+        """
+        TODO
+        :return:
+        """
+        named_arguments = deepcopy(self.named_arguments)
+        positional_arguments = deepcopy(self.positional_arguments)
+
+        def get_mounts(cli_arguments: List[Any]) -> Set[str]:
+            parser = argparse.ArgumentParser()
+            for name in named_arguments:
+                parser.add_argument(name, type=str)
+            parser.add_argument("positional_arguments", type=str, nargs="*")
+            arguments, _ = parser.parse_known_args(cli_arguments)
+
+            mounts = set()  # type: Set[str]
+
+            for name in named_arguments:
+                value = getattr(arguments, name.lstrip("-"), None)
+                if value is not None:
+                    mounts.add(value)
+
+            if positional_arguments != MountedArgumentParser.ALL_POSITIONAL_ARGUMENTS:
+                for position in positional_arguments:
+                    if position <= len(arguments.positional_arguments):
+                        mounts.add(arguments.positional_arguments[position - 1])
+            else:
+                mounts = mounts.union(set(arguments.positional_arguments))
+
+            return mounts
+
+        return get_mounts
+
+
 from startfortest.executables.controllers import DefinedExecutablesController
 from startfortest.executables.models import Executable
 
@@ -122,18 +174,3 @@ class DefinedExecutablesControllerTypeBuilder:
             (DefinedExecutablesController, ),
             {"named_executables": self.named_executables}
         )
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

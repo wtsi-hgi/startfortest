@@ -1,6 +1,7 @@
 import os
 
 import logging
+from typing import List, Any, Set
 
 from hgicommon.docker.client import create_client
 
@@ -29,7 +30,7 @@ def pull_docker_image(image: str):
     :param image:
     :return:
     """
-    #Ensure the image with the real binaries have been pulled to stop it polluting the output
+    # Ensure the image with the real binaries have been pulled to stop it polluting the output
     if ":" in image:
         repository, tag = image.split(":")
     else:
@@ -40,3 +41,21 @@ def pull_docker_image(image: str):
         for line in docker_client.pull(image, stream=True):
             # TODO: Remove logging to root logger
             logging.debug(line)
+
+
+# TODO: Test this
+def get_all_path_like_arguments_for_mounting(arguments: List[Any], allow_relative_paths: bool=True) -> Set[str]:
+    """
+    TODO
+    :param arguments:
+    :param allow_relative_paths:
+    :return:
+    """
+    mounts = set()  # type: Set[str]
+    for argument in arguments:
+        if allow_relative_paths:
+            argument = os.path.abspath(argument)
+        if argument.startswith(os.path.sep):
+            mounts.add(os.path.dirname(argument))
+    return mounts
+
