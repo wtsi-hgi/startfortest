@@ -1,4 +1,4 @@
-from startfortest.executables.builders import CommandsBuilder, MountedArgumentParser
+from startfortest.executables.builders import CommandsBuilder, MountedArgumentParserBuilder
 from startfortest.executables.controllers import DefinedExecutablesController
 from startfortest.executables.models import Executable
 
@@ -13,8 +13,8 @@ class IrodsExecutablesController(DefinedExecutablesController):
                              "iqdel", "iqmod", "iqstat", "iquest", "iquota", "ireg", "irepl", "irm", "irmtrash",
                              "irsync", "irule", "iscan", "isysmeta", "itrim", "iuserinfo", "ixmsg", "izonereport",
                              "imeta", "iadmin"}
-    _GET_POSITIONAL_ARGUMENTS_TO_MOUNT = MountedArgumentParser(
-        positional_arguments=MountedArgumentParser.ALL_POSITIONAL_ARGUMENTS).build()
+    _GET_POSITIONAL_ARGUMENTS_TO_MOUNT = MountedArgumentParserBuilder(
+        positional_arguments=MountedArgumentParserBuilder.ALL_POSITIONAL_ARGUMENTS).build()
 
     def __init__(self, irods_container_name: str, image_with_compatible_icommands: str,
                  settings_directory_on_host: str, settings_directory_in_container: str="/root/.irods"):

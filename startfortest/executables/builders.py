@@ -2,13 +2,12 @@ import argparse
 import base64
 import os
 import sys
-from typing import List, Iterable, Dict, Set, Type, Callable, Any, Union
-
 from copy import deepcopy
+from typing import List, Iterable, Dict, Set, Callable, Any, Union
+
 from dill import dill
 
 from startfortest.executables.common import CLI_ARGUMENTS
-
 
 _PROJECT_DIRECTORY = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../")
 _ARGUMENTS_TO_MOUNT_SCRIPT = os.path.join(_PROJECT_DIRECTORY, "executables", "paths_to_mount.py")
@@ -98,7 +97,7 @@ class CommandsBuilder:
         }
 
 
-class MountedArgumentParser:
+class MountedArgumentParserBuilder:
     """
     TODO
     """
@@ -135,7 +134,7 @@ class MountedArgumentParser:
                 if value is not None:
                     mounts.add(value)
 
-            if positional_arguments != MountedArgumentParser.ALL_POSITIONAL_ARGUMENTS:
+            if positional_arguments != MountedArgumentParserBuilder.ALL_POSITIONAL_ARGUMENTS:
                 for position in positional_arguments:
                     if position <= len(arguments.positional_arguments):
                         mounts.add(arguments.positional_arguments[position - 1])
@@ -145,37 +144,3 @@ class MountedArgumentParser:
             return mounts
 
         return get_mounts
-
-
-from startfortest.executables.controllers import DefinedExecutablesController
-from startfortest.executables.models import Executable
-
-
-class DefinedExecutablesControllerTypeBuilder:
-    """
-    TODO
-    """
-    def __init__(self, type_name: str, named_executables: Dict[str, Executable]):
-        """
-        TODO
-        :param type_name:
-        :param named_executables:
-        """
-        self.type_name = type_name
-        self.named_executables = named_executables
-
-    def build(self) -> Type[DefinedExecutablesController]:
-        """
-        TODO
-        :return:
-        """
-        named_executables = deepcopy(self.named_executables)
-
-        def init(controller: DefinedExecutablesController, *args, **kwargs):
-            super(type(controller), controller).__init__(*args, named_executables=named_executables, **kwargs)
-
-        return type(
-            self.type_name,
-            (DefinedExecutablesController, ),
-            {"__init__": init}
-        )

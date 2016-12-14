@@ -6,18 +6,18 @@ import unittest
 from typing import Set, List, Tuple
 
 from hgicommon.helpers import create_random_string
-from startfortest.executables.builders import CommandsBuilder, MountedArgumentParser
+from startfortest.executables.builders import CommandsBuilder, MountedArgumentParserBuilder
 from startfortest.executables.common import write_commands
 from startfortest.executables.controllers import ExecutablesController
 from startfortest.executables.models import Executable
 from startfortest.tests.executables._common import MOUNTABLE_TEMP_DIRECTORY, MAX_RUN_TIME_IN_SECONDS, \
-    get_builder_for_commands_to_run_persistent_ubuntu, UBUNTU_IMAGE_TO_TEST_WITH
+    get_builder_for_commands_to_run_persistent_ubuntu, UBUNTU_IMAGE_TO_TEST_WITH, run
 
 _CONTENT = "Hello World!"
-_CAT_MOUNTED_ARGUMENT_PARSER = MountedArgumentParser(
-    positional_arguments=MountedArgumentParser.ALL_POSITIONAL_ARGUMENTS).build()
-_TOUCH_MOUNTED_ARGUMENT_PARSER = MountedArgumentParser(
-    named_arguments={"-r"}, positional_arguments=MountedArgumentParser.ALL_POSITIONAL_ARGUMENTS).build()
+_CAT_MOUNTED_ARGUMENT_PARSER = MountedArgumentParserBuilder(
+    positional_arguments=MountedArgumentParserBuilder.ALL_POSITIONAL_ARGUMENTS).build()
+_TOUCH_MOUNTED_ARGUMENT_PARSER = MountedArgumentParserBuilder(
+    named_arguments={"-r"}, positional_arguments=MountedArgumentParserBuilder.ALL_POSITIONAL_ARGUMENTS).build()
 
 
 class TestExecutablesController(unittest.TestCase):
@@ -114,17 +114,8 @@ class TestExecutablesController(unittest.TestCase):
 
         location = self._create_mountable_temp_file()
         write_commands(location, commands)
-        arguments.insert(0, location)
 
-        process = subprocess.Popen(arguments, stdout=subprocess.PIPE, stdin=subprocess.PIPE, stderr=subprocess.PIPE)
-        out, error = process.communicate(timeout=MAX_RUN_TIME_IN_SECONDS)
-        out = out.decode("utf-8").rstrip("\n")
-        error = error.decode("utf-8")
-
-        if raise_if_stderr and len(error) > 0:
-            raise ValueError("Unexpected output on standard error:\n%s" % error)
-
-        return out, error
+        return run([location] + arguments, raise_if_stderr)
 
     def _create_mountable_temp_file(self) -> str:
         """

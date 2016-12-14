@@ -2,8 +2,9 @@ import atexit
 import os
 import shutil
 import tempfile
-from typing import Dict, Set, Optional
+from typing import Dict, Set, Optional, Type
 
+from copy import deepcopy
 from docker.errors import NotFound
 
 from hgicommon.docker.client import create_client
@@ -158,3 +159,33 @@ class DefinedExecutablesController(ExecutablesController):
             write_commands(executable_location, commands)
 
         return location
+
+
+class DefinedExecutablesControllerTypeBuilder:
+    """
+    TODO
+    """
+    def __init__(self, type_name: str, named_executables: Dict[str, Executable]):
+        """
+        TODO
+        :param type_name:
+        :param named_executables:
+        """
+        self.type_name = type_name
+        self.named_executables = named_executables
+
+    def build(self) -> Type[DefinedExecutablesController]:
+        """
+        TODO
+        :return:
+        """
+        named_executables = deepcopy(self.named_executables)
+
+        def init(controller: DefinedExecutablesController, *args, **kwargs):
+            super(type(controller), controller).__init__(*args, named_executables=named_executables, **kwargs)
+
+        return type(
+            self.type_name,
+            (DefinedExecutablesController, ),
+            {"__init__": init}
+        )
