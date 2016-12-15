@@ -3,6 +3,8 @@ from typing import Dict, Iterable, Type, Generic, TypeVar
 from typing import Set
 from unittest import TestCase
 
+from copy import copy, deepcopy
+
 from startfortest._docker_helpers import is_docker_container_running
 from startfortest.services.models import DockerisedService, Service
 
@@ -63,7 +65,8 @@ def create_tests(superclass: Type[TestDockerisedServiceControllerSubclass], type
         test = type(
             name,
             (superclass[test_type],),
-            {"_get_controller_type": staticmethod(lambda: test_type)}
+            # Confusing lambda magic explained here: http://stackoverflow.com/a/2295368
+            {"_get_controller_type": staticmethod((lambda test_type: lambda: test_type)(test_type))}
         )
         tests[name] = test
     return tests

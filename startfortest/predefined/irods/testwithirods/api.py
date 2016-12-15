@@ -1,32 +1,8 @@
 import os
-from enum import Enum, unique
+from enum import Enum
 from typing import Union
 
-from startfortest.predefined.irods.testwithirods.irods_4_controller import StaticIrods4_1_8ServerController, StaticIrods4_1_9ServerController, \
-    StaticIrods4_1_10ServerController
-from testwithirods.irods_3_controller import StaticIrods3_3_1ServerController
-from testwithirods.irods_contoller import StaticIrodsServerController
 from testwithirods.models import IrodsServer, IrodsUser
-
-
-@unique
-class IrodsVersion(Enum):
-    """
-    Enum mapping between iRODS server versions and the related server controllers.
-    """
-    v3_3_1 = StaticIrods3_3_1ServerController
-    v4_1_8 = StaticIrods4_1_8ServerController
-    v4_1_9 = StaticIrods4_1_9ServerController
-    v4_1_10 = StaticIrods4_1_10ServerController
-
-
-def get_static_irods_server_controller(irods_version: IrodsVersion=IrodsVersion.v4_1_10) -> StaticIrodsServerController:
-    """
-    Gets a controller for the an iRODS server of the given version.
-    :param irods_version: the iRODS version that the controller must work with
-    :return: the iRODS server controller
-    """
-    return irods_version.value
 
 
 class IrodsEnvironmentKey(Enum):

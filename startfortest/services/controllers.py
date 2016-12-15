@@ -29,7 +29,7 @@ class ServiceController(Generic[ServiceModel], metaclass=ABCMeta):
         Constructor.
         :param service_model: the type of model for the service this controller handles
         """
-        # TODO: It would nice to do `ServiceModel()` but I don't think this is possible in Python
+        # XXX: It would nice to do `ServiceModel()` but I don't think this is possible in Python
         self._service_model = service_model
 
     @abstractmethod
@@ -75,7 +75,7 @@ class ContainerisedServiceController(ServiceController[ServiceModel], metaclass=
         :return: `True` if the service has started successfully
         """
 
-    def __init__(self, service_model: Type[ServiceModel], start_timeout: float=math.inf, start_tries: int=math.inf,
+    def __init__(self, service_model: Type[ServiceModel], start_timeout: float=math.inf, start_tries: int=10,
                  stop_on_exit: bool=True):
         """
         Constructor.
@@ -100,6 +100,8 @@ class ContainerisedServiceController(ServiceController[ServiceModel], metaclass=
         while not started:
             if tries >= self.start_tries:
                 raise ServiceStartException()
+            if tries > 0:
+                self._stop(service)
             self._start(service)
             try:
                 if self.start_timeout is not math.inf:
@@ -169,7 +171,7 @@ class DockerisedServiceController(ContainerisedServiceController[ServiceModel], 
             # Docker image doesn't exist locally: getting from DockerHub
             _docker_client.pull(self.repository, self.tag)
 
-        service.name = create_random_string(prefix="%s-" % self.repository)
+        service.name = create_random_string(prefix="%s-" % self.repository.split("/")[-1])
         service.ports = {port: get_open_port() for port in self.ports}
         service.container = _docker_client.create_container(
             image=self._get_docker_image(self.repository, self.tag),
@@ -196,12 +198,13 @@ class DockerisedServiceController(ContainerisedServiceController[ServiceModel], 
         for line in create_client().logs(service.container, stream=True):
             line = str(line)
             logging.debug(line)
-            if self.start_detector(line):
-                return True
-            elif self.persistent_error_detector is not None and self.persistent_error_detector(line):
+
+            if self.persistent_error_detector is not None and self.persistent_error_detector(line):
                 raise PersistentServiceStartException(line)
             elif self.transient_error_detector is not None and self.transient_error_detector(line):
                 raise TransientServiceStartException(line)
+            elif self.start_detector(line):
+                return True
 
         assert not is_docker_container_running(service)
         raise TransientServiceStartException("No error detected in logs but the container has stopped")
