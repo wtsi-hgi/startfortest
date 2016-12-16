@@ -3,7 +3,7 @@ from abc import ABCMeta
 
 from pymongo import MongoClient
 
-from startfortest.service.mongo import Mongo3DockerisedServiceController, MongoDockerisedServiceController
+from startfortest.services.mongo import Mongo3DockerisedServiceController, MongoDockerisedServiceController
 from startfortest.tests.service._common import TestDockerisedServiceControllerSubclass, create_tests, ControllerType
 
 
