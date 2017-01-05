@@ -7,9 +7,9 @@ from time import sleep
 from typing import List, Type, Callable, Sequence
 
 from hgicommon.docker.client import create_client
-from startfortest.predefined.irods.models import IrodsUser, IrodsDockerisedService
+from startfortest.predefined.irods.models import IrodsUser, IrodsDockerisedService, Version
 from startfortest.services.controllers import DockerisedServiceController
-from testwithirods.models import ContainerisedIrodsServer, Version
+from startfortest.services.models import DockerisedService
 
 _logger = logging.getLogger(__name__)
 
@@ -118,7 +118,7 @@ class Irods3ServiceController(IrodsServiceController, metaclass=ABCMeta):
                          persistent_error_detector=IrodsServiceController._persistent_error_detector,
                          start_timeout=start_timeout, start_tries=start_tries)
 
-    def _wait_until_started(self, container: ContainerisedIrodsServer) -> bool:
+    def _wait_until_started(self, container: DockerisedService) -> bool:
         if super()._wait_until_started(container) is False:
             return False
 
