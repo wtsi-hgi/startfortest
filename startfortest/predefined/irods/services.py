@@ -7,33 +7,11 @@ from time import sleep
 from typing import List, Type, Callable, Sequence
 
 from hgicommon.docker.client import create_client
-from hgicommon.models import Model
+from startfortest.predefined.irods.models import IrodsUser, IrodsDockerisedService
 from startfortest.services.controllers import DockerisedServiceController
-from startfortest.services.models import DockerisedService
 from testwithirods.models import ContainerisedIrodsServer, Version
 
 _logger = logging.getLogger(__name__)
-
-
-class IrodsUser(Model):
-    """
-    Model of an iRODS user.
-    """
-    def __init__(self, username: str, zone: str, password: str = None, admin=False):
-        super().__init__()
-        self.username = username
-        self.password = password
-        self.zone = zone
-        self.admin = admin
-
-class IrodsDockerisedService(DockerisedService):
-    """
-    TODO
-    """
-    def __init__(self):
-        super().__init__()
-        self.users = [] # type: List[IrodsUser]
-        self.version = None
 
 
 class IrodsServiceController(DockerisedServiceController, metaclass=ABCMeta):
@@ -249,3 +227,6 @@ Irods4_1_8ServiceController = _build_irods_service_controller_type("4.1.8", Irod
 Irods4_1_9ServiceController = _build_irods_service_controller_type("4.1.9", Irods4ServiceController)
 Irods4_1_10ServiceController = _build_irods_service_controller_type("4.1.10", Irods4ServiceController)
 IrodsLatestServiceController = Irods4_1_10ServiceController
+
+irods_service_controllers = {Irods3_3_1ServiceController, Irods4_1_8ServiceController, Irods4_1_9ServiceController,
+                             Irods4_1_10ServiceController}

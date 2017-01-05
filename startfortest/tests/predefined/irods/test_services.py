@@ -5,9 +5,9 @@ from abc import ABCMeta
 from tempfile import TemporaryDirectory
 
 from startfortest.predefined.irods import IrodsExecutablesController
+from startfortest.predefined.irods.helpers import SetupHelper
 from startfortest.predefined.irods.services import Irods3_3_1ServiceController, Irods4_1_8ServiceController, \
     Irods4_1_9ServiceController, Irods4_1_10ServiceController
-from startfortest.predefined.irods.testwithirods.helpers import SetupHelper
 from startfortest.tests.service.common import TestDockerisedServiceControllerSubclass, ControllerType, create_tests
 from testwithirods.helpers import SetupHelper
 
@@ -21,9 +21,10 @@ class _TestIrodsServiceController(TestDockerisedServiceControllerSubclass[Contro
         with TemporaryDirectory(dir="/tmp") as settings_directory:
             service = self._start_service()
 
-            config_file_path = os.path.join(settings_directory, self.controller.config_file_name)
+            config_file_path = os.path.join(settings_directory, self.icat_controller.config_file_name)
             password = self._get_controller_type().write_connection_settings(config_file_path, service)
 
+            # TODO: Docker repo+tag should be setting
             irods_executables_controller = IrodsExecutablesController(
                 service.name, "mercury/icat:%s" % service.version, settings_directory)
 
