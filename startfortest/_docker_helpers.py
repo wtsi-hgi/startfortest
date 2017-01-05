@@ -1,5 +1,5 @@
 from hgicommon.docker.client import create_client
-from startfortest.models import DockerisedService
+from startfortest.services.models import DockerisedService
 
 try:
     _docker_client = create_client()

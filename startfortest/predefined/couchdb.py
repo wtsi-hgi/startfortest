@@ -1,4 +1,4 @@
-from startfortest._builders import DockerisedServiceControllerTypeBuilder
+from startfortest.services._builders import DockerisedServiceControllerTypeBuilder
 
 _repository = "couchdb"
 _ports = [5984]

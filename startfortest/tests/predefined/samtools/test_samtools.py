@@ -4,7 +4,7 @@ from abc import ABCMeta
 from typing import Type
 
 from startfortest.executables.controllers import DefinedExecutablesController
-from startfortest.executables.predefined.samtools import Samtools1_3_1_ExecutablesController
+from startfortest.predefined.samtools import Samtools1_3_1_ExecutablesController
 from startfortest.tests.executables._common import run
 
 EXAMPLE_BAM = os.path.join(os.path.dirname(os.path.realpath(__file__)), "example.bam")

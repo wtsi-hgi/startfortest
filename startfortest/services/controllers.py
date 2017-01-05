@@ -10,9 +10,9 @@ from stopit import ThreadingTimeout, TimeoutException
 from hgicommon.docker.client import create_client
 from hgicommon.helpers import create_random_string, get_open_port
 from startfortest._docker_helpers import is_docker_container_running
-from startfortest.exceptions import ServiceStartException, TransientServiceStartException, \
+from startfortest.services.exceptions import ServiceStartException, TransientServiceStartException, \
     PersistentServiceStartException
-from startfortest.models import Service, DockerisedService
+from startfortest.services.models import Service, DockerisedService
 
 _logger = logging.getLogger(__name__)
 

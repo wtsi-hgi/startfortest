@@ -2,10 +2,10 @@ from abc import ABCMeta
 from typing import Type
 
 from hgicommon.helpers import get_open_port
-from startfortest.controllers import ServiceController
-from startfortest.models import DockerisedService
+from startfortest.services.controllers import ServiceController
+from startfortest.services.models import DockerisedService
 from testwithirods.api import IrodsVersion, get_static_irods_server_controller
-from testwithirods.models import ContainerisedIrodsServer, IrodsServer
+from testwithirods.models import ContainerisedIrodsServer
 
 
 class IrodsDockerisedService(ContainerisedIrodsServer, DockerisedService):

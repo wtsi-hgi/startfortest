@@ -4,9 +4,10 @@ from typing import Set
 from unittest import TestCase
 
 from startfortest._docker_helpers import is_docker_container_running
-from startfortest.controllers import ServiceController
-from startfortest.models import DockerisedService, Service
+from startfortest.services.models import DockerisedService, Service
+
 from hgicommon.docker.client import create_client
+from startfortest.services.controllers import ServiceController
 
 ControllerType = TypeVar("ControllerType", bound=ServiceController)
 

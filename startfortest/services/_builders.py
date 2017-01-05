@@ -1,8 +1,8 @@
 from abc import ABCMeta
 from typing import Type, TypeVar
 
-from startfortest.controllers import DockerisedServiceController, ServiceModel
-from startfortest.models import Service, DockerisedService
+from startfortest.services.controllers import DockerisedServiceController, ServiceModel
+from startfortest.services.models import DockerisedService, Service
 
 DockerControllerType = TypeVar("DockerControllerType", bound=DockerisedServiceController)
 

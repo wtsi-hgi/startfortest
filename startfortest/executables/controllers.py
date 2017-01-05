@@ -2,9 +2,9 @@ import atexit
 import os
 import shutil
 import tempfile
+from copy import deepcopy
 from typing import Dict, Set, Optional, Type
 
-from copy import deepcopy
 from docker.errors import NotFound
 
 from hgicommon.docker.client import create_client

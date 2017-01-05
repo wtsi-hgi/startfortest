@@ -1,6 +1,6 @@
 from bidict import bidict
 
-from startfortest.exceptions import UnexpectedNumberOfPortsException
+from startfortest.services.exceptions import UnexpectedNumberOfPortsException
 
 
 class Service:
