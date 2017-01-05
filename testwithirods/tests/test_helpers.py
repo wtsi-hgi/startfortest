@@ -1,7 +1,6 @@
 import unittest
 from abc import ABCMeta
 
-import testwithirods
 from testwithirods.helpers import SetupHelper, AccessLevel
 from testwithirods.irods_contoller import IrodsServerController
 from testwithirods.models import IrodsUser
@@ -160,7 +159,7 @@ class TestSetupHelper(IcatTest, metaclass=ABCMeta):
 
 # Setup tests for all iCAT setups
 create_tests_for_all_irods_setups(TestSetupHelper)
-for name, value in testwithirods.tests._common.__dict__.items():
+for name, value in merge.testwithirods.tests._common.__dict__.items():
     if TestSetupHelper.__name__ in name:
         globals()[name] = value
 del TestSetupHelper

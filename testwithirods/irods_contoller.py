@@ -8,7 +8,7 @@ from typing import Sequence, Type
 from docker.errors import APIError
 
 from hgicommon.docker.client import create_client
-from hgicommon.helpers import create_random_string, get_open_port
+from hgicommon.helpers import create_random_string
 from testwithirods.models import ContainerisedIrodsServer, IrodsServer, IrodsUser, Version
 
 

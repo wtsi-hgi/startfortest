@@ -1,7 +1,6 @@
 import unittest
 from abc import ABCMeta
 
-import testwithirods
 from hgicommon.docker.client import create_client
 from testwithirods.helpers import SetupHelper
 from testwithirods.irods_contoller import IrodsServerController
@@ -61,7 +60,7 @@ class TestIrodsServerController(IcatTest, metaclass=ABCMeta):
 
 # Setup tests for all iCAT setups
 create_tests_for_all_irods_setups(TestIrodsServerController)
-for name, value in testwithirods.tests._common.__dict__.items():
+for name, value in merge.testwithirods.tests._common.__dict__.items():
     if TestIrodsServerController.__name__ in name:
         globals()[name] = value
 del TestIrodsServerController
