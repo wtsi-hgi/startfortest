@@ -3,8 +3,8 @@ import unittest
 from abc import ABCMeta
 
 from startfortest.predefined.irods.services import Irods4_1_10Controller
+from startfortest.predefined.irods.testwithirods.helpers import SetupHelper
 from startfortest.tests.service.common import TestDockerisedServiceControllerSubclass, create_tests, ControllerType
-from testwithirods.helpers import SetupHelper
 from testwithirods.proxies import ICommandProxyController
 
 
