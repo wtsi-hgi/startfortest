@@ -1,13 +1,15 @@
+import os
+import shutil
+import tempfile
 import unittest
 from abc import ABCMeta
 
-from startfortest.predefined.irods.testwithirods.helpers import SetupHelper, AccessLevel
-from testwithirods.irods_contoller import IrodsServerController
-from testwithirods.models import IrodsUser
-from testwithirods.models import Metadata
-from testwithirods.proxies import ICommandProxyController
-from testwithirods.tests._common import IcatTest, create_tests_for_all_irods_setups, \
-    get_image_with_compatible_icat_binaries
+import startfortest
+from startfortest.predefined.irods import IrodsExecutablesController
+from startfortest.predefined.irods.helpers import SetupHelper, AccessLevel
+from startfortest.predefined.irods.models import Metadata, IrodsUser
+from startfortest.tests.predefined.irods._common import create_tests_for_all_irods_setups
+from startfortest.tests.service.common import TestServiceControllerSubclass
 
 _METADATA = Metadata({
     "attribute_1": ["value_1", "value_2"],
@@ -17,23 +19,31 @@ _METADATA = Metadata({
 _DATA_OBJECT_NAME = "data-object-name"
 
 
-class TestSetupHelper(IcatTest, metaclass=ABCMeta):
+class TestSetupHelper(TestServiceControllerSubclass, metaclass=ABCMeta):
     """
     Tests for `SetupHelper`.
     """
     def setUp(self):
-        self._server_controller = self.ServerController()   # type: IrodsServerController
-        self.irods_server = self._server_controller.start_server()
+        super().setUp()
 
-        self._proxy_controller = ICommandProxyController(
-            self.irods_server, get_image_with_compatible_icat_binaries(self.irods_server))
-        icommands_location = self._proxy_controller.create_proxy_binaries()
+        # TODO: Change "/tmp" to something more crossplatform
+        self.settings_directory = tempfile.mkdtemp(dir="/tmp")
+        self.irods_service = self.icat_controller.start_service()
 
+        config_file_path = os.path.join(self.settings_directory, self.icat_controller.config_file_name)
+        password = self._get_controller_type().write_connection_settings(config_file_path, self.irods_service)
+
+        # TODO: Docker repo+tag should be setting
+        self.executables_controller = IrodsExecutablesController(
+            self.irods_service.name, "mercury/icat:%s" % self.irods_service.version, self.settings_directory)
+
+        icommands_location = self.executables_controller.write_executables_and_authenticate(password)
         self.setup_helper = SetupHelper(icommands_location)
 
     def tearDown(self):
-        self._server_controller.stop_server(self.irods_server)
-        self._proxy_controller.tear_down()
+        self.icat_controller.stop_service(self.irods_service)
+        self.executables_controller.tear_down()
+        shutil.rmtree(self.settings_directory)
 
     def test_run_icommand(self):
         ils = self.setup_helper.run_icommand(["ils"])
@@ -93,7 +103,7 @@ class TestSetupHelper(IcatTest, metaclass=ABCMeta):
         resource = self.setup_helper.create_replica_storage()
         self.setup_helper.replicate_data_object(_DATA_OBJECT_NAME, resource)
 
-        expected_checksum = "900150983cd24fb0d6963f7d28e17f72" if self.irods_server.version.major == 3 \
+        expected_checksum = "900150983cd24fb0d6963f7d28e17f72" if self.irods_service.version.major == 3 \
             else "sha2:ungWv48Bz+pBQUDeXa4iI7ADYaOWF3qctBD/YfIAFa0="
 
         # Asserting that checksum is not stored before now
@@ -105,7 +115,7 @@ class TestSetupHelper(IcatTest, metaclass=ABCMeta):
 
     def test_get_checksum(self):
         path = self.setup_helper.create_data_object(_DATA_OBJECT_NAME, "abc")
-        expected_checksum = "900150983cd24fb0d6963f7d28e17f72" if self.irods_server.version.major == 3 \
+        expected_checksum = "900150983cd24fb0d6963f7d28e17f72" if self.irods_service.version.major == 3 \
             else "sha2:ungWv48Bz+pBQUDeXa4iI7ADYaOWF3qctBD/YfIAFa0="
         self.assertEqual(expected_checksum, self.setup_helper.get_checksum(path))
 
@@ -116,11 +126,11 @@ class TestSetupHelper(IcatTest, metaclass=ABCMeta):
         self.assertIn("resc_def_path: %s" % resource.location, resource_info)
 
     def test_create_user_with_existing_username(self):
-        existing_user = self.irods_server.users[0]
+        existing_user = self.irods_service.users[0]
         self.assertRaises(ValueError, self.setup_helper.create_user, existing_user.username, existing_user.zone)
 
     def test_create_user(self):
-        expected_user = IrodsUser("user_1", self.irods_server.users[0].zone)
+        expected_user = IrodsUser("user_1", self.irods_service.users[0].zone)
         user = self.setup_helper.create_user(expected_user.username, expected_user.zone)
         self.assertEqual(expected_user, user)
         user_list = self.setup_helper.run_icommand(["iadmin", "lu"])
@@ -128,7 +138,7 @@ class TestSetupHelper(IcatTest, metaclass=ABCMeta):
 
     def test_set_access(self):
         path = self.setup_helper.create_data_object(_DATA_OBJECT_NAME)
-        zone = self.irods_server.users[0].zone
+        zone = self.irods_service.users[0].zone
         user_1 = self.setup_helper.create_user("user_1", zone)
         user_2 = self.setup_helper.create_user("user_2", zone)
 
@@ -140,7 +150,7 @@ class TestSetupHelper(IcatTest, metaclass=ABCMeta):
         self.assertIn("%s#%s:modify object" % (user_2.username, zone), access_info)
 
     def test_get_icat_version(self):
-        self.assertEqual(self.irods_server.version, self.setup_helper.get_icat_version())
+        self.assertEqual(self.irods_service.version, self.setup_helper.get_icat_version())
 
     def _assert_metadata_in_retrieved(self, metadata: Metadata, retrieved_metadata: str):
         """
@@ -159,7 +169,7 @@ class TestSetupHelper(IcatTest, metaclass=ABCMeta):
 
 # Setup tests for all iCAT setups
 create_tests_for_all_irods_setups(TestSetupHelper)
-for name, value in merge.testwithirods.tests._common.__dict__.items():
+for name, value in startfortest.tests.predefined.irods._common.__dict__.items():
     if TestSetupHelper.__name__ in name:
         globals()[name] = value
 del TestSetupHelper

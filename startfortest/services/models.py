@@ -1,9 +1,10 @@
 from bidict import bidict
+from hgicommon.models import Model
 
 from startfortest.services.exceptions import UnexpectedNumberOfPortsException
 
 
-class Service:
+class Service(Model):
     """
     Model of a service.
     """

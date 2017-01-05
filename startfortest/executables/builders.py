@@ -19,8 +19,8 @@ class CommandsBuilder:
     """
     def __init__(self, executable: str=None, container: str=None, image: str=None, executable_arguments: List[str]=None,
                  get_path_arguments_to_mount: Callable[[List[Any]], Set[str]]=None,
-                 ports: Dict[int, int]=None, mounts: Dict[str, str]=None, variables: Iterable[str]=None, name: str=None,
-                 detached: bool=False, other_docker: str=""):
+                 ports: Dict[int, int]=None, mounts: Dict[str, Union[str, Set[str]]]=None,
+                 variables: Iterable[str]=None, name: str=None, detached: bool=False, other_docker: str=""):
         self.executable = executable
         self.container = container
         self.image = image
@@ -45,8 +45,11 @@ class CommandsBuilder:
             raise ValueError("Cannot build Docker command to work in for both an image and a running container")
 
         mounts = ""
-        for local_volume, container_volume in self.mounts.items():
-            mounts += "-v %s:%s" % (local_volume, container_volume)
+        for local_volume, container_volumes in self.mounts.items():
+            if not isinstance(container_volumes, set):
+                container_volumes = {container_volumes}
+            for container_volume in container_volumes:
+                mounts += "-v %s:%s " % (local_volume, container_volume)
 
         ports = ""
         for local_port, container_port in self.ports.items():

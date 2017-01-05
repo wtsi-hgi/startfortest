@@ -10,7 +10,7 @@ from tempfile import mkdtemp
 from typing import List, Union
 from uuid import uuid4
 
-from startfortest.predefined.irods.testwithirods import Metadata, IrodsResource, IrodsUser, Version
+from startfortest.predefined.irods.models import IrodsResource, IrodsUser, Version, Metadata
 
 
 @unique

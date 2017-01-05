@@ -3,18 +3,17 @@ from typing import Dict, Iterable, Type, Generic, TypeVar
 from typing import Set
 from unittest import TestCase
 
-from startfortest._docker_helpers import is_docker_container_running
-from startfortest.services.models import DockerisedService, Service
-
 from hgicommon.docker.client import create_client
+from startfortest._docker_helpers import is_docker_container_running
 from startfortest.services.controllers import ServiceController
+from startfortest.services.models import DockerisedService, Service
 
 ControllerType = TypeVar("ControllerType", bound=ServiceController)
 
 
-class TestDockerisedServiceControllerSubclass(Generic[ControllerType], TestCase, metaclass=ABCMeta):
+class TestServiceControllerSubclass(Generic[ControllerType], TestCase, metaclass=ABCMeta):
     """
-    Superclass for `DockerisedServiceController` tests.
+    TODO
     """
     @staticmethod
     @abstractmethod
@@ -27,26 +26,31 @@ class TestDockerisedServiceControllerSubclass(Generic[ControllerType], TestCase,
     def setUp(self):
         self._started = set()   # type: Set[Service]
         self._docker_client = create_client()
-        self.controller = type(self)._get_controller_type()()
+        self.icat_controller = type(self)._get_controller_type()()
 
     def tearDown(self):
         for service in self._started:
-            self.controller.stop_service(service)
+            self.icat_controller.stop_service(service)
 
+    def _start_service(self) -> Service:
+        service = self.icat_controller.start_service()
+        self._started.add(service)
+        return service
+
+
+class TestDockerisedServiceControllerSubclass(TestServiceControllerSubclass[ControllerType], metaclass=ABCMeta):
+    """
+    Superclass for `DockerisedServiceController` tests.
+    """
     def test_stop(self):
         service = self._start_service()
         assert is_docker_container_running(service)
-        self.controller.stop_service(service)
+        self.icat_controller.stop_service(service)
         self.assertFalse(is_docker_container_running(service))
 
     def test_stop_when_not_started(self):
         service = DockerisedService()
-        self.controller.stop_service(service)
-
-    def _start_service(self):
-        service = self.controller.start_service()
-        self._started.add(service)
-        return service
+        self.icat_controller.stop_service(service)
 
 
 def create_tests(superclass: Type[TestDockerisedServiceControllerSubclass], types: Iterable[type]) \
@@ -63,7 +67,8 @@ def create_tests(superclass: Type[TestDockerisedServiceControllerSubclass], type
         test = type(
             name,
             (superclass[test_type],),
-            {"_get_controller_type": staticmethod(lambda: test_type)}
+            # Confusing lambda magic explained here: http://stackoverflow.com/a/2295368
+            {"_get_controller_type": staticmethod((lambda test_type: lambda: test_type)(test_type))}
         )
         tests[name] = test
     return tests

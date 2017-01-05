@@ -1,81 +1,232 @@
-from abc import ABCMeta
-from typing import Type
+import json
+import logging
+import math
+import os
+from abc import abstractmethod, ABCMeta
+from time import sleep
+from typing import List, Type, Callable, Sequence
 
-from hgicommon.helpers import get_open_port
-from startfortest.predefined.irods.testwithirods.api import IrodsVersion, get_static_irods_server_controller
-from startfortest.services.controllers import ServiceController
-from startfortest.services.models import DockerisedService
-from testwithirods.models import ContainerisedIrodsServer
+from hgicommon.docker.client import create_client
+from startfortest.predefined.irods.models import IrodsUser, IrodsDockerisedService
+from startfortest.services.controllers import DockerisedServiceController
+from testwithirods.models import ContainerisedIrodsServer, Version
+
+_logger = logging.getLogger(__name__)
 
 
-class IrodsDockerisedService(ContainerisedIrodsServer, DockerisedService):
+class IrodsServiceController(DockerisedServiceController, metaclass=ABCMeta):
     """
-    Combination model of a Dockerised iRODS service, compatible with both this library and `test-with-irods`.
+    TODO
     """
-    def __init__(self):
-        super().__init__()
+    @staticmethod
+    @abstractmethod
+    def write_connection_settings(file_location: str, service: IrodsDockerisedService) -> str:
+        """
+        TODO
+        :param file_location:
+        :param service:
+        :return: associated password
+        """
 
-    @property
-    def container(self) -> dict:
-        return self.native_object
+    @staticmethod
+    def _persistent_error_detector(log_line: str) -> bool:
+        """
+        TODO
+        :param log_line:
+        :return:
+        """
+        return "No space left on device" in log_line
 
-    @container.setter
-    def container(self, value: dict):
-        self.native_object = value
+    def __init__(self, version: Version, users: Sequence[IrodsUser], config_file_name: str,
+                 repository: str, tag: str, ports: List[int], start_detector: Callable[[str], bool], **kwargs):
+        super().__init__(IrodsDockerisedService, repository, tag, ports, start_detector, **kwargs)
+        self.config_file_name = config_file_name
+        self._version = version
+        self._users = users
 
-    @DockerisedService.port.setter
-    def port(self, value: int):
-        if value is not None:
-            self.ports[value] = value
+    def start_service(self) -> IrodsDockerisedService:
+        service = super().start_service()
+        service.users = self._users
+        service.version = self._version
+        return service
 
 
-class IrodsServiceController(ServiceController, metaclass=ABCMeta):
+class Irods3ServiceController(IrodsServiceController, metaclass=ABCMeta):
     """
     iRODS service controller.
     """
-    def __init__(self, irods_version: IrodsVersion):
+    _DOCKER_REPOSITORY = "mercury/icat"
+
+    _PORT = 1247
+    _CONFIG_FILE_NAME = ".irodsEnv"
+
+    _HOST_PARAMETER_NAME = "irodsHost"
+    _PORT_PARAMETER_NAME = "irodsPort"
+    _USERNAME_PARAMETER_NAME = "irodsUserName"
+    _ZONE_PARAMETER_NAME = "irodsZone"
+
+    _USERS = [IrodsUser("rods", "iplant", "rods", admin=True)]
+
+    @staticmethod
+    def write_connection_settings(file_location: str, service: IrodsDockerisedService) -> str:
+        if os.path.isfile(file_location):
+            raise ValueError("Settings cannot be written to a file that already exists")
+
+        user = service.users[0]
+        config = [
+            (Irods3ServiceController._USERNAME_PARAMETER_NAME, user.username),
+            (Irods3ServiceController._HOST_PARAMETER_NAME, service.name),
+            (Irods3ServiceController._PORT_PARAMETER_NAME, Irods3ServiceController._PORT),
+            (Irods3ServiceController._ZONE_PARAMETER_NAME, user.zone)
+        ]
+        _logger.debug("Writing iRODS connection config to: %s" % file_location)
+        with open(file_location, "w") as settings_file:
+            settings_file.write("\n".join(["%s %s" % x for x in config]))
+
+        return user.password
+
+    @staticmethod
+    def _start_detector(log_line: str) -> bool:
         """
         TODO
-        :param irods_version:
+        :param log_line:
+        :return:
         """
-        super().__init__(IrodsDockerisedService)
-        self.irods_server_controller = get_static_irods_server_controller(irods_version=irods_version)
+        return "exited: irods" in log_line
 
-    def __del__(self):
-        try:
-            self.irods_server_controller.tear_down()
-        except AttributeError:
-            """ Constructor not completed """
+    @staticmethod
+    def _transient_error_detector(log_line: str) -> bool:
+        """
+        TODO
+        :param log_line:
+        :return:
+        """
+        return "failed to start" in log_line or "exited: irods" in log_line and "not expected" in log_line
 
-    def start_service(self) -> IrodsDockerisedService:
-        mapped_port = get_open_port()
-        test_with_irods_server = self.irods_server_controller.start_server(mapped_port)
-        service = IrodsDockerisedService()
-        # Rather hacky model conversion
-        for property, value in vars(test_with_irods_server).items():
-            setattr(service, property, value)
-        service.ports[1247] = mapped_port
-        return service
+    # TODO: Use default `start_timeout` and `start_tries` values from superclass
+    def __init__(self, docker_tag: str, start_timeout: int=math.inf, start_tries: int=10):
+        """
+        TODO
+        :param docker_tag:
+        :param start_timeout:
+        :param start_tries:
+        """
+        super().__init__(Version(docker_tag), Irods3ServiceController._USERS, Irods3ServiceController._CONFIG_FILE_NAME,
+                         Irods3ServiceController._DOCKER_REPOSITORY, docker_tag, [Irods3ServiceController._PORT],
+                         Irods3ServiceController._start_detector,
+                         transient_error_detector=Irods3ServiceController._transient_error_detector,
+                         persistent_error_detector=IrodsServiceController._persistent_error_detector,
+                         start_timeout=start_timeout, start_tries=start_tries)
 
-    def stop_service(self, service: IrodsDockerisedService):
-        self.irods_server_controller.stop_server(service)
+    def _wait_until_started(self, container: ContainerisedIrodsServer) -> bool:
+        if super()._wait_until_started(container) is False:
+            return False
+
+        # Just because iRODS says it has started, it does not mean it is ready to do queries!
+        docker_client = create_client()
+        status_query = docker_client.exec_create(
+            container.name, "su - irods -c \"/home/irods/iRODS/irodsctl --verbose status\"", stdout=True)
+        while "No servers running" in docker_client.exec_start(status_query).decode("utf8"):
+            # Nothing else to check on - just sleep it out
+            _logger.info("Still waiting on iRODS setup")
+            sleep(0.1)
+
+        return True
 
 
-def _build_irods_service_controller_type(irods_version: IrodsVersion) -> Type[IrodsServiceController]:
+class Irods4ServiceController(IrodsServiceController, metaclass=ABCMeta):
     """
-    Builds an iRODS service controller type for the version of iRODs given.
-    :param irods_version: version of iRODS that the controller is for
-    :return: the build controller type
+    iRODS 4 service controller.
     """
-    def init(self: IrodsServiceController):
-        super(type(self), self).__init__(irods_version)
+    _DOCKER_REPOSITORY = "mercury/icat"
+
+    _PORT = 1247
+    _CONFIG_FILE_NAME = "irods_environment.json"
+
+    _HOST_PARAMETER_NAME = "irods_host"
+    _PORT_PARAMETER_NAME = "irods_port"
+    _USERNAME_PARAMETER_NAME = "irods_user_name"
+    _ZONE_PARAMETER_NAME = "irods_zone_name"
+
+    _USERS = [
+        IrodsUser("rods", "testZone", "irods123", admin=True)
+    ]
+
+    @staticmethod
+    def write_connection_settings(file_location: str, service: IrodsDockerisedService) -> str:
+        if os.path.isfile(file_location):
+            raise ValueError("Settings cannot be written to a file that already exists")
+
+        user = service.users[0]
+        config = {
+            Irods4ServiceController._USERNAME_PARAMETER_NAME: user.username,
+            Irods4ServiceController._HOST_PARAMETER_NAME: service.name,
+            Irods4ServiceController._PORT_PARAMETER_NAME: Irods4ServiceController._PORT,
+            Irods4ServiceController._ZONE_PARAMETER_NAME: user.zone
+        }
+        config_as_json = json.dumps(config)
+        logging.debug("Writing iRODS connection config to: %s" % file_location)
+        with open(file_location, "w") as settings_file:
+            settings_file.write(config_as_json)
+
+        return user.password
+
+    @staticmethod
+    def _start_detector(log_line: str) -> bool:
+        """
+        TODO
+        :param log_line:
+        :return:
+        """
+        return "iRODS server started successfully!" in log_line
+
+    @staticmethod
+    def _transient_error_detector(log_line: str) -> bool:
+        """
+        TODO
+        :param log_line:
+        :return:
+        """
+        # Note: iRODS schema validation has been observed to randomly fail before, raising `RuntimeError`
+        return "iRODS server failed to start." in log_line or "RuntimeError:" in log_line
+
+    def __init__(self, docker_tag: str, start_timeout: int=math.inf, start_tries: int=math.inf):
+        """
+        Constructor.
+        :param start_timeout:
+        :param start_tries:
+        """
+        super().__init__(Version(docker_tag), Irods4ServiceController._USERS, Irods4ServiceController._CONFIG_FILE_NAME,
+                         Irods4ServiceController._DOCKER_REPOSITORY, docker_tag, [Irods4ServiceController._PORT],
+                         Irods4ServiceController._start_detector,
+                         transient_error_detector=Irods4ServiceController._transient_error_detector,
+                         persistent_error_detector=IrodsServiceController._persistent_error_detector,
+                         start_timeout=start_timeout, start_tries=start_tries)
+
+
+def _build_irods_service_controller_type(docker_tag: str, superclass: type) -> Type[IrodsServiceController]:
+    """
+    TODO
+    :param docker_tag:
+    :param superclass:
+    :return:
+    """
+    def init(self: superclass, *args, **kwargs):
+        super(type(self), self).__init__(docker_tag, *args, **kwargs)
 
     return type(
-        "Irods%sController" % irods_version.name.replace("v", ""),
-        (IrodsServiceController,),
+        "Irods%sServiceController" % docker_tag.replace(".", "_"),
+        (superclass,),
         {"__init__": init}
     )
 
 
-Irods4_1_10Controller = _build_irods_service_controller_type(IrodsVersion.v4_1_10)
-IrodsController = Irods4_1_10Controller
+# Concrete service controller definitions
+Irods3_3_1ServiceController = _build_irods_service_controller_type("3.3.1", Irods3ServiceController)
+Irods4_1_8ServiceController = _build_irods_service_controller_type("4.1.8", Irods4ServiceController)
+Irods4_1_9ServiceController = _build_irods_service_controller_type("4.1.9", Irods4ServiceController)
+Irods4_1_10ServiceController = _build_irods_service_controller_type("4.1.10", Irods4ServiceController)
+IrodsLatestServiceController = Irods4_1_10ServiceController
+
+irods_service_controllers = {Irods3_3_1ServiceController, Irods4_1_8ServiceController, Irods4_1_9ServiceController,
+                             Irods4_1_10ServiceController}
