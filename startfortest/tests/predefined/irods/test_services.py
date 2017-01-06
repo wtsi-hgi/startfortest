@@ -4,27 +4,26 @@ import unittest
 from abc import ABCMeta
 from tempfile import TemporaryDirectory
 
+from hgicommon.testing import TypeToTest, create_tests
 from startfortest.predefined.irods import IrodsExecutablesController
 from startfortest.predefined.irods.helpers import SetupHelper
-from startfortest.predefined.irods.services import Irods3_3_1ServiceController, Irods4_1_8ServiceController, \
-    Irods4_1_9ServiceController, Irods4_1_10ServiceController
-from startfortest.tests.service.common import TestDockerisedServiceControllerSubclass, ControllerType, create_tests
-from testwithirods.helpers import SetupHelper
+from startfortest.predefined.irods.services import irods_service_controllers
+from startfortest.tests.common import MOUNTABLE_TEMP_DIRECTORY
+from startfortest.tests.service.common import TestDockerisedServiceControllerSubclass
 
 
-class _TestIrodsServiceController(TestDockerisedServiceControllerSubclass[ControllerType], metaclass=ABCMeta):
+class _TestIrodsServiceController(TestDockerisedServiceControllerSubclass[TypeToTest], metaclass=ABCMeta):
     """
     Tests for iRODS controller.
     """
     def test_start(self):
-        # TODO: `/tmp` is not very cross-platform!
-        with TemporaryDirectory(dir="/tmp") as settings_directory:
+        with TemporaryDirectory(dir=MOUNTABLE_TEMP_DIRECTORY) as settings_directory:
             service = self._start_service()
 
             config_file_path = os.path.join(settings_directory, self.icat_controller.config_file_name)
             password = self._get_controller_type().write_connection_settings(config_file_path, service)
 
-            # TODO: Docker repo+tag should be setting
+            # TODO: Docker repo+tag should be a setting
             irods_executables_controller = IrodsExecutablesController(
                 service.name, "mercury/icat:%s" % service.version, settings_directory)
 
@@ -45,12 +44,7 @@ class _TestIrodsServiceController(TestDockerisedServiceControllerSubclass[Contro
 
 
 # Setup tests
-CLASSES_TO_TEST = {
-    Irods3_3_1ServiceController,
-    Irods4_1_8ServiceController,
-    Irods4_1_9ServiceController,
-    Irods4_1_10ServiceController}
-globals().update(create_tests(_TestIrodsServiceController, CLASSES_TO_TEST))
+globals().update(create_tests(_TestIrodsServiceController, irods_service_controllers))
 
 
 # Fix for unittest

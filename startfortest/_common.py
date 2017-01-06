@@ -1,4 +1,4 @@
-_TAB = "    "
+_TAB_AS_SPACES = "    "
 
 
 def reduce_whitespace(string: str) -> str:
@@ -7,9 +7,11 @@ def reduce_whitespace(string: str) -> str:
     :param string: the command to reduce whitespace from
     :return: command with reduced whitespace
     """
-    leading_tabs = int(min({(len(line) - len(line.lstrip(_TAB))) / len(_TAB) for line in string.split("\n") if len(line.strip()) > 0}))
+    leading_tabs = int(min({(len(line) - len(line.lstrip(_TAB_AS_SPACES))) / len(_TAB_AS_SPACES)
+                            for line in string.split("\n") if len(line.strip()) > 0}))
     stripped = []
     for line in string.split("\n"):
-        stripped.append(line.replace(_TAB, "", leading_tabs))
+        stripped.append(line.replace(_TAB_AS_SPACES, "", leading_tabs))
     return "\n".join(stripped)
+
 

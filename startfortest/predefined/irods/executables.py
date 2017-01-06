@@ -23,6 +23,13 @@ class IrodsExecutablesController(DefinedExecutablesController):
 
     def __init__(self, irods_container_name: str, image_with_compatible_icommands: str, settings_directory_on_host: str,
                  settings_directories_in_container: Sequence[str]=_DEFAULT_SETTINGS_DIRECTORIES):
+        """
+        Constructor.
+        :param irods_container_name:
+        :param image_with_compatible_icommands:
+        :param settings_directory_on_host:
+        :param settings_directories_in_container:
+        """
         self._image_with_compatible_icommands = image_with_compatible_icommands
         self._run_container_commands_builder = CommandsBuilder(
             "sleep", executable_arguments=["infinity"], image=image_with_compatible_icommands,

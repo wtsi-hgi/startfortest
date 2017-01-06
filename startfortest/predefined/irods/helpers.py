@@ -76,9 +76,9 @@ class SetupHelper:
 
     def read_data_object(self, path: str) -> str:
         """
-        TODO
-        :param path:
-        :return:
+        Reads the contents of the entity with the given path.
+        :param path: the path to the entity in iRODS
+        :return: the entity's contents
         """
         return self.run_icommand(["iget", path, "-"])
 

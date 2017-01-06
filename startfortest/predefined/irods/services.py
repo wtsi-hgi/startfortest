@@ -53,7 +53,7 @@ class IrodsServiceController(DockerisedServiceController, metaclass=ABCMeta):
 
 class Irods3ServiceController(IrodsServiceController, metaclass=ABCMeta):
     """
-    iRODS service controller.
+    iRODS 3 service controller.
     """
     _DOCKER_REPOSITORY = "mercury/icat"
 

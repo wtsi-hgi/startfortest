@@ -1,29 +1,29 @@
 import subprocess
 from typing import List, Tuple, Optional
 
+from startfortest.tests.common import MAX_RUN_TIME_IN_SECONDS
 from startfortest.executables.builders import CommandsBuilder
 
-MOUNTABLE_TEMP_DIRECTORY = "/tmp"
-MAX_RUN_TIME_IN_SECONDS = 120
 UBUNTU_IMAGE_TO_TEST_WITH = "ubuntu:16.04"
 
 
 def get_builder_for_commands_to_run_persistent_ubuntu() -> CommandsBuilder:
     """
-    TODO
-    :return:
+    Gets commands builder to run a persistent Ubuntu container.
+    :return: the commands builder
     """
     return CommandsBuilder("sleep", image=UBUNTU_IMAGE_TO_TEST_WITH, executable_arguments=["infinity"])
 
 
-def run(arguments: List=None, raise_if_stderr: bool=True, pipe_in: str=None, decode_output_to: Optional[str]= "utf-8") \
+def run(arguments: List=None, raise_if_stderr: bool=True, pipe_in: str=None, decode_output_to: Optional[str]="utf-8") \
         -> Tuple[str, str]:
     """
-    TODO
-    :param arguments: the arguments to execute, where the first argument is the executable
+    Calls out to run the given arguments on the system.
+    :param arguments: the arguments to execute, where the first item is the executable and subsequent items are the
+    executable's arguments
     :param raise_if_stderr: whether the test should raise an exception if anything is written to standard error
-    :param pipe_in: TODO
-    :param decode_output_to: TODO
+    :param pipe_in: any string that should be piped into the process as input
+    :param decode_output_to: the output character encoding
     :return: tuple where the first element is what was written to standard out and the second is what was written to
     standard error
     """

@@ -1,14 +1,15 @@
 import os
-import shutil
-import tempfile
 import unittest
 from abc import ABCMeta
+from typing import Set, Type
 
-import startfortest
+from hgicommon.managers import TempManager
+from hgicommon.testing import TypeToTest, create_tests
 from startfortest.predefined.irods import IrodsExecutablesController
 from startfortest.predefined.irods.helpers import SetupHelper, AccessLevel
 from startfortest.predefined.irods.models import Metadata, IrodsUser
-from startfortest.tests.predefined.irods._common import create_tests_for_all_irods_setups
+from startfortest.predefined.irods.services import IrodsServiceController, irods_service_controllers
+from startfortest.tests.common import MOUNTABLE_TEMP_CREATION_KWARGS
 from startfortest.tests.service.common import TestServiceControllerSubclass
 
 _METADATA = Metadata({
@@ -19,21 +20,21 @@ _METADATA = Metadata({
 _DATA_OBJECT_NAME = "data-object-name"
 
 
-class TestSetupHelper(TestServiceControllerSubclass, metaclass=ABCMeta):
+class _TestSetupHelper(TestServiceControllerSubclass[TypeToTest], metaclass=ABCMeta):
     """
     Tests for `SetupHelper`.
     """
     def setUp(self):
         super().setUp()
+        self._temp_manager = TempManager(MOUNTABLE_TEMP_CREATION_KWARGS, MOUNTABLE_TEMP_CREATION_KWARGS)
 
-        # TODO: Change "/tmp" to something more crossplatform
-        self.settings_directory = tempfile.mkdtemp(dir="/tmp")
+        self.settings_directory = self._temp_manager.create_temp_directory()
         self.irods_service = self.icat_controller.start_service()
 
         config_file_path = os.path.join(self.settings_directory, self.icat_controller.config_file_name)
-        password = self._get_controller_type().write_connection_settings(config_file_path, self.irods_service)
+        password = self.get_type_to_test().write_connection_settings(config_file_path, self.irods_service)
 
-        # TODO: Docker repo+tag should be setting
+        # TODO: Docker repo+tag should be a setting
         self.executables_controller = IrodsExecutablesController(
             self.irods_service.name, "mercury/icat:%s" % self.irods_service.version, self.settings_directory)
 
@@ -43,7 +44,7 @@ class TestSetupHelper(TestServiceControllerSubclass, metaclass=ABCMeta):
     def tearDown(self):
         self.icat_controller.stop_service(self.irods_service)
         self.executables_controller.tear_down()
-        shutil.rmtree(self.settings_directory)
+        self._temp_manager.tear_down()
 
     def test_run_icommand(self):
         ils = self.setup_helper.run_icommand(["ils"])
@@ -167,13 +168,24 @@ class TestSetupHelper(TestServiceControllerSubclass, metaclass=ABCMeta):
                 self.assertIn("attribute: %s\nvalue: %s" % (attribute, value), retrieved_metadata)
 
 
-# Setup tests for all iCAT setups
-create_tests_for_all_irods_setups(TestSetupHelper)
-for name, value in startfortest.tests.predefined.irods._common.__dict__.items():
-    if TestSetupHelper.__name__ in name:
-        globals()[name] = value
-del TestSetupHelper
+def _get_classes_to_test() -> Set[Type[_TestSetupHelper]]:
+    """
+    Gets the classes that are to be tested
+    :return: classes to be tested
+    """
+    classes_to_test = set()   # type: Set[Type[IrodsServiceController]]
+    single_setup = os.environ.get("SINGLE_TEST_SETUP")
+    if single_setup:
+        classes_to_test.add(globals()[single_setup])
+    else:
+        classes_to_test = classes_to_test.union(irods_service_controllers)
+    return classes_to_test
 
+globals().update(create_tests(_TestSetupHelper, _get_classes_to_test()))
+
+
+# Fix for unittest
+del _TestSetupHelper
 
 if __name__ == "__main__":
     unittest.main()

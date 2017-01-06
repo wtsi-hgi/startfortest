@@ -5,7 +5,7 @@ from typing import Type
 
 from startfortest.executables.controllers import DefinedExecutablesController
 from startfortest.predefined.samtools import Samtools1_3_1_ExecutablesController
-from startfortest.tests.executables._common import run
+from startfortest.tests.executables.common import run
 
 EXAMPLE_BAM = os.path.join(os.path.dirname(os.path.realpath(__file__)), "example.bam")
 assert os.path.exists(EXAMPLE_BAM)
@@ -42,6 +42,7 @@ class _TestSamtoolsExecutablesController(unittest.TestCase, metaclass=ABCMeta):
         self.assertEqual(original_sam_contents, sam_contents)
 
 
+# FIXME: Move to using `create_tests` in `hgicommon`
 for controller, version in CONTROLLERS.items():
     name = "Test%s" % controller.__name__
 

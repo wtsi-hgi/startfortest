@@ -1,17 +1,17 @@
 import os
-import shutil
-import subprocess
 import tempfile
 import unittest
-from typing import Set, List, Tuple
+from typing import List, Tuple
 
 from hgicommon.helpers import create_random_string
+from hgicommon.managers import TempManager
 from startfortest.executables.builders import CommandsBuilder, MountedArgumentParserBuilder
 from startfortest.executables.common import write_commands
 from startfortest.executables.controllers import ExecutablesController
 from startfortest.executables.models import Executable
-from startfortest.tests.executables._common import MOUNTABLE_TEMP_DIRECTORY, MAX_RUN_TIME_IN_SECONDS, \
-    get_builder_for_commands_to_run_persistent_ubuntu, UBUNTU_IMAGE_TO_TEST_WITH, run
+from startfortest.tests.executables.common import get_builder_for_commands_to_run_persistent_ubuntu, \
+    UBUNTU_IMAGE_TO_TEST_WITH, run
+from startfortest.tests.common import MOUNTABLE_TEMP_DIRECTORY, MOUNTABLE_TEMP_CREATION_KWARGS
 
 _CONTENT = "Hello World!"
 _CAT_MOUNTED_ARGUMENT_PARSER = MountedArgumentParserBuilder(
@@ -25,16 +25,14 @@ class TestExecutablesController(unittest.TestCase):
     Tests for ExecutablesController.
     """
     def setUp(self):
-        self._temp_files = set()    # type: Set[str]
+        self._temp_manager = TempManager(MOUNTABLE_TEMP_CREATION_KWARGS, MOUNTABLE_TEMP_CREATION_KWARGS)
         self.controller = ExecutablesController()
         self.persistent_run_controller = ExecutablesController(get_builder_for_commands_to_run_persistent_ubuntu())
 
     def tearDown(self):
         self.controller.tear_down()
         self.persistent_run_controller.tear_down()
-        while len(self._temp_files) > 0:
-            directory = self._temp_files.pop()
-            shutil.rmtree(directory, ignore_errors=True)
+        self._temp_manager.tear_down()
 
     def test_create_executable_commands_with_no_running_container(self):
         commands_builder = CommandsBuilder("echo", image=UBUNTU_IMAGE_TO_TEST_WITH, executable_arguments=[_CONTENT])
@@ -43,7 +41,7 @@ class TestExecutablesController(unittest.TestCase):
         self.assertEqual(_CONTENT, out)
 
     def test_create_executable_commands_with_positional_parameter_needing_mounting_for_read(self):
-        read_file = self._create_mountable_temp_file()
+        _, read_file = self._temp_manager.create_temp_file()
         with open(read_file, "w") as file:
             file.write(_CONTENT)
 
@@ -72,7 +70,7 @@ class TestExecutablesController(unittest.TestCase):
             commands = self.persistent_run_controller.create_executable_commands(Executable(commands_builder, False))
 
             test_file = os.path.join(temp_directory, "test-file")
-            reference = self._create_mountable_temp_file()
+            _, reference = self._temp_manager.create_temp_file()
             os.utime(reference, (0, 0))
             self._run_commands(commands, ["-r", reference, test_file])
             self.assertEqual(0.0, os.path.getmtime(test_file))
@@ -112,19 +110,10 @@ class TestExecutablesController(unittest.TestCase):
         if arguments is None:
             arguments = []
 
-        location = self._create_mountable_temp_file()
+        _, location = self._temp_manager.create_temp_file()
         write_commands(location, commands)
 
         return run([location] + arguments, raise_if_stderr)
-
-    def _create_mountable_temp_file(self) -> str:
-        """
-        Creates a temp file with only a lifespan of the test, which can be mounted.
-        :return: the location of the temp file
-        """
-        _, location = tempfile.mkstemp(dir=MOUNTABLE_TEMP_DIRECTORY, text=True)
-        self._temp_files.add(location)
-        return location
 
 
 if __name__ == "__main__":

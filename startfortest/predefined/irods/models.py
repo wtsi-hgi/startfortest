@@ -37,7 +37,7 @@ class IrodsUser(Model):
 
 class IrodsDockerisedService(DockerisedService):
     """
-    TODO
+    Model of a iRODS service running in Docker.
     """
     def __init__(self):
         super().__init__()
