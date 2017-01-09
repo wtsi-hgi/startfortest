@@ -195,7 +195,8 @@ class DockerisedServiceController(ContainerisedServiceController[ServiceModel], 
                     raise e
 
     def _wait_until_started(self, service: DockerisedService) -> bool:
-        for line in create_client().logs(service.container, stream=True):
+        _docker_client = create_client()
+        for line in _docker_client.logs(service.container, stream=True):
             line = str(line)
             logging.debug(line)
 
@@ -207,4 +208,5 @@ class DockerisedServiceController(ContainerisedServiceController[ServiceModel], 
                 return True
 
         assert not is_docker_container_running(service)
-        raise TransientServiceStartException("No error detected in logs but the container has stopped")
+        raise TransientServiceStartException("No error detected in logs but the container has stopped. Log dump: %s"
+                                             % _docker_client.logs(service.container))
