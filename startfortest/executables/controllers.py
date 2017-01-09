@@ -1,18 +1,18 @@
 import atexit
 import os
-import shutil
-import tempfile
 from copy import deepcopy
-from typing import Dict, Set, Optional, Type
+from typing import Dict, Optional, Type
 
 from docker.errors import NotFound
 
 from hgicommon.docker.client import create_client
 from hgicommon.helpers import create_random_string
+from hgicommon.managers import TempManager
 from startfortest._common import reduce_whitespace
 from startfortest.executables.builders import CommandsBuilder
 from startfortest.executables.common import CLI_ARGUMENTS, write_commands, pull_docker_image
 from startfortest.executables.models import Executable
+from startfortest.tests.common import MOUNTABLE_TEMP_DIRECTORY
 
 
 class ExecutablesController:
@@ -128,7 +128,7 @@ class DefinedExecutablesController(ExecutablesController):
     def __init__(self, run_container_commands_builder: Optional[CommandsBuilder]=None,
                  named_executables: Dict[str, Executable]=None):
         super().__init__(run_container_commands_builder)
-        self._temp_directories = set()  # type: Set[str]
+        self._temp_manager = TempManager()
         self.named_executables = named_executables if named_executables is not None else dict()
 
     def tear_down(self):
@@ -137,9 +137,7 @@ class DefinedExecutablesController(ExecutablesController):
         :return:
         """
         super().tear_down()
-        while len(self._temp_directories) > 0:
-            directory = self._temp_directories.pop()
-            shutil.rmtree(directory, ignore_errors=True)
+        self._temp_manager.tear_down()
 
     def write_executables(self, location: str=None) -> str:
         """
@@ -149,9 +147,7 @@ class DefinedExecutablesController(ExecutablesController):
         :return: the directory containing the executables
         """
         if location is None:
-            # TODO: fix /tmp default
-            location = tempfile.mkdtemp(prefix="executables-", dir="/tmp")
-            self._temp_directories.add(location)
+            location = self._temp_manager.create_temp_directory(prefix="executables-", dir=MOUNTABLE_TEMP_DIRECTORY)
 
         for name, executable in self.named_executables.items():
             executable_location = os.path.join(location, name)
