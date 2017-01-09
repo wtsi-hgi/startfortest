@@ -21,7 +21,7 @@ install:
   - pip install -r test_requirements.txt
 
 script:
-  - nosetests -v --with-coverage --cover-package=startfortest --cover-inclusive --exclude-test=startfortest.tests.services._common.TestDockerisedServiceControllerSubclass --exclude-test=startfortest.tests.services._common.create_tests
+  - nosetests -v --with-coverage --cover-package=useintest --cover-inclusive --exclude-test=useintest.tests.services._common.TestDockerisedServiceControllerSubclass --exclude-test=useintest.tests.services._common.create_tests
 
 after_success:
   - codecov

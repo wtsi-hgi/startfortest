@@ -1,7 +1,7 @@
-[![Build Status](https://travis-ci.org/wtsi-hgi/startfortest.svg)](https://travis-ci.org/wtsi-hgi/startfortest)
-[![codecov.io](https://codecov.io/gh/wtsi-hgi/startfortest/graph/badge.svg)](https://codecov.io/github/wtsi-hgi/startfortest)
-# Start For Test 
-*I don't care how it's done, just start one of those so I can test my application with it!*
+[![Build Status](https://travis-ci.org/wtsi-hgi/useintest.svg)](https://travis-ci.org/wtsi-hgi/useintest)
+[![codecov.io](https://codecov.io/gh/wtsi-hgi/useintest/graph/badge.svg)](https://codecov.io/github/wtsi-hgi/useintest)
+# Use In Test
+*I don't care how it's done, I just want to use it in my tests!*
 
 ## Introduction
 ### Key Features
@@ -39,13 +39,13 @@ to those used in production.
 ### Installation
 Bleeding edge versions can be installed directly from GitHub:
 ```bash
-$pip3 install https://github.com/wtsi-hgi/startfortest@master#startfortest
+$pip3 install https://github.com/wtsi-hgi/useintest@master#useintest
 ```
 
 ### Use
 #### Overview
 ```python
-from startfortest.services.mongo import MongoController
+from useintest.services.mongo import MongoController
 
 # Starts a containerised version of Mongo
 controller = MongoController()              
@@ -57,16 +57,16 @@ controller.stop_service(service)
 
 #### Available Services
 ##### Mongo
-In the `startfortest.service.mongo` module:
+In the `useintest.service.mongo` module:
 - `MongoController`: Latest version of Mongo available.
 - `Mongo3Controller`: Mongo version 3.
 
 ##### CouchDB:
-In the `startfortest.service.couchdb` module:
+In the `useintest.service.couchdb` module:
 - `CouchDBController`: Latest version of CouchDB available.
 - `CouchDB1_6Controller`: CouchDB version 1.6.
 
 ##### iRODS
-In the `startfortest.service.irods` module:
+In the `useintest.service.irods` module:
 - `IrodsController`: Latest version of iRODS available.  
 - `Irods4_1_10Controller`: iRODS version 4.1.10.

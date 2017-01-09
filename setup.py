@@ -9,18 +9,18 @@ except ImportError:
         return open(file, "r").read()
 
 setup(
-    name="startfortest",
+    name="useintest",
     version="1.0.0",
     author="Colin Nolan",
     author_email="colin.nolan@sanger.ac.uk",
     packages=find_packages(exclude=["tests"]),
     install_requires=[x for x in open("requirements.txt").read().splitlines() if "://" not in x],
     dependency_links=[x for x in open("requirements.txt").read().splitlines() if "://" in x],
-    url="https://github.com/wtsi-hgi/startfortest",
+    url="https://github.com/wtsi-hgi/useintest",
     license="MIT",
     description="I don't care how it's done, just start one of these so I can test my application with it!",
     long_description=read_markdown("README.md"),
-    test_suite="startfortest.tests",
+    test_suite="useintest.tests",
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Operating System :: OS Independent",
