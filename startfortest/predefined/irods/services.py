@@ -22,10 +22,9 @@ class IrodsServiceController(DockerisedServiceController, metaclass=ABCMeta):
     @abstractmethod
     def write_connection_settings(file_location: str, service: IrodsDockerisedService) -> str:
         """
-        TODO
-        :param file_location:
-        :param service:
-        :return: associated password
+        Writes the connection settings for the given iRODS service to the given location.
+        :param file_location: the location to write the settings to (file should not already exist)
+        :param service: the Dockerized iRODS service
         """
 
     @staticmethod
@@ -39,6 +38,17 @@ class IrodsServiceController(DockerisedServiceController, metaclass=ABCMeta):
 
     def __init__(self, version: Version, users: Sequence[IrodsUser], config_file_name: str,
                  repository: str, tag: str, ports: List[int], start_detector: Callable[[str], bool], **kwargs):
+        """
+        Constructor.
+        :param version:
+        :param users:
+        :param config_file_name:
+        :param repository:
+        :param tag:
+        :param ports:
+        :param start_detector:
+        :param kwargs:
+        """
         super().__init__(IrodsDockerisedService, repository, tag, ports, start_detector, **kwargs)
         self.config_file_name = config_file_name
         self._version = version
@@ -206,7 +216,7 @@ class Irods4ServiceController(IrodsServiceController, metaclass=ABCMeta):
 
 def _build_irods_service_controller_type(docker_tag: str, superclass: type) -> Type[IrodsServiceController]:
     """
-    TODO
+    Builds a controller for an iRODS server that runs in containers of on the given Docker image.
     :param docker_tag:
     :param superclass:
     :return:

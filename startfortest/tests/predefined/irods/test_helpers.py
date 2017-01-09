@@ -184,8 +184,8 @@ def _get_classes_to_test() -> Set[Type[_TestSetupHelper]]:
 globals().update(create_tests(_TestSetupHelper, _get_classes_to_test()))
 
 
-# Fix for unittest
-del _TestSetupHelper
+# Fix for stupidity of test runners
+del _TestSetupHelper, TestServiceControllerSubclass, create_tests
 
 if __name__ == "__main__":
     unittest.main()

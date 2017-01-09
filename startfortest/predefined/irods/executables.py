@@ -9,7 +9,7 @@ from startfortest.executables.models import Executable
 
 class IrodsExecutablesController(DefinedExecutablesController):
     """
-    TODO
+    Executables ("i*") for use against an iRODS server (iCAT).
     """
     _ICOMMAND_EXECUTABLES = {"ibun", "icd", "ichksum", "ichmod", "icp", "idbug", "ienv", "ierror", "iexecmd", "iexit",
                              "ifsck", "iget", "igetwild", "ihelp", "iinit", "ilocate", "ils", "ilsresc", "imcoll",
@@ -21,14 +21,16 @@ class IrodsExecutablesController(DefinedExecutablesController):
         positional_arguments=MountedArgumentParserBuilder.ALL_POSITIONAL_ARGUMENTS).build()
     _DEFAULT_SETTINGS_DIRECTORIES = {"/root/.irods", "/home/root/.irods"}
 
+    # TODO: Could add option to connect to iRODS server not running in Docker (i.e. via port opposed to link)
     def __init__(self, irods_container_name: str, image_with_compatible_icommands: str, settings_directory_on_host: str,
                  settings_directories_in_container: Sequence[str]=_DEFAULT_SETTINGS_DIRECTORIES):
         """
         Constructor.
-        :param irods_container_name:
-        :param image_with_compatible_icommands:
-        :param settings_directory_on_host:
-        :param settings_directories_in_container:
+        :param irods_container_name: the name of the container running the iRODS server
+        :param image_with_compatible_icommands: image containing icommands that are compatible with the iRODS server
+        :param settings_directory_on_host: directory on the Docker host machine that are used to access iRODS
+        :param settings_directories_in_container: the directories on the container running the Docker image that need to
+        contain the settings
         """
         self._image_with_compatible_icommands = image_with_compatible_icommands
         self._run_container_commands_builder = CommandsBuilder(
@@ -40,10 +42,10 @@ class IrodsExecutablesController(DefinedExecutablesController):
 
     def authenticate(self, executables_directory: str, password: str):
         """
-        TODO
-        :param executables_directory:
-        :param password:
-        :return:
+        Authenticate "client" with the iRODS server using `iinit` in the given executables directory and the given
+        password.
+        :param executables_directory: the directory containing the iRODS executables
+        :param password: the password used to authenticate based on the settings provided to the constructor
         """
         process = subprocess.Popen([os.path.join(executables_directory, "iinit"), password], stdout=subprocess.PIPE,
                                    stderr=subprocess.PIPE)
@@ -53,10 +55,11 @@ class IrodsExecutablesController(DefinedExecutablesController):
 
     def write_executables_and_authenticate(self, password: str, location: str=None) -> str:
         """
-        TODO
-        :param password:
-        :param location:
-        :return:
+        Both writes the executables to the given location and then authenticates to use the server with the given
+        password.
+        :param password: password used by the `authenticate` method
+        :param location: location used by the `write_executables` method
+        :return: the location of the written executables
         """
         location = self.write_executables(location)
         self.authenticate(location, password)
@@ -64,8 +67,7 @@ class IrodsExecutablesController(DefinedExecutablesController):
 
     def _register_named_executables(self):
         """
-        TODO
-        :return:
+        Registers the executables that can be written by this controller.
         """
         for icommand in IrodsExecutablesController._ICOMMAND_EXECUTABLES - {"iget", "iput"}:
             self.named_executables[icommand] = Executable(CommandsBuilder(icommand), True)

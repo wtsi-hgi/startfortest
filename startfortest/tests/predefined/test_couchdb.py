@@ -26,9 +26,8 @@ CLASSES_TO_TEST = {CouchDB1_6DockerisedServiceController, CouchDBDockerisedServi
 globals().update(create_tests(_TestCouchDBDockerisedServiceController, CLASSES_TO_TEST))
 
 
-# Fix for unittest
-del _TestCouchDBDockerisedServiceController
-del TestDockerisedServiceControllerSubclass
+# Fix for stupidity of test runners
+del _TestCouchDBDockerisedServiceController, TestDockerisedServiceControllerSubclass, create_tests
 
 
 if __name__ == "__main__":

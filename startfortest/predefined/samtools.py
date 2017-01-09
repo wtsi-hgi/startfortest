@@ -4,7 +4,7 @@ from startfortest.executables.controllers import DefinedExecutablesControllerTyp
 from startfortest.executables.models import Executable
 
 Samtools1_3_1_ExecutablesController = DefinedExecutablesControllerTypeBuilder(
-    "SamtoolsExecutablesController",
+    "Samtools1_3_1_ExecutablesController",
     {
         "samtools": Executable(
             CommandsBuilder(
@@ -18,3 +18,6 @@ Samtools1_3_1_ExecutablesController = DefinedExecutablesControllerTypeBuilder(
         )
     }
 ).build()
+
+
+samtools_executable_controllers = {Samtools1_3_1_ExecutablesController}

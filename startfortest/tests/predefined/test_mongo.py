@@ -27,9 +27,8 @@ CLASSES_TO_TEST = {Mongo3DockerisedServiceController, MongoDockerisedServiceCont
 globals().update(create_tests(_TestMongoDockerisedServiceController, CLASSES_TO_TEST))
 
 
-# Fix for unittest
-del _TestMongoDockerisedServiceController
-del TestDockerisedServiceControllerSubclass
+# Fix for stupidity of test runners
+del _TestMongoDockerisedServiceController, TestDockerisedServiceControllerSubclass, create_tests
 
 
 if __name__ == "__main__":

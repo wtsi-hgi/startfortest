@@ -45,6 +45,7 @@ class SetupHelper:
         if "/" in name:
             raise ValueError("Data object name cannot include '/'")
 
+        # TODO: Consider using `TempManager` from `hgicommon` instead
         def remove_temp_folder(location: str):
             if os.path.exists(location):
                 try:

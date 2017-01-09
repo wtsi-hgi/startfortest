@@ -21,7 +21,7 @@ class _TestIrodsServiceController(TestDockerisedServiceControllerSubclass[TypeTo
             service = self._start_service()
 
             config_file_path = os.path.join(settings_directory, self.icat_controller.config_file_name)
-            password = self._get_controller_type().write_connection_settings(config_file_path, service)
+            password = self.get_type_to_test().write_connection_settings(config_file_path, service)
 
             # TODO: Docker repo+tag should be a setting
             irods_executables_controller = IrodsExecutablesController(
@@ -47,10 +47,8 @@ class _TestIrodsServiceController(TestDockerisedServiceControllerSubclass[TypeTo
 globals().update(create_tests(_TestIrodsServiceController, irods_service_controllers))
 
 
-# Fix for unittest
-del _TestIrodsServiceController
-del TestDockerisedServiceControllerSubclass
-
+# Fix for stupidity of test runners
+del _TestIrodsServiceController, TestDockerisedServiceControllerSubclass, create_tests
 
 if __name__ == "__main__":
     unittest.main()
