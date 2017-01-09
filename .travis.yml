@@ -3,6 +3,11 @@ language: python
 python:
   - 3.6
 
+env:
+  matrix:
+    - TEST_LATEST_ONLY=0
+    - TEST_LATEST_ONLY=1
+
 services:
   - docker
 
