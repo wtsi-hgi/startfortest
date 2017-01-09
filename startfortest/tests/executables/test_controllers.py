@@ -9,8 +9,8 @@ from startfortest.executables.builders import CommandsBuilder, MountedArgumentPa
 from startfortest.executables.common import write_commands
 from startfortest.executables.controllers import ExecutablesController
 from startfortest.executables.models import Executable
-from startfortest.tests.executables.common import get_builder_for_commands_to_run_persistent_ubuntu, \
-    UBUNTU_IMAGE_TO_TEST_WITH, run
+from startfortest.tests.executables.common import get_builder_for_commands_to_run_persistent_ubuntu, run, \
+    UBUNTU_IMAGE_TO_TEST_WITH
 from startfortest.tests.common import MOUNTABLE_TEMP_DIRECTORY, MOUNTABLE_TEMP_CREATION_KWARGS
 
 _CONTENT = "Hello World!"

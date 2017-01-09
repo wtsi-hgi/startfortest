@@ -23,3 +23,5 @@ CouchDBDockerisedServiceController = DockerisedServiceControllerTypeBuilder(
 
 CouchDB1_6Controller = CouchDB1_6DockerisedServiceController
 CouchDBController = CouchDBDockerisedServiceController
+
+couchdb_controllers = {CouchDB1_6DockerisedServiceController}

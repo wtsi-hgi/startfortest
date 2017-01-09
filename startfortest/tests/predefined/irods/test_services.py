@@ -4,10 +4,10 @@ import unittest
 from abc import ABCMeta
 from tempfile import TemporaryDirectory
 
-from hgicommon.testing import TypeToTest, create_tests
+from hgicommon.testing import TypeToTest, create_tests, get_classes_to_test
 from startfortest.predefined.irods import IrodsExecutablesController
 from startfortest.predefined.irods.helpers import SetupHelper
-from startfortest.predefined.irods.services import irods_service_controllers
+from startfortest.predefined.irods.services import irods_service_controllers, IrodsServiceController
 from startfortest.tests.common import MOUNTABLE_TEMP_DIRECTORY
 from startfortest.tests.service.common import TestDockerisedServiceControllerSubclass
 
@@ -44,11 +44,11 @@ class _TestIrodsServiceController(TestDockerisedServiceControllerSubclass[TypeTo
 
 
 # Setup tests
-globals().update(create_tests(_TestIrodsServiceController, irods_service_controllers))
+globals().update(create_tests(_TestIrodsServiceController, get_classes_to_test(irods_service_controllers, IrodsServiceController)))
 
 
 # Fix for stupidity of test runners
-del _TestIrodsServiceController, TestDockerisedServiceControllerSubclass, create_tests
+del _TestIrodsServiceController, TestDockerisedServiceControllerSubclass, create_tests, get_classes_to_test
 
 if __name__ == "__main__":
     unittest.main()

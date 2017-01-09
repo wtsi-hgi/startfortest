@@ -3,8 +3,8 @@ from abc import ABCMeta
 
 from couchdb import Server
 
-from hgicommon.testing import TypeToTest, create_tests
-from startfortest.predefined.couchdb import CouchDBDockerisedServiceController, CouchDB1_6DockerisedServiceController
+from hgicommon.testing import TypeToTest, create_tests, get_classes_to_test
+from startfortest.predefined.couchdb import couchdb_controllers, CouchDBController
 from startfortest.tests.service.common import TestDockerisedServiceControllerSubclass
 
 
@@ -22,12 +22,11 @@ class _TestCouchDBDockerisedServiceController(TestDockerisedServiceControllerSub
 
 
 # Setup tests
-CLASSES_TO_TEST = {CouchDB1_6DockerisedServiceController, CouchDBDockerisedServiceController}
-globals().update(create_tests(_TestCouchDBDockerisedServiceController, CLASSES_TO_TEST))
+globals().update(create_tests(_TestCouchDBDockerisedServiceController, get_classes_to_test(couchdb_controllers, CouchDBController)))
 
 
 # Fix for stupidity of test runners
-del _TestCouchDBDockerisedServiceController, TestDockerisedServiceControllerSubclass, create_tests
+del _TestCouchDBDockerisedServiceController, TestDockerisedServiceControllerSubclass, create_tests, get_classes_to_test
 
 
 if __name__ == "__main__":

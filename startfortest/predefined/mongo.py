@@ -25,3 +25,5 @@ MongoDockerisedServiceController = DockerisedServiceControllerTypeBuilder(
 
 Mongo3Controller = Mongo3DockerisedServiceController
 MongoController = MongoDockerisedServiceController
+
+mongo_controllers = {Mongo3DockerisedServiceController}

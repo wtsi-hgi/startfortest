@@ -4,11 +4,12 @@ from abc import ABCMeta
 from typing import Set, Type
 
 from hgicommon.managers import TempManager
-from hgicommon.testing import TypeToTest, create_tests
+from hgicommon.testing import TypeToTest, create_tests, get_classes_to_test
 from startfortest.predefined.irods import IrodsExecutablesController
 from startfortest.predefined.irods.helpers import SetupHelper, AccessLevel
 from startfortest.predefined.irods.models import Metadata, IrodsUser
-from startfortest.predefined.irods.services import IrodsServiceController, irods_service_controllers
+from startfortest.predefined.irods.services import IrodsBaseServiceController, irods_service_controllers, \
+    IrodsServiceController
 from startfortest.tests.common import MOUNTABLE_TEMP_CREATION_KWARGS
 from startfortest.tests.service.common import TestServiceControllerSubclass
 
@@ -168,24 +169,13 @@ class _TestSetupHelper(TestServiceControllerSubclass[TypeToTest], metaclass=ABCM
                 self.assertIn("attribute: %s\nvalue: %s" % (attribute, value), retrieved_metadata)
 
 
-def _get_classes_to_test() -> Set[Type[_TestSetupHelper]]:
-    """
-    Gets the classes that are to be tested
-    :return: classes to be tested
-    """
-    classes_to_test = set()   # type: Set[Type[IrodsServiceController]]
-    single_setup = os.environ.get("SINGLE_TEST_SETUP")
-    if single_setup:
-        classes_to_test.add(globals()[single_setup])
-    else:
-        classes_to_test = classes_to_test.union(irods_service_controllers)
-    return classes_to_test
-
-globals().update(create_tests(_TestSetupHelper, _get_classes_to_test()))
+globals().update(
+    create_tests(_TestSetupHelper, get_classes_to_test(irods_service_controllers, IrodsServiceController))
+)
 
 
 # Fix for stupidity of test runners
-del _TestSetupHelper, TestServiceControllerSubclass, create_tests
+del _TestSetupHelper, TestServiceControllerSubclass, create_tests, get_classes_to_test
 
 if __name__ == "__main__":
     unittest.main()
