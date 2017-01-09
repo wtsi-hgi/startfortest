@@ -110,7 +110,8 @@ class TestExecutablesController(unittest.TestCase):
         if arguments is None:
             arguments = []
 
-        _, location = self._temp_manager.create_temp_file()
+        file_handle, location = self._temp_manager.create_temp_file()
+        os.close(file_handle)
         write_commands(location, commands)
 
         return run([location] + arguments, raise_if_stderr)
