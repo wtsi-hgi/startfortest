@@ -3,10 +3,12 @@ from startfortest.services._builders import DockerisedServiceControllerTypeBuild
 _repository = "couchdb"
 _ports = [5984]
 _start_detector = lambda log_line: "Apache CouchDB has started" in log_line
+_persistent_error_detector = lambda log_line: "no space left on device" in log_line
 
 _common_setup = {
     "repository": _repository,
     "start_detector": _start_detector,
+    "persistent_error_detector": _persistent_error_detector,
     "ports": _ports
 }
 
