@@ -1,2 +1,2 @@
-from useintest.predefined.irods.executables import IrodsExecutablesController
+from useintest.predefined.irods.executables import _IrodsExecutablesController
 from useintest.predefined.irods.services import Irods4_1_10ServiceController, IrodsServiceController

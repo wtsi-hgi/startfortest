@@ -3,8 +3,8 @@ from useintest.executables.common import get_all_path_like_arguments_for_mountin
 from useintest.executables.controllers import DefinedExecutablesControllerTypeBuilder
 from useintest.executables.models import Executable
 
-Samtools1_3_1_ExecutablesController = DefinedExecutablesControllerTypeBuilder(
-    "Samtools1_3_1_ExecutablesController",
+Samtools1_3_1ExecutablesController = DefinedExecutablesControllerTypeBuilder(
+    "Samtools1_3_1ExecutablesController",
     {
         "samtools": Executable(
             CommandsBuilder(
@@ -19,5 +19,6 @@ Samtools1_3_1_ExecutablesController = DefinedExecutablesControllerTypeBuilder(
     }
 ).build()
 
+SamtoolsExecutablesController = Samtools1_3_1ExecutablesController
 
-samtools_executable_controllers = {Samtools1_3_1_ExecutablesController}
+samtools_executable_controllers = {Samtools1_3_1ExecutablesController}

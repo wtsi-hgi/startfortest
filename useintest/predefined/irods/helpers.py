@@ -24,9 +24,9 @@ class AccessLevel(Enum):
     OWN = "own"
 
 
-class SetupHelper:
+class IrodsSetupHelper:
     """
-    Helper for setting up tests using.
+    Helper for setting up tests using iRODS.
     """
     def __init__(self, icommands_location: str):
         """

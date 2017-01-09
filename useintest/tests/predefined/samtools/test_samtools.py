@@ -19,7 +19,7 @@ class _TestSamtoolsExecutablesController(TestUsingType[TypeToTest], metaclass=AB
     def setUp(self):
         self.controller = self.get_type_to_test()()
         self.version = Version(self.get_type_to_test().__name__.replace("Samtools", "")
-                               .replace("_ExecutablesController", "").replace("_", "."))
+                               .replace("ExecutablesController", "").replace("_", "."))
         self.executables_location = self.controller.write_executables()
         self.samtools_location = os.path.join(self.executables_location, "samtools")
 

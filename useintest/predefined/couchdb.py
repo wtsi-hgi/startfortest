@@ -13,17 +13,17 @@ _common_setup = {
 }
 
 CouchDB1_6DockerisedServiceController = DockerisedServiceControllerTypeBuilder(
-    name="CouchDB1_6Controller",
+    name="CouchDB1_6DockerisedServiceController",
     tag="1.6",
     **_common_setup).build()   # type: type
 
-CouchDBDockerisedServiceController = DockerisedServiceControllerTypeBuilder(
-    name="CouchDBLatestDockerController",
+CouchDBLatestDockerisedServiceController = DockerisedServiceControllerTypeBuilder(
+    name="CouchDBLatestDockerisedServiceController",
     tag="latest",
     **_common_setup).build()   # type: type
 
 
-CouchDB1_6Controller = CouchDB1_6DockerisedServiceController
-CouchDBController = CouchDBDockerisedServiceController
+CouchDB1_6ServiceController = CouchDB1_6DockerisedServiceController
+CouchDBServiceController = CouchDBLatestDockerisedServiceController
 
-couchdb_controllers = {CouchDB1_6DockerisedServiceController}
+couchdb_service_controllers = {CouchDB1_6ServiceController, CouchDBServiceController}

@@ -1,14 +1,14 @@
 import os
 import unittest
 from abc import ABCMeta
-from typing import Set, Type
 
+from hgicommon.helpers import extract_version_number
 from hgicommon.managers import TempManager
 from hgicommon.testing import TypeToTest, create_tests, get_classes_to_test
-from useintest.predefined.irods import IrodsExecutablesController
-from useintest.predefined.irods.helpers import SetupHelper, AccessLevel
+from useintest.predefined.irods import _IrodsExecutablesController
+from useintest.predefined.irods.helpers import IrodsSetupHelper, AccessLevel
 from useintest.predefined.irods.models import Metadata, IrodsUser
-from useintest.predefined.irods.services import IrodsBaseServiceController, irods_service_controllers, \
+from useintest.predefined.irods.services import irods_service_controllers, \
     IrodsServiceController
 from useintest.tests.common import MOUNTABLE_TEMP_CREATION_KWARGS
 from useintest.tests.service.common import TestServiceControllerSubclass
@@ -21,29 +21,29 @@ _METADATA = Metadata({
 _DATA_OBJECT_NAME = "data-object-name"
 
 
-class _TestSetupHelper(TestServiceControllerSubclass[TypeToTest], metaclass=ABCMeta):
+class _TestIrodsSetupHelper(TestServiceControllerSubclass[TypeToTest], metaclass=ABCMeta):
     """
-    Tests for `SetupHelper`.
+    Tests for `IrodsSetupHelper`.
     """
     def setUp(self):
         super().setUp()
         self._temp_manager = TempManager(MOUNTABLE_TEMP_CREATION_KWARGS, MOUNTABLE_TEMP_CREATION_KWARGS)
 
         self.settings_directory = self._temp_manager.create_temp_directory()
-        self.irods_service = self.icat_controller.start_service()
+        self.irods_service = self.service_controller.start_service()
 
-        config_file_path = os.path.join(self.settings_directory, self.icat_controller.config_file_name)
+        config_file_path = os.path.join(self.settings_directory, self.service_controller.config_file_name)
         password = self.get_type_to_test().write_connection_settings(config_file_path, self.irods_service)
 
         # TODO: Docker repo+tag should be a setting
-        self.executables_controller = IrodsExecutablesController(
+        self.executables_controller = _IrodsExecutablesController(
             self.irods_service.name, "mercury/icat:%s" % self.irods_service.version, self.settings_directory)
 
         icommands_location = self.executables_controller.write_executables_and_authenticate(password)
-        self.setup_helper = SetupHelper(icommands_location)
+        self.setup_helper = IrodsSetupHelper(icommands_location)
 
     def tearDown(self):
-        self.icat_controller.stop_service(self.irods_service)
+        self.service_controller.stop_service(self.irods_service)
         self.executables_controller.tear_down()
         self._temp_manager.tear_down()
 
@@ -169,13 +169,12 @@ class _TestSetupHelper(TestServiceControllerSubclass[TypeToTest], metaclass=ABCM
                 self.assertIn("attribute: %s\nvalue: %s" % (attribute, value), retrieved_metadata)
 
 
-globals().update(
-    create_tests(_TestSetupHelper, get_classes_to_test(irods_service_controllers, IrodsServiceController))
-)
-
+globals().update(create_tests(_TestIrodsSetupHelper, get_classes_to_test(irods_service_controllers, IrodsServiceController),
+                              lambda superclass, test_type: "TestIrodsSetupHelperWithIrods%s"
+                                                            % extract_version_number(test_type.__name__).replace(".", "_")))
 
 # Fix for stupidity of test runners
-del _TestSetupHelper, TestServiceControllerSubclass, create_tests, get_classes_to_test
+del _TestIrodsSetupHelper, TestServiceControllerSubclass, create_tests, get_classes_to_test
 
 if __name__ == "__main__":
     unittest.main()

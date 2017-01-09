@@ -17,13 +17,13 @@ Mongo3DockerisedServiceController = DockerisedServiceControllerTypeBuilder(
     tag="3",
     **_common_setup).build()   # type: type
 
-MongoDockerisedServiceController = DockerisedServiceControllerTypeBuilder(
+MongoLatestDockerisedServiceController = DockerisedServiceControllerTypeBuilder(
     name="MongoLatestDockerController",
     tag="latest",
     **_common_setup).build()   # type: type
 
 
-Mongo3Controller = Mongo3DockerisedServiceController
-MongoController = MongoDockerisedServiceController
+Mongo3ServiceController = Mongo3DockerisedServiceController
+MongoServiceController = MongoLatestDockerisedServiceController
 
-mongo_controllers = {Mongo3DockerisedServiceController}
+mongo_service_controllers = {Mongo3ServiceController, MongoServiceController}

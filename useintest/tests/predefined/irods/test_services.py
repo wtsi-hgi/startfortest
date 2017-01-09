@@ -4,9 +4,11 @@ import unittest
 from abc import ABCMeta
 from tempfile import TemporaryDirectory
 
+from hgicommon.helpers import extract_version_number
 from hgicommon.testing import TypeToTest, create_tests, get_classes_to_test
-from useintest.predefined.irods import IrodsExecutablesController
-from useintest.predefined.irods.helpers import SetupHelper
+from useintest.predefined.irods.executables import irods_executables_controllers_and_versions
+from useintest.predefined.irods.helpers import IrodsSetupHelper
+from useintest.predefined.irods.models import Version
 from useintest.predefined.irods.services import irods_service_controllers, IrodsServiceController
 from useintest.tests.common import MOUNTABLE_TEMP_DIRECTORY
 from useintest.tests.service.common import TestDockerisedServiceControllerSubclass
@@ -16,21 +18,24 @@ class _TestIrodsServiceController(TestDockerisedServiceControllerSubclass[TypeTo
     """
     Tests for iRODS controller.
     """
+    def setUp(self):
+        super().setUp()
+        self.irods_version = Version(extract_version_number(self.get_type_to_test().__name__))
+
     def test_start(self):
         with TemporaryDirectory(dir=MOUNTABLE_TEMP_DIRECTORY) as settings_directory:
             service = self._start_service()
 
-            config_file_path = os.path.join(settings_directory, self.icat_controller.config_file_name)
+            config_file_path = os.path.join(settings_directory, self.service_controller.config_file_name)
             password = self.get_type_to_test().write_connection_settings(config_file_path, service)
 
-            # TODO: Docker repo+tag should be a setting
-            irods_executables_controller = IrodsExecutablesController(
-                service.name, "mercury/icat:%s" % service.version, settings_directory)
+            executables_controller = irods_executables_controllers_and_versions[self.irods_version]
+            irods_executables_controller = executables_controller(service.name, settings_directory)
 
             icommands_location = None
             try:
                 icommands_location = irods_executables_controller.write_executables_and_authenticate(password)
-                setup_helper = SetupHelper(icommands_location)
+                setup_helper = IrodsSetupHelper(icommands_location)
 
                 # TODO: This is really 2 tests - one checking the version, one checking the file upload/download
                 self.assertEqual(service.version, setup_helper.get_icat_version())
@@ -45,7 +50,6 @@ class _TestIrodsServiceController(TestDockerisedServiceControllerSubclass[TypeTo
 
 # Setup tests
 globals().update(create_tests(_TestIrodsServiceController, get_classes_to_test(irods_service_controllers, IrodsServiceController)))
-
 
 # Fix for stupidity of test runners
 del _TestIrodsServiceController, TestDockerisedServiceControllerSubclass, create_tests, get_classes_to_test

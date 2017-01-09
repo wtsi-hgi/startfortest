@@ -1,13 +1,14 @@
 import os
 import subprocess
-from typing import Sequence
+from typing import Sequence, Type
 
 from useintest.executables.builders import CommandsBuilder, MountedArgumentParserBuilder
 from useintest.executables.controllers import DefinedExecutablesController
 from useintest.executables.models import Executable
+from useintest.predefined.irods.models import Version
 
 
-class IrodsExecutablesController(DefinedExecutablesController):
+class _IrodsExecutablesController(DefinedExecutablesController):
     """
     Executables ("i*") for use against an iRODS server (iCAT).
     """
@@ -69,13 +70,13 @@ class IrodsExecutablesController(DefinedExecutablesController):
         """
         Registers the executables that can be written by this controller.
         """
-        for icommand in IrodsExecutablesController._ICOMMAND_EXECUTABLES - {"iget", "iput"}:
+        for icommand in _IrodsExecutablesController._ICOMMAND_EXECUTABLES - {"iget", "iput"}:
             self.named_executables[icommand] = Executable(CommandsBuilder(icommand), True)
 
         def create_executable_template(command: str):
             commands_builder = CommandsBuilder(
                 command, image=self._image_with_compatible_icommands,
-                get_path_arguments_to_mount=IrodsExecutablesController._GET_POSITIONAL_ARGUMENTS_TO_MOUNT,
+                get_path_arguments_to_mount=_IrodsExecutablesController._GET_POSITIONAL_ARGUMENTS_TO_MOUNT,
                 mounts=self._run_container_commands_builder.mounts,
                 other_docker=self._run_container_commands_builder.other_docker)
             return Executable(commands_builder, False)
@@ -84,3 +85,39 @@ class IrodsExecutablesController(DefinedExecutablesController):
         # current directory. This leads to an unnecessary mount and the use of `-w` to change the working directory.
         self.named_executables["iget"] = create_executable_template("iget")
         self.named_executables["iput"] = create_executable_template("iput")
+
+
+def _build_irods_executables_controller(image_with_compatible_icommands: str, irods_version: Version) \
+        -> Type[_IrodsExecutablesController]:
+    """
+    TODO
+    :param image_with_compatible_icommands:
+    :param irods_version:
+    :return:
+    """
+    def init(self, *args, **kwargs):
+        args = list(args)
+        args.insert(1, image_with_compatible_icommands)
+        args = tuple(args)
+        super(type(self), self).__init__(*args, **kwargs)
+
+    return type(
+        "Irods%sExecutablesController" % str(irods_version).replace(".", "_"),
+        (_IrodsExecutablesController,),
+        {"__init__": init}
+    )
+
+
+Irods3_3_1ExecutablesController = _build_irods_executables_controller("mercury/icat:3.3.1", Version("3.3.1"))
+Irods4_1_8ExecutablesController = _build_irods_executables_controller("mercury/icat:4.1.8", Version("4.1.8"))
+Irods4_1_9ExecutablesController = _build_irods_executables_controller("mercury/icat:4.1.9", Version("4.1.9"))
+Irods4_1_10ExecutablesController = _build_irods_executables_controller("mercury/icat:4.1.10", Version("4.1.10"))
+IrodsExecutablesController = Irods4_1_10ExecutablesController
+
+irods_executables_controllers_and_versions = {
+    Version("3.3.1"): Irods3_3_1ExecutablesController,
+    Version("4.1.8"): Irods4_1_8ExecutablesController,
+    Version("4.1.9"): Irods4_1_9ExecutablesController,
+    Version("4.1.10"): Irods4_1_10ExecutablesController,
+}
+irods_executables_controllers = irods_executables_controllers_and_versions.values()

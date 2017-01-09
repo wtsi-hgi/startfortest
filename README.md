@@ -5,11 +5,11 @@
 
 ## Introduction
 ### Key Features
-- Simple way of running services (e.g. Mongo, CouchDB, iRODS).
+- Simple way of running services (e.g. Mongo, CouchDB, iRODS) and using executables (e.g. Samtools, icommands).
 - No knowledge of containers required.
-- No knowledge of service required (how to install it, when it's ready to use, etc.).
+- No knowledge of service/executables required (how to install it, when it's ready to use, etc.).
 - Does not require the installation of anything on your local machine, aside from Docker.
-- Makes it simple to test against multiple versions of the same service.
+- Makes it simple to test against multiple versions of the same service or set of executables.
 - Easy to achieve test isolation.
 
 ### Why use this library?
@@ -33,40 +33,76 @@ to those used in production.
 
 ## How to use?
 ### Prerequisites
-- Python >= 3.5.2
-- Docker >= 1.12.3 (must be running)
+- Python >= 3.6
+- Docker >= 1.12.5 (must be running)
 
 ### Installation
 Bleeding edge versions can be installed directly from GitHub:
 ```bash
-$pip3 install https://github.com/wtsi-hgi/useintest@master#useintest
+$pip install https://github.com/wtsi-hgi/useintest@master#useintest
 ```
 
 ### Use
 #### Overview
+This example shows how this library enables services to be used in tests:
 ```python
-from useintest.services.mongo import MongoController
+from useintest.predefined.mongo import MongoServiceController
 
 # Starts a containerised version of Mongo
-controller = MongoController()              
+controller = MongoServiceController()              
 service = controller.start_service()      
-run_my_test(my_application, service.host, service.port)
-controller.stop_service(service)                                 
+run_my_tests(my_application, service.host, service.port)
+controller.stop_service(service)
+```
+
+This example shows how this library enables executables to be used in tests:
+```python
+from useintest.predefined.samtools import SamtoolsExecutablesController
+
+controller = SamtoolsExecutablesController()  
+executables_directory = controller.write_executables()
+# In the case of Samtools, there will be one executable in `executables_directory` named "samtools"
+run_my_tests(my_application, executables_directory)
+controller.tear_down()
 ```
 
 
-#### Available Services
+
+#### Predefined Services and Executables
 ##### Mongo
-In the `useintest.service.mongo` module:
-- `MongoController`: Latest version of Mongo available.
-- `Mongo3Controller`: Mongo version 3.
+In the `useintest.predefined.mongo` module:
+- `MongoServiceController`: Latest version of Mongo available.
+- `Mongo3ServiceController`: Mongo version 3.
 
 ##### CouchDB:
-In the `useintest.service.couchdb` module:
-- `CouchDBController`: Latest version of CouchDB available.
+In the `useintest.predefined.couchdb` module:
+- `CouchDBServiceController`: Latest version of CouchDB available.
 - `CouchDB1_6Controller`: CouchDB version 1.6.
 
 ##### iRODS
-In the `useintest.service.irods` module:
-- `IrodsController`: Latest version of iRODS available.  
-- `Irods4_1_10Controller`: iRODS version 4.1.10.
+###### Services (iCAT, i.e. the iRODS server)
+In the `useintest.predefined.irods.services` module:
+- `IrodsServiceController`: Latest version of iRODS available.  
+- `Irods4_1_10ServiceController`: iRODS version 4.1.10.
+- `Irods4_1_9ServiceController`: iRODS version 4.1.9.
+- `Irods4_1_8ServiceController`: iRODS version 4.1.8.
+- `Irods3_3_1ServiceController`: iRODS version 3.3.1.
+
+###### Executables (i.e. the icommands)
+In the `useintest.predefined.irods.executables` module:
+- `IrodsServiceController`: Latest version of iRODS available.  
+- `Irods4_1_10ExecutablesController`: iRODS version 4.1.10.
+- `Irods4_1_9ExecutablesController`: iRODS version 4.1.9.
+- `Irods4_1_8ExecutablesController`: iRODS version 4.1.8.
+- `Irods3_3_1ExecutablesController`: iRODS version 3.3.1.
+
+_Note: Use `authenticate` (or `write_executables_and_authenticate`) to handle authentication to the iRODS before use._
+
+###### Helpers
+In the `useintest.predefined.irods.helpers` module:
+- `IrodsSetupHelper`: class to help with setup of tests with iRODS (works with any supported version of iRODS).
+
+##### Samtools
+In the `useintest.predefined.samtools` module:
+- `SamtoolsExecutablesController`: Latest version of samtools available.
+- `Samtools1_3_1ExecutablesController`: Samtools version 1.3.1 (using htslib 1.3.1).

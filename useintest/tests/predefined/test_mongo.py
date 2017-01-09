@@ -4,14 +4,14 @@ from abc import ABCMeta
 from pymongo import MongoClient
 
 from hgicommon.testing import create_tests, TypeToTest, get_classes_to_test
-from useintest.predefined.mongo import Mongo3DockerisedServiceController, MongoDockerisedServiceController, \
-    MongoController, mongo_controllers
+from useintest.predefined.mongo import Mongo3DockerisedServiceController, MongoLatestDockerisedServiceController, \
+    MongoServiceController, mongo_service_controllers
 from useintest.tests.service.common import TestDockerisedServiceControllerSubclass
 
 
 class _TestMongoDockerisedServiceController(TestDockerisedServiceControllerSubclass[TypeToTest], metaclass=ABCMeta):
     """
-    Tests for dockerised Mongo service controller.
+    Tests for Mongo service controllers.
     """
     def test_start(self):
         service = self._start_service()
@@ -24,8 +24,8 @@ class _TestMongoDockerisedServiceController(TestDockerisedServiceControllerSubcl
 
 
 # Setup tests
-CLASSES_TO_TEST = {Mongo3DockerisedServiceController, MongoDockerisedServiceController}
-globals().update(create_tests(_TestMongoDockerisedServiceController, get_classes_to_test(mongo_controllers, MongoController)))
+CLASSES_TO_TEST = {Mongo3DockerisedServiceController, MongoLatestDockerisedServiceController}
+globals().update(create_tests(_TestMongoDockerisedServiceController, get_classes_to_test(mongo_service_controllers, MongoServiceController)))
 
 
 # Fix for stupidity of test runners
