@@ -5,6 +5,7 @@
 - Groups predefined controllers by product (e.g. iRODS) not by type (e.g. service).
 - Allows quicker testing with latest versions of controllers only.
 - Rebranded from `startfortest` to `useintest`.
+- Moved documentation to ReadTheDocs.
 
 ## 1.0.0
 ### Added

@@ -66,6 +66,6 @@ controller.tear_down()
 
 ## Documentation
 For more details, including information on how to setup and use the library, please [view the documentation on 
-ReadTheDocs](https://useintest.readthedocs.io) (no yet active!)  or read it from `/docs`.
+ReadTheDocs](https://useintest.readthedocs.io) or read it from `/docs`.
 
 
