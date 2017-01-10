@@ -10,7 +10,7 @@ from useintest.predefined.irods.models import Version
 
 class _IrodsExecutablesController(DefinedExecutablesController):
     """
-    Executables ("i*") for use against an iRODS server (iCAT).
+    Executables (icomands) for use against an iRODS server (iCAT).
     """
     _ICOMMAND_EXECUTABLES = {"ibun", "icd", "ichksum", "ichmod", "icp", "idbug", "ienv", "ierror", "iexecmd", "iexit",
                              "ifsck", "iget", "igetwild", "ihelp", "iinit", "ilocate", "ils", "ilsresc", "imcoll",

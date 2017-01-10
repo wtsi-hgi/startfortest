@@ -29,8 +29,8 @@ class _TestIrodsServiceController(TestDockerisedServiceControllerSubclass[TypeTo
             config_file_path = os.path.join(settings_directory, self.service_controller.config_file_name)
             password = self.get_type_to_test().write_connection_settings(config_file_path, service)
 
-            executables_controller = irods_executables_controllers_and_versions[self.irods_version]
-            irods_executables_controller = executables_controller(service.name, settings_directory)
+            ExecutablesController = irods_executables_controllers_and_versions[service.version]
+            irods_executables_controller = ExecutablesController(service.name, settings_directory)
 
             icommands_location = None
             try:

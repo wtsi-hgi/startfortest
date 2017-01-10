@@ -1,0 +1,13 @@
+site_name: Use In Test Documentation
+site_url: https://useintest.readthedocs.io
+repo_url: https://github.com/wtsi-hgi/useintest
+theme: readthedocs
+site_author: Colin Nolan
+pages:
+  - 'index.md'
+  - 'setup.md'
+  - 'predefined.md'
+  - 'development.md'
+  - 'license.md'
+extra_css:
+  - 'style.css'
