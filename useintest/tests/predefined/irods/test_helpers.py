@@ -3,7 +3,7 @@ from abc import ABCMeta
 
 from hgicommon.helpers import extract_version_number
 from hgicommon.testing import TypeToTest, create_tests, get_classes_to_test
-from useintest.predefined.irods import setup, irods_service_controllers
+from useintest.predefined.irods import setup_irods, irods_service_controllers
 from useintest.predefined.irods.helpers import IrodsSetupHelper, AccessLevel
 from useintest.predefined.irods.models import Metadata, IrodsUser
 from useintest.predefined.irods.services import IrodsServiceController
@@ -23,7 +23,7 @@ class _TestIrodsSetupHelper(TestServiceControllerSubclass[TypeToTest], metaclass
     """
     def setUp(self):
         super().setUp()
-        self.icommands_location, self.service, self.icommands_controller, self.icat_controller = setup(
+        self.icommands_location, self.service, self.icommands_controller, self.icat_controller = setup_irods(
             self.get_type_to_test())
         self.setup_helper = IrodsSetupHelper(self.icommands_location)
 

@@ -2,7 +2,7 @@ import unittest
 from abc import ABCMeta
 
 from hgicommon.testing import TypeToTest, create_tests, get_classes_to_test
-from useintest.predefined.irods import setup
+from useintest.predefined.irods import setup_irods
 from useintest.predefined.irods.helpers import IrodsSetupHelper
 from useintest.predefined.irods.services import irods_service_controllers, IrodsServiceController
 from useintest.tests.service.common import TestDockerisedServiceControllerSubclass
@@ -14,7 +14,7 @@ class _TestIrodsServiceController(TestDockerisedServiceControllerSubclass[TypeTo
     """
     def setUp(self):
         super().setUp()
-        self.icommands_location, self.service, self.icommands_controller, self.icat_controller = setup(
+        self.icommands_location, self.service, self.icommands_controller, self.icat_controller = setup_irods(
             irods_service_controller=self.get_type_to_test())
         self.setup_helper = IrodsSetupHelper(self.icommands_location)
 

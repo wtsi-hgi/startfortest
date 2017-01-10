@@ -66,10 +66,10 @@ The easiest way to use iRODS in your test is to use the `setup` method, which st
 icommands on the host machine and then deals with authentication. The end result is a set of icommands that are ready to 
 use against a clean iRODS server:
 ```python
-from useintest.predefined.irods import setup, Irods4_1_10ServiceController
+from useintest.predefined.irods import setup_irods
 
 # Optionally define the service controller (i.e. the version of iRODS) with the `irods_service_controller` parameter
-icommands_location, service, icommands_controller, icat_controller = setup()
+icommands_location, service, icommands_controller, icat_controller = setup_irods()
 run_my_test(my_application, icommands_location)
 
 # Tear down (should be in try-finally)
@@ -120,7 +120,7 @@ For help in setting up tests there is `IrodsSetupHelper`:
 ```python
 from useintest.predefined.irods import IrodsSetupHelper
 
-# This can be used to help setup tests
+setup_irods
 setup_helper = IrodsSetupHelper(icommands_location)
 ```
 

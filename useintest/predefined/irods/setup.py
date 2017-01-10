@@ -1,16 +1,18 @@
 import os
-from typing import Tuple
+from typing import Tuple, Type
 
 from hgicommon.managers import TempManager
 from useintest._common import MOUNTABLE_TEMP_DIRECTORY
-from useintest.predefined.irods import IrodsServiceController, IrodsExecutablesController, Type, \
-    irods_executables_controllers_and_versions, IrodsBaseServiceController, IrodsDockerisedService
+from useintest.predefined.irods.services import IrodsServiceController, IrodsBaseServiceController
+from useintest.predefined.irods.executables import IrodsExecutablesController, \
+    irods_executables_controllers_and_versions
+from useintest.predefined.irods.models import IrodsDockerisedService
 
 _temp_manager = TempManager()
 
 
-def setup(irods_service_controller: Type[IrodsBaseServiceController]=IrodsServiceController) \
-        -> Tuple[str, IrodsDockerisedService, IrodsExecutablesController, IrodsServiceController]:
+def setup_irods(irods_service_controller: Type[IrodsBaseServiceController]=IrodsServiceController) \
+        -> Tuple[str, IrodsDockerisedService, IrodsExecutablesController, IrodsBaseServiceController]:
     """
     Sets up an iRODS server and the icommands needed to access the server from the local machine.
     :param irods_service_controller:

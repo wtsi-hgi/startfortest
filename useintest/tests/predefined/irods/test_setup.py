@@ -1,18 +1,20 @@
 import unittest
+from abc import ABCMeta
 
 from hgicommon.helpers import extract_version_number
 from hgicommon.testing import create_tests, get_classes_to_test, TypeToTest, TestUsingType
-from useintest.predefined.irods import irods_service_controllers, IrodsServiceController, ABCMeta, \
-    IrodsBaseExecutablesController, IrodsSetupHelper
-from useintest.predefined.irods.setup import setup
+from useintest.predefined.irods.services import irods_service_controllers, IrodsServiceController
+from useintest.predefined.irods.executables import IrodsBaseExecutablesController
+from useintest.predefined.irods.helpers import IrodsSetupHelper
+from useintest.predefined.irods.setup import setup_irods
 
 
-class _TestSetup(TestUsingType[TypeToTest], metaclass=ABCMeta):
+class _TestSetupIrods(TestUsingType[TypeToTest], metaclass=ABCMeta):
     """
-    Tests for `setup`.
+    Tests for `setup_irods`.
     """
     def test_setup(self):
-        icommands_location, service, icommands_controller, icat_controller = setup(self.get_type_to_test())
+        icommands_location, service, icommands_controller, icat_controller = setup_irods(self.get_type_to_test())
         self.assertIsInstance(icommands_controller, IrodsBaseExecutablesController)
         self.assertIsInstance(icat_controller, self.get_type_to_test())
         setup_helper = IrodsSetupHelper(icommands_location)
@@ -20,12 +22,12 @@ class _TestSetup(TestUsingType[TypeToTest], metaclass=ABCMeta):
 
 
 # Setup tests
-globals().update(create_tests(_TestSetup, get_classes_to_test(irods_service_controllers, IrodsServiceController),
+globals().update(create_tests(_TestSetupIrods, get_classes_to_test(irods_service_controllers, IrodsServiceController),
                               lambda superclass, test_type: "TestSetupWith%s"
                                                             % extract_version_number(test_type.__name__).replace(".", "_")))
 
 # Fix for stupidity of test runners
-del _TestSetup, TestUsingType, create_tests, get_classes_to_test
+del _TestSetupIrods, TestUsingType, create_tests, get_classes_to_test
 
 if __name__ == "__main__":
     unittest.main()
