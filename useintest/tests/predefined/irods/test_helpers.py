@@ -1,16 +1,12 @@
-import os
 import unittest
 from abc import ABCMeta
 
 from hgicommon.helpers import extract_version_number
-from hgicommon.managers import TempManager
 from hgicommon.testing import TypeToTest, create_tests, get_classes_to_test
-from useintest.predefined.irods import irods_executables_controllers_and_versions
+from useintest.predefined.irods import setup, irods_service_controllers
 from useintest.predefined.irods.helpers import IrodsSetupHelper, AccessLevel
-from useintest.predefined.irods.models import Metadata, IrodsUser, Version
-from useintest.predefined.irods.services import irods_service_controllers, \
-    IrodsServiceController
-from useintest.tests.common import MOUNTABLE_TEMP_CREATION_KWARGS
+from useintest.predefined.irods.models import Metadata, IrodsUser
+from useintest.predefined.irods.services import IrodsServiceController
 from useintest.tests.service.common import TestServiceControllerSubclass
 
 _METADATA = Metadata({
@@ -27,24 +23,13 @@ class _TestIrodsSetupHelper(TestServiceControllerSubclass[TypeToTest], metaclass
     """
     def setUp(self):
         super().setUp()
-        self._temp_manager = TempManager(MOUNTABLE_TEMP_CREATION_KWARGS, MOUNTABLE_TEMP_CREATION_KWARGS)
-
-        self.settings_directory = self._temp_manager.create_temp_directory()
-        self.irods_service = self.service_controller.start_service()
-
-        config_file_path = os.path.join(self.settings_directory, self.service_controller.config_file_name)
-        password = self.get_type_to_test().write_connection_settings(config_file_path, self.irods_service)
-
-        ExecutablesController = irods_executables_controllers_and_versions[self.irods_service.version]
-        self.executables_controller = ExecutablesController(self.irods_service.name, self.settings_directory)
-
-        icommands_location = self.executables_controller.write_executables_and_authenticate(password)
-        self.setup_helper = IrodsSetupHelper(icommands_location)
+        self.icommands_location, self.service, self.icommands_controller, self.icat_controller = setup(
+            self.get_type_to_test())
+        self.setup_helper = IrodsSetupHelper(self.icommands_location)
 
     def tearDown(self):
-        self.service_controller.stop_service(self.irods_service)
-        self.executables_controller.tear_down()
-        self._temp_manager.tear_down()
+        self.icat_controller.stop_service(self.service)
+        self.icommands_controller.tear_down()
 
     def test_run_icommand(self):
         ils = self.setup_helper.run_icommand(["ils"])
@@ -104,7 +89,7 @@ class _TestIrodsSetupHelper(TestServiceControllerSubclass[TypeToTest], metaclass
         resource = self.setup_helper.create_replica_storage()
         self.setup_helper.replicate_data_object(_DATA_OBJECT_NAME, resource)
 
-        expected_checksum = "900150983cd24fb0d6963f7d28e17f72" if self.irods_service.version.major == 3 \
+        expected_checksum = "900150983cd24fb0d6963f7d28e17f72" if self.service.version.major == 3 \
             else "sha2:ungWv48Bz+pBQUDeXa4iI7ADYaOWF3qctBD/YfIAFa0="
 
         # Asserting that checksum is not stored before now
@@ -116,7 +101,7 @@ class _TestIrodsSetupHelper(TestServiceControllerSubclass[TypeToTest], metaclass
 
     def test_get_checksum(self):
         path = self.setup_helper.create_data_object(_DATA_OBJECT_NAME, "abc")
-        expected_checksum = "900150983cd24fb0d6963f7d28e17f72" if self.irods_service.version.major == 3 \
+        expected_checksum = "900150983cd24fb0d6963f7d28e17f72" if self.service.version.major == 3 \
             else "sha2:ungWv48Bz+pBQUDeXa4iI7ADYaOWF3qctBD/YfIAFa0="
         self.assertEqual(expected_checksum, self.setup_helper.get_checksum(path))
 
@@ -127,11 +112,11 @@ class _TestIrodsSetupHelper(TestServiceControllerSubclass[TypeToTest], metaclass
         self.assertIn("resc_def_path: %s" % resource.location, resource_info)
 
     def test_create_user_with_existing_username(self):
-        existing_user = self.irods_service.users[0]
+        existing_user = self.service.users[0]
         self.assertRaises(ValueError, self.setup_helper.create_user, existing_user.username, existing_user.zone)
 
     def test_create_user(self):
-        expected_user = IrodsUser("user_1", self.irods_service.users[0].zone)
+        expected_user = IrodsUser("user_1", self.service.users[0].zone)
         user = self.setup_helper.create_user(expected_user.username, expected_user.zone)
         self.assertEqual(expected_user, user)
         user_list = self.setup_helper.run_icommand(["iadmin", "lu"])
@@ -139,7 +124,7 @@ class _TestIrodsSetupHelper(TestServiceControllerSubclass[TypeToTest], metaclass
 
     def test_set_access(self):
         path = self.setup_helper.create_data_object(_DATA_OBJECT_NAME)
-        zone = self.irods_service.users[0].zone
+        zone = self.service.users[0].zone
         user_1 = self.setup_helper.create_user("user_1", zone)
         user_2 = self.setup_helper.create_user("user_2", zone)
 
@@ -151,7 +136,7 @@ class _TestIrodsSetupHelper(TestServiceControllerSubclass[TypeToTest], metaclass
         self.assertIn("%s#%s:modify object" % (user_2.username, zone), access_info)
 
     def test_get_icat_version(self):
-        self.assertEqual(self.irods_service.version, self.setup_helper.get_icat_version())
+        self.assertEqual(self.service.version, self.setup_helper.get_icat_version())
 
     def _assert_metadata_in_retrieved(self, metadata: Metadata, retrieved_metadata: str):
         """
