@@ -7,7 +7,7 @@ from hgicommon.testing import TestUsingType, TypeToTest
 from useintest._docker_helpers import is_docker_container_running
 from useintest.services.models import DockerisedService, Service
 
-
+# TODO: These need sorting out - why is there 2 classes here?
 class TestServiceControllerSubclass(TestUsingType[TypeToTest], TestCase, metaclass=ABCMeta):
     """
     TODO

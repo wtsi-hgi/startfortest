@@ -5,9 +5,9 @@ from abc import ABCMeta
 from hgicommon.helpers import extract_version_number
 from hgicommon.managers import TempManager
 from hgicommon.testing import TypeToTest, create_tests, get_classes_to_test
-from useintest.predefined.irods import _IrodsExecutablesController
+from useintest.predefined.irods import irods_executables_controllers_and_versions
 from useintest.predefined.irods.helpers import IrodsSetupHelper, AccessLevel
-from useintest.predefined.irods.models import Metadata, IrodsUser
+from useintest.predefined.irods.models import Metadata, IrodsUser, Version
 from useintest.predefined.irods.services import irods_service_controllers, \
     IrodsServiceController
 from useintest.tests.common import MOUNTABLE_TEMP_CREATION_KWARGS
@@ -35,9 +35,8 @@ class _TestIrodsSetupHelper(TestServiceControllerSubclass[TypeToTest], metaclass
         config_file_path = os.path.join(self.settings_directory, self.service_controller.config_file_name)
         password = self.get_type_to_test().write_connection_settings(config_file_path, self.irods_service)
 
-        # TODO: Docker repo+tag should be a setting
-        self.executables_controller = _IrodsExecutablesController(
-            self.irods_service.name, "mercury/icat:%s" % self.irods_service.version, self.settings_directory)
+        ExecutablesController = irods_executables_controllers_and_versions[self.irods_service.version]
+        self.executables_controller = ExecutablesController(self.irods_service.name, self.settings_directory)
 
         icommands_location = self.executables_controller.write_executables_and_authenticate(password)
         self.setup_helper = IrodsSetupHelper(icommands_location)
