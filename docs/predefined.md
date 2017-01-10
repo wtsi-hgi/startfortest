@@ -62,14 +62,41 @@ controller.stop_service(service)
 - `IrodsSetupHelper`: class to help with setup of tests with iRODS (works with any supported version of iRODS).
 
 ### Examples
+The easiest way to use iRODS in your test is to use the `setup` method, which start the iRODS server, creates the 
+icommands on the host machine and then deals with authentication. The end result is a set of icommands that are ready to 
+use against a clean iRODS server:
 ```python
-import os
-import shutil
-from useintest.predefined.irods import IrodsServiceController, IrodsExecutablesController, IrodsSetupHelper
+from useintest.predefined.irods import setup, Irods4_1_10ServiceController
+
+# Optionally define the service controller (i.e. the version of iRODS) with the `irods_service_controller` parameter
+icommands_location, service, icommands_controller, icat_controller = setup()
+run_my_test(my_application, icommands_location)
+
+# Tear down (should be in try-finally)
+icat_controller.stop_service(service)
+icommands_controller.tear_down()
+```
+
+Alternatively, to just set up an iRODS service ("iCAT"):
+```python
+from useintest.predefined.irods import IrodsServiceController
 
 # Setup iRODS server
 icat_controller = IrodsServiceController()
 service = icat_controller.start_service()
+
+# Use the iRODS server in test
+run_my_test(my_application, service.host, service.port)
+
+# Tear down (should be in try-finally)
+icat_controller.stop_service(service)
+```
+
+To setup corresponding icommands for an iRODS service:
+```python
+import os
+import shutil
+from useintest.predefined.irods import IrodsServiceController, IrodsExecutablesController
 
 # Write iRODS connection settings for the server
 settings_directory = "/tmp/irods"
@@ -81,12 +108,20 @@ password = IrodsServiceController.write_connection_settings(config_file, service
 irods_executables_controller = IrodsExecutablesController(service.name, settings_directory)
 icommands_location = irods_executables_controller.write_executables_and_authenticate(password)
 
-# This can be used to help setup tests
-setup_helper = IrodsSetupHelper(icommands_location)
+# Use the iRODS server in test
+run_my_test(my_application, service.host, service.port)
 
 # Cleanup (should be in a try-catch!)
 irods_executables_controller.tear_down()
 shutil.rmtree(settings_directory)
+```
+
+For help in setting up tests there is `IrodsSetupHelper`:
+```python
+from useintest.predefined.irods import IrodsSetupHelper
+
+# This can be used to help setup tests
+setup_helper = IrodsSetupHelper(icommands_location)
 ```
 
 
