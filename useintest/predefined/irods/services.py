@@ -14,7 +14,7 @@ from useintest.services.models import DockerisedService
 _logger = logging.getLogger(__name__)
 
 
-class _IrodsServiceController(DockerisedServiceController, metaclass=ABCMeta):
+class IrodsBaseServiceController(DockerisedServiceController, metaclass=ABCMeta):
     """
     TODO
     """
@@ -61,7 +61,7 @@ class _IrodsServiceController(DockerisedServiceController, metaclass=ABCMeta):
         return service
 
 
-class Irods3ServiceController(_IrodsServiceController, metaclass=ABCMeta):
+class Irods3ServiceController(IrodsBaseServiceController, metaclass=ABCMeta):
     """
     iRODS 3 service controller.
     """
@@ -125,7 +125,7 @@ class Irods3ServiceController(_IrodsServiceController, metaclass=ABCMeta):
                          Irods3ServiceController._DOCKER_REPOSITORY, docker_tag, [Irods3ServiceController._PORT],
                          Irods3ServiceController._start_detector,
                          transient_error_detector=Irods3ServiceController._transient_error_detector,
-                         persistent_error_detector=_IrodsServiceController._persistent_error_detector,
+                         persistent_error_detector=IrodsBaseServiceController._persistent_error_detector,
                          start_timeout=start_timeout, start_tries=start_tries)
 
     def _wait_until_started(self, container: DockerisedService) -> bool:
@@ -144,7 +144,7 @@ class Irods3ServiceController(_IrodsServiceController, metaclass=ABCMeta):
         return True
 
 
-class Irods4ServiceController(_IrodsServiceController, metaclass=ABCMeta):
+class Irods4ServiceController(IrodsBaseServiceController, metaclass=ABCMeta):
     """
     iRODS 4 service controller.
     """
@@ -211,11 +211,11 @@ class Irods4ServiceController(_IrodsServiceController, metaclass=ABCMeta):
                          Irods4ServiceController._DOCKER_REPOSITORY, docker_tag, [Irods4ServiceController._PORT],
                          Irods4ServiceController._start_detector,
                          transient_error_detector=Irods4ServiceController._transient_error_detector,
-                         persistent_error_detector=_IrodsServiceController._persistent_error_detector,
+                         persistent_error_detector=IrodsBaseServiceController._persistent_error_detector,
                          start_timeout=start_timeout, start_tries=start_tries)
 
 
-def _build_irods_service_controller_type(docker_tag: str, superclass: type) -> Type[_IrodsServiceController]:
+def _build_irods_service_controller_type(docker_tag: str, superclass: type) -> Type[IrodsBaseServiceController]:
     """
     Builds a controller for an iRODS server that runs in containers of on the given Docker image.
     :param docker_tag:

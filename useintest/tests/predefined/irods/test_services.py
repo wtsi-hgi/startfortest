@@ -10,7 +10,7 @@ from useintest.predefined.irods.executables import irods_executables_controllers
 from useintest.predefined.irods.helpers import IrodsSetupHelper
 from useintest.predefined.irods.models import Version
 from useintest.predefined.irods.services import irods_service_controllers, IrodsServiceController
-from useintest.tests.common import MOUNTABLE_TEMP_DIRECTORY
+from useintest._common import MOUNTABLE_TEMP_DIRECTORY
 from useintest.tests.service.common import TestDockerisedServiceControllerSubclass
 
 

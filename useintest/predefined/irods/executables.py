@@ -8,7 +8,7 @@ from useintest.executables.models import Executable
 from useintest.predefined.irods.models import Version
 
 
-class _IrodsExecutablesController(DefinedExecutablesController):
+class IrodsBaseExecutablesController(DefinedExecutablesController):
     """
     Executables (icomands) for use against an iRODS server (iCAT).
     """
@@ -70,13 +70,13 @@ class _IrodsExecutablesController(DefinedExecutablesController):
         """
         Registers the executables that can be written by this controller.
         """
-        for icommand in _IrodsExecutablesController._ICOMMAND_EXECUTABLES - {"iget", "iput"}:
+        for icommand in IrodsBaseExecutablesController._ICOMMAND_EXECUTABLES - {"iget", "iput"}:
             self.named_executables[icommand] = Executable(CommandsBuilder(icommand), True)
 
         def create_executable_template(command: str):
             commands_builder = CommandsBuilder(
                 command, image=self._image_with_compatible_icommands,
-                get_path_arguments_to_mount=_IrodsExecutablesController._GET_POSITIONAL_ARGUMENTS_TO_MOUNT,
+                get_path_arguments_to_mount=IrodsBaseExecutablesController._GET_POSITIONAL_ARGUMENTS_TO_MOUNT,
                 mounts=self._run_container_commands_builder.mounts,
                 other_docker=self._run_container_commands_builder.other_docker)
             return Executable(commands_builder, False)
@@ -88,7 +88,7 @@ class _IrodsExecutablesController(DefinedExecutablesController):
 
 
 def _build_irods_executables_controller(image_with_compatible_icommands: str, irods_version: Version) \
-        -> Type[_IrodsExecutablesController]:
+        -> Type[IrodsBaseExecutablesController]:
     """
     TODO
     :param image_with_compatible_icommands:
@@ -103,7 +103,7 @@ def _build_irods_executables_controller(image_with_compatible_icommands: str, ir
 
     return type(
         "Irods%sExecutablesController" % str(irods_version).replace(".", "_"),
-        (_IrodsExecutablesController,),
+        (IrodsBaseExecutablesController,),
         {"__init__": init}
     )
 
