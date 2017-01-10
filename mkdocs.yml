@@ -6,7 +6,7 @@ site_author: Colin Nolan
 pages:
   - 'index.md'
   - 'setup.md'
-  - 'predefined.md'
+  - 'Predefined Support': 'predefined.md'
   - 'development.md'
   - 'license.md'
 extra_css:

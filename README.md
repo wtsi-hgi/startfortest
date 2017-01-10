@@ -3,6 +3,8 @@
 # Use In Test
 *I don't care how it's done, I just want to use it in my tests!*
 
+[Less blurb, more documentation - link to ReadTheDocs](https://useintest.readthedocs.io).
+
 ## Key Features
 - Simple way of running services (e.g. Mongo, CouchDB, iRODS) and using executables (e.g. Samtools, icommands).
 - No knowledge of containers required.
@@ -13,6 +15,7 @@
 
 ## Predefined Support
 Out of the box support for:
+
 - Mongo
 - CouchDB
 - iRODS
@@ -63,6 +66,6 @@ controller.tear_down()
 
 ## Documentation
 For more details, including information on how to setup and use the library, please [view the documentation on 
-ReadTheDocs](TODO) (no yet active!)  or read it from `/docs`.
+ReadTheDocs](https://useintest.readthedocs.io) (no yet active!)  or read it from `/docs`.
 
 
