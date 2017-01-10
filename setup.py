@@ -18,13 +18,13 @@ setup(
     dependency_links=[x for x in open("requirements.txt").read().splitlines() if "://" in x],
     url="https://github.com/wtsi-hgi/useintest",
     license="MIT",
-    description="I don't care how it's done, just start one of these so I can test my application with it!",
+    description="I don't care how it's done, I just want to use it in my tests!",
     long_description=read_markdown("README.md"),
     test_suite="useintest.tests",
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Operating System :: OS Independent",
-        "Programming Language :: Python :: 3.5",
+        "Programming Language :: Python :: 3.6",
         "License :: OSI Approved :: MIT License"
     ]
 )

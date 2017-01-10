@@ -35,13 +35,12 @@ class _TestSamtoolsExecutablesController(TestUsingType[TypeToTest], metaclass=AB
         sam_contents, _ = run([self.samtools_location, "view", "-O", "SAM", EXAMPLE_BAM], decode_output_to=None)
         self.assertEqual(original_sam_contents, sam_contents)
 
+
 # Setup tests
 globals().update(create_tests(_TestSamtoolsExecutablesController, samtools_executable_controllers))
 
-
 # Fix for stupidity of test runners
 del _TestSamtoolsExecutablesController, TestUsingType, create_tests
-
 
 if __name__ == "__main__":
     unittest.main()
