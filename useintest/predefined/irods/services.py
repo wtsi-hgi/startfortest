@@ -13,6 +13,8 @@ from useintest.services.models import DockerisedService
 
 _logger = logging.getLogger(__name__)
 
+_DOCKER_REPOSITORY = "mercury/icat"
+
 
 class IrodsBaseServiceController(DockerisedServiceController, metaclass=ABCMeta):
     """
@@ -65,8 +67,6 @@ class Irods3ServiceController(IrodsBaseServiceController, metaclass=ABCMeta):
     """
     iRODS 3 service controller.
     """
-    _DOCKER_REPOSITORY = "mercury/icat"
-
     _PORT = 1247
     _CONFIG_FILE_NAME = ".irodsEnv"
 
@@ -114,15 +114,19 @@ class Irods3ServiceController(IrodsBaseServiceController, metaclass=ABCMeta):
         return "failed to start" in log_line or "exited: irods" in log_line and "not expected" in log_line
 
     # TODO: Use default `start_timeout` and `start_tries` values from superclass
-    def __init__(self, docker_tag: str, start_timeout: int=math.inf, start_tries: int=10):
+    def __init__(self, docker_repository: str, docker_tag: str, start_timeout: int=math.inf, start_tries: int=10,
+                 version: Version=None):
         """
-        TODO
-        :param docker_tag:
-        :param start_timeout:
-        :param start_tries:
+        Constructor.
+        :param docker_repository: name of the Docker repository
+        :param docker_tag: tag of the Docker image that will run the iRODS 4 server
+        :param start_timeout: see `ContainerisedServiceController.__init__`
+        :param start_tries: see `ContainerisedServiceController.__init__`
+        :param version: exact version of the iRODS 4 sever (will use `docker_tag` if not supplied)
         """
-        super().__init__(Version(docker_tag), Irods3ServiceController._USERS, Irods3ServiceController._CONFIG_FILE_NAME,
-                         Irods3ServiceController._DOCKER_REPOSITORY, docker_tag, [Irods3ServiceController._PORT],
+        version = version if version is not None else Version(docker_tag)
+        super().__init__(version, Irods3ServiceController._USERS, Irods3ServiceController._CONFIG_FILE_NAME,
+                         docker_repository, docker_tag, [Irods3ServiceController._PORT],
                          Irods3ServiceController._start_detector,
                          transient_error_detector=Irods3ServiceController._transient_error_detector,
                          persistent_error_detector=IrodsBaseServiceController._persistent_error_detector,
@@ -148,8 +152,6 @@ class Irods4ServiceController(IrodsBaseServiceController, metaclass=ABCMeta):
     """
     iRODS 4 service controller.
     """
-    _DOCKER_REPOSITORY = "mercury/icat"
-
     _PORT = 1247
     _CONFIG_FILE_NAME = "irods_environment.json"
 
@@ -201,29 +203,36 @@ class Irods4ServiceController(IrodsBaseServiceController, metaclass=ABCMeta):
         # Note: iRODS schema validation has been observed to randomly fail before, raising `RuntimeError`
         return "iRODS server failed to start." in log_line or "RuntimeError:" in log_line
 
-    def __init__(self, docker_tag: str, start_timeout: int=math.inf, start_tries: int=math.inf):
+    def __init__(self, docker_repository: str, docker_tag: str, start_timeout: int=math.inf, start_tries: int=10,
+                 version: Version=None):
         """
         Constructor.
-        :param start_timeout:
-        :param start_tries:
+        :param docker_repository: name of the Docker repository
+        :param docker_tag: the Docker tag of the iRODS 4 image
+        :param start_timeout: see `ContainerisedServiceController.__init__`
+        :param start_tries: see `ContainerisedServiceController.__init__`
+        :param version: exact version of the iRODS 4 sever (will use `docker_tag` if not supplied)
         """
-        super().__init__(Version(docker_tag), Irods4ServiceController._USERS, Irods4ServiceController._CONFIG_FILE_NAME,
-                         Irods4ServiceController._DOCKER_REPOSITORY, docker_tag, [Irods4ServiceController._PORT],
+        version = version if version is not None else Version(docker_tag)
+        super().__init__(version, Irods4ServiceController._USERS, Irods4ServiceController._CONFIG_FILE_NAME,
+                         docker_repository, docker_tag, [Irods4ServiceController._PORT],
                          Irods4ServiceController._start_detector,
                          transient_error_detector=Irods4ServiceController._transient_error_detector,
                          persistent_error_detector=IrodsBaseServiceController._persistent_error_detector,
                          start_timeout=start_timeout, start_tries=start_tries)
 
 
-def _build_irods_service_controller_type(docker_tag: str, superclass: type) -> Type[IrodsBaseServiceController]:
+def build_irods_service_controller_type(docker_repository: str, docker_tag: str, superclass: type) \
+        -> Type[IrodsBaseServiceController]:
     """
     Builds a controller for an iRODS server that runs in containers of on the given Docker image.
-    :param docker_tag:
-    :param superclass:
-    :return:
+    :param docker_repository: name of the Docker repository
+    :param docker_tag: the Docker tag of the image in the Docker repository
+    :param superclass: the superclass of the service controller
+    :return: the build service controller for the given image
     """
     def init(self: superclass, *args, **kwargs):
-        super(type(self), self).__init__(docker_tag, *args, **kwargs)
+        super(type(self), self).__init__(docker_repository, docker_tag, *args, **kwargs)
 
     return type(
         "Irods%sServiceController" % docker_tag.replace(".", "_"),
@@ -233,10 +242,10 @@ def _build_irods_service_controller_type(docker_tag: str, superclass: type) -> T
 
 
 # Concrete service controller definitions
-Irods3_3_1ServiceController = _build_irods_service_controller_type("3.3.1", Irods3ServiceController)
-Irods4_1_8ServiceController = _build_irods_service_controller_type("4.1.8", Irods4ServiceController)
-Irods4_1_9ServiceController = _build_irods_service_controller_type("4.1.9", Irods4ServiceController)
-Irods4_1_10ServiceController = _build_irods_service_controller_type("4.1.10", Irods4ServiceController)
+Irods3_3_1ServiceController = build_irods_service_controller_type(_DOCKER_REPOSITORY, "3.3.1", Irods3ServiceController)
+Irods4_1_8ServiceController = build_irods_service_controller_type(_DOCKER_REPOSITORY, "4.1.8", Irods4ServiceController)
+Irods4_1_9ServiceController = build_irods_service_controller_type(_DOCKER_REPOSITORY, "4.1.9", Irods4ServiceController)
+Irods4_1_10ServiceController = build_irods_service_controller_type(_DOCKER_REPOSITORY, "4.1.10", Irods4ServiceController)
 IrodsServiceController = Irods4_1_10ServiceController
 
 irods_service_controllers = {Irods3_3_1ServiceController, Irods4_1_8ServiceController, Irods4_1_9ServiceController,
