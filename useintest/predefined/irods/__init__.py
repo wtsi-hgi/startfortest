@@ -6,4 +6,4 @@ from useintest.predefined.irods.models import IrodsResource, IrodsUser, IrodsDoc
 from useintest.predefined.irods.services import IrodsBaseServiceController, Irods3ServiceController, \
     Irods4ServiceController, Irods3_3_1ServiceController, Irods4_1_8ServiceController, Irods4_1_9ServiceController, \
     Irods4_1_10ServiceController, IrodsServiceController, irods_service_controllers
-from useintest.predefined.irods.setup import setup_irods
+from useintest.predefined.irods.setup_irods import setup_irods

@@ -6,7 +6,7 @@ from hgicommon.testing import create_tests, get_classes_to_test, TypeToTest, Tes
 from useintest.predefined.irods.services import irods_service_controllers, IrodsServiceController
 from useintest.predefined.irods.executables import IrodsBaseExecutablesController
 from useintest.predefined.irods.helpers import IrodsSetupHelper
-from useintest.predefined.irods.setup import setup_irods
+from useintest.predefined.irods.setup_irods import setup_irods
 
 
 class _TestSetupIrods(TestUsingType[TypeToTest], metaclass=ABCMeta):

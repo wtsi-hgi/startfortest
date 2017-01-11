@@ -3,10 +3,10 @@ from abc import ABCMeta
 
 from hgicommon.helpers import extract_version_number
 from hgicommon.testing import TypeToTest, create_tests, get_classes_to_test
-from useintest.predefined.irods import setup_irods, irods_service_controllers
+from useintest.predefined.irods.setup_irods import setup_irods
 from useintest.predefined.irods.helpers import IrodsSetupHelper, AccessLevel
 from useintest.predefined.irods.models import Metadata, IrodsUser
-from useintest.predefined.irods.services import IrodsServiceController
+from useintest.predefined.irods.services import IrodsServiceController, irods_service_controllers
 from useintest.tests.service.common import TestServiceControllerSubclass
 
 _METADATA = Metadata({
