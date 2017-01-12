@@ -3,13 +3,13 @@ from abc import ABCMeta
 
 from pymongo import MongoClient
 
-from hgicommon.testing import create_tests, TypeToTest, get_classes_to_test
+from hgicommon.testing import create_tests, TypeUsedInTest, get_classes_to_test
 from useintest.predefined.mongo import Mongo3DockerisedServiceController, MongoLatestDockerisedServiceController, \
     MongoServiceController, mongo_service_controllers
 from useintest.tests.service.common import TestDockerisedServiceControllerSubclass
 
 
-class _TestMongoDockerisedServiceController(TestDockerisedServiceControllerSubclass[TypeToTest], metaclass=ABCMeta):
+class _TestMongoDockerisedServiceController(TestDockerisedServiceControllerSubclass[TypeUsedInTest], metaclass=ABCMeta):
     """
     Tests for Mongo service controllers.
     """

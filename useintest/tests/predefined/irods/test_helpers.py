@@ -2,7 +2,7 @@ import unittest
 from abc import ABCMeta
 
 from hgicommon.helpers import extract_version_number
-from hgicommon.testing import TypeToTest, create_tests, get_classes_to_test
+from hgicommon.testing import TypeUsedInTest, create_tests, get_classes_to_test
 from useintest.predefined.irods.setup_irods import setup_irods
 from useintest.predefined.irods.helpers import IrodsSetupHelper, AccessLevel
 from useintest.predefined.irods.models import Metadata, IrodsUser
@@ -17,7 +17,7 @@ _METADATA = Metadata({
 _DATA_OBJECT_NAME = "data-object-name"
 
 
-class _TestIrodsSetupHelper(TestServiceControllerSubclass[TypeToTest], metaclass=ABCMeta):
+class _TestIrodsSetupHelper(TestServiceControllerSubclass[TypeUsedInTest], metaclass=ABCMeta):
     """
     Tests for `IrodsSetupHelper`.
     """

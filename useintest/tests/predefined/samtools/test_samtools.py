@@ -2,7 +2,7 @@ import os
 import unittest
 from abc import ABCMeta
 
-from hgicommon.testing import create_tests, TestUsingType, TypeToTest
+from hgicommon.testing import create_tests, TestUsingType, TypeUsedInTest
 from useintest.predefined.irods.models import Version
 from useintest.predefined.samtools import samtools_executable_controllers
 from useintest.tests.executables.common import run
@@ -11,7 +11,7 @@ EXAMPLE_BAM = os.path.join(os.path.dirname(os.path.realpath(__file__)), "example
 assert os.path.exists(EXAMPLE_BAM)
 
 
-class _TestSamtoolsExecutablesController(TestUsingType[TypeToTest], metaclass=ABCMeta):
+class _TestSamtoolsExecutablesController(TestUsingType[TypeUsedInTest], metaclass=ABCMeta):
     """
     Tests for executables controllers for Samtools.
     """

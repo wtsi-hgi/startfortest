@@ -3,12 +3,12 @@ from abc import ABCMeta
 
 from couchdb import Server
 
-from hgicommon.testing import TypeToTest, create_tests, get_classes_to_test
+from hgicommon.testing import TypeUsedInTest, create_tests, get_classes_to_test
 from useintest.predefined.couchdb import couchdb_service_controllers, CouchDBServiceController
 from useintest.tests.service.common import TestDockerisedServiceControllerSubclass
 
 
-class _TestCouchDBDockerisedServiceController(TestDockerisedServiceControllerSubclass[TypeToTest], metaclass=ABCMeta):
+class _TestCouchDBDockerisedServiceController(TestDockerisedServiceControllerSubclass[TypeUsedInTest], metaclass=ABCMeta):
     """
     Tests for CouchDB service controllers.
     """

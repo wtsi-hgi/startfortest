@@ -3,13 +3,13 @@ from typing import Set
 from unittest import TestCase
 
 from hgicommon.docker.client import create_client
-from hgicommon.testing import TestUsingType, TypeToTest
+from hgicommon.testing import TestUsingType, TypeUsedInTest
 from useintest._docker_helpers import is_docker_container_running
 from useintest.services.models import DockerisedService, Service
 
 
 # TODO: These need sorting out - why is there 2 classes here?
-class TestServiceControllerSubclass(TestUsingType[TypeToTest], TestCase, metaclass=ABCMeta):
+class TestServiceControllerSubclass(TestUsingType[TypeUsedInTest], TestCase, metaclass=ABCMeta):
     """
     TODO
     """
@@ -28,7 +28,7 @@ class TestServiceControllerSubclass(TestUsingType[TypeToTest], TestCase, metacla
         return service
 
 
-class TestDockerisedServiceControllerSubclass(TestServiceControllerSubclass[TypeToTest], metaclass=ABCMeta):
+class TestDockerisedServiceControllerSubclass(TestServiceControllerSubclass[TypeUsedInTest], metaclass=ABCMeta):
     """
     Superclass for `DockerisedServiceController` tests.
     """

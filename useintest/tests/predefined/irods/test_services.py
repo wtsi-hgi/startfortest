@@ -1,14 +1,14 @@
 import unittest
 from abc import ABCMeta
 
-from hgicommon.testing import TypeToTest, create_tests, get_classes_to_test
+from hgicommon.testing import TypeUsedInTest, create_tests, get_classes_to_test
 from useintest.predefined.irods.setup_irods import setup_irods
 from useintest.predefined.irods.helpers import IrodsSetupHelper
 from useintest.predefined.irods.services import irods_service_controllers, IrodsServiceController
 from useintest.tests.service.common import TestDockerisedServiceControllerSubclass
 
 
-class _TestIrodsServiceController(TestDockerisedServiceControllerSubclass[TypeToTest], metaclass=ABCMeta):
+class _TestIrodsServiceController(TestDockerisedServiceControllerSubclass[TypeUsedInTest], metaclass=ABCMeta):
     """
     Tests for iRODS controller.
     """
