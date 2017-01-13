@@ -141,7 +141,7 @@ class DockerisedServiceController(ContainerisedServiceController[ServiceModel], 
                  start_detector: Callable[[str], bool],
                  persistent_error_detector: Callable[[str], bool]=None,
                  transient_error_detector: Callable[[str], bool]=None,
-                 start_timeout: int=math.inf, start_tries: int=math.inf):
+                 start_timeout: int=math.inf, start_tries: int=math.inf, additional_run_settings: dict=None):
         """
         Constructor.
         :param service_model: see `ServiceController.__init__`
@@ -154,6 +154,7 @@ class DockerisedServiceController(ContainerisedServiceController[ServiceModel], 
         starting
         :param start_timeout: timeout for starting containers
         :param start_tries: number of times to try starting the containerised service
+        :param additional_run_settings: other run settings (see https://docker-py.readthedocs.io/en/1.2.3/api/#create_container)
         """
         super().__init__(service_model, start_timeout, start_tries)
         self.repository = repository
@@ -162,6 +163,7 @@ class DockerisedServiceController(ContainerisedServiceController[ServiceModel], 
         self.start_detector = start_detector
         self.persistent_error_detector = persistent_error_detector
         self.transient_error_detector = transient_error_detector
+        self.run_settings = additional_run_settings if additional_run_settings is not None else {}
         self._log_iterator = dict()     # type: Dict[Service, Iterator]
 
     def _start(self, service: DockerisedService):
@@ -177,7 +179,8 @@ class DockerisedServiceController(ContainerisedServiceController[ServiceModel], 
             image=self._get_docker_image(self.repository, self.tag),
             name=service.name,
             ports=list(service.ports.values()),
-            host_config=_docker_client.create_host_config(port_bindings=service.ports))
+            host_config=_docker_client.create_host_config(port_bindings=service.ports),
+            **self.run_settings)
 
         _docker_client.start(service.container)
 
