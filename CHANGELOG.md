@@ -1,4 +1,8 @@
 # Change Log
+## [Unreleased]
+### Added
+- Predefined support for GitLab.
+
 ## 2.0.0 - 2017-01-11
 ### Changed
 - Switched to using native iRODS controllers, executables and helpers (no longer requires `test-with-irods`).

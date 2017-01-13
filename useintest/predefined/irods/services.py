@@ -222,6 +222,7 @@ class Irods4ServiceController(IrodsBaseServiceController, metaclass=ABCMeta):
                          start_timeout=start_timeout, start_tries=start_tries)
 
 
+# TODO: Why not use DockerisedServiceControllerTypeBuilder?
 def build_irods_service_controller_type(docker_repository: str, docker_tag: str, superclass: type) \
         -> Type[IrodsBaseServiceController]:
     """
