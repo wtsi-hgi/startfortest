@@ -23,6 +23,7 @@ class IrodsResource(Model):
         self.location = location
 
 
+# TODO: Extend User in /common
 class IrodsUser(Model):
     """
     Model of an iRODS user.
@@ -35,6 +36,7 @@ class IrodsUser(Model):
         self.admin = admin
 
 
+# TODO: Extend ServiceWithUsers in /common
 class IrodsDockerisedService(DockerisedService):
     """
     Model of a iRODS service running in Docker.
