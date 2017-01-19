@@ -10,7 +10,7 @@ _ROOT_PASSWORD = "gitlab123"
 _repository = "gitlab/gitlab-ce"
 _ports = [80, 433, 22]
 _start_detector = lambda log_line: "==> /var/log/gitlab/redis/current <==" in log_line
-_persistent_error_detector = lambda log_line: "no space left on device" in log_line
+_persistent_error_detector = lambda log_line: "o space left on device" in log_line
 _environment_variables = {"GITLAB_ROOT_PASSWORD": _ROOT_PASSWORD}
 
 
