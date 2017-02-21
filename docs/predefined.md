@@ -160,16 +160,18 @@ container - the result would not be pretty.
 
 ### Contents
 * `GitLabServiceController`: Latest version of GitLab available.
-* `GitLab8_13_11_ce_0ServiceController`: GitLab 8.13.11-ce.0..
+* `GitLab8_16_6_ce_0ServiceController`: GitLab 8.16.6-ce.0.
+* `GitLab8_13_11_ce_0ServiceController`: GitLab 8.13.11-ce.0.
 * `GitLab8_10_4_ce_0ServiceController`: GitLab 8.10.4-ce.0.
 
 ### Examples
 To use containerised Samtools executable in a test:
 ```python
 from useintest.predefined.gitlab import GitLabServiceController
+from useintest.models import DockerisedServiceWithUsers
 
 controller = GitLabServiceController()
-service = controller.start_service()      
+service: DockerisedServiceWithUsers = controller.start_service()        
 run_my_test(my_application, service.host, service.port, service.root_user.username, service.root_user.password)
 controller.stop_service(service)
 ```
