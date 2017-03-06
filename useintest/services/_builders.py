@@ -48,5 +48,5 @@ class DockerisedServiceControllerTypeBuilder(ServiceControllerTypeBuilder):
     Builder for Docker controllers with particular setups (e.g. repositories and tags).
     """
     def __init__(self, name: str, *args, superclass: Type[DockerisedServiceController]=DockerisedServiceController,
-                 **kwargs):
-        super().__init__(name, *args, superclass=superclass, service_model=DockerisedService, **kwargs)
+                 service_model: Type[DockerisedService]=DockerisedService, **kwargs):
+        super().__init__(name, *args, superclass=superclass, service_model=service_model, **kwargs)

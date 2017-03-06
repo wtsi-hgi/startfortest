@@ -4,7 +4,6 @@ import logging
 import signal
 import sys
 
-from testwithbaton.api import TestWithBaton, BatonSetup
 
 _PROGRAM_DESCRIPTION = "Sets up version of baton connected to an iRODS server for use in testing"
 _PROGRAM_BATON_VERSION_PARAMETER_NAME = "baton"

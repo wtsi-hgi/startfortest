@@ -1,5 +1,6 @@
 import os
 import subprocess
+from abc import ABCMeta
 from typing import Sequence, Type
 
 from useintest.executables.builders import CommandsBuilder, MountedArgumentParserBuilder
@@ -8,7 +9,37 @@ from useintest.executables.models import Executable
 from useintest.predefined.irods.models import Version
 
 
-class IrodsBaseExecutablesController(DefinedExecutablesController):
+class IrodsAuthenticatedExecutablesController(DefinedExecutablesController, metaclass=ABCMeta):
+    """
+    Controller for executables that authenticate with iRODS using an `iinit` binary.
+    """
+    def authenticate(self, password: str, executables_directory: str):
+        """
+        Authenticate "client" with the iRODS server using `iinit` in the given executables directory and the given
+        password.
+        :param password: the password used to authenticate based on the settings provided to the constructor
+        :param executables_directory: the directory containing the iRODS executables
+        """
+        process = subprocess.Popen([password, os.path.join(executables_directory, "iinit")], stdout=subprocess.PIPE,
+                                   stderr=subprocess.PIPE)
+        out, error = process.communicate()
+        if len(error) > 0:
+            raise Exception("Error authenticating to iCAT server with password \"%s\": %s" % (password, error))
+
+    def write_executables_and_authenticate(self, password: str, location: str=None) -> str:
+        """
+        Both writes the executables to the given location and then authenticates to use the server with the given
+        password.
+        :param password: password used by the `authenticate` method
+        :param location: location used by the `write_executables` method
+        :return: the location of the written executables
+        """
+        location = self.write_executables(location)
+        self.authenticate(password, location)
+        return location
+
+
+class IrodsBaseExecutablesController(IrodsAuthenticatedExecutablesController, metaclass=ABCMeta):
     """
     Executables (icomands) for use against an iRODS server (iCAT).
     """
@@ -41,31 +72,6 @@ class IrodsBaseExecutablesController(DefinedExecutablesController):
         super().__init__(run_container_commands_builder=self._run_container_commands_builder)
         self._register_named_executables()
 
-    def authenticate(self, executables_directory: str, password: str):
-        """
-        Authenticate "client" with the iRODS server using `iinit` in the given executables directory and the given
-        password.
-        :param executables_directory: the directory containing the iRODS executables
-        :param password: the password used to authenticate based on the settings provided to the constructor
-        """
-        process = subprocess.Popen([os.path.join(executables_directory, "iinit"), password], stdout=subprocess.PIPE,
-                                   stderr=subprocess.PIPE)
-        out, error = process.communicate()
-        if len(error) > 0:
-            raise Exception("Error authenticating to iCAT server with password \"%s\": %s" % (password, error))
-
-    def write_executables_and_authenticate(self, password: str, location: str=None) -> str:
-        """
-        Both writes the executables to the given location and then authenticates to use the server with the given
-        password.
-        :param password: password used by the `authenticate` method
-        :param location: location used by the `write_executables` method
-        :return: the location of the written executables
-        """
-        location = self.write_executables(location)
-        self.authenticate(location, password)
-        return location
-
     def _register_named_executables(self):
         """
         Registers the executables that can be written by this controller.
@@ -87,13 +93,13 @@ class IrodsBaseExecutablesController(DefinedExecutablesController):
         self.named_executables["iput"] = create_executable_template("iput")
 
 
-def _build_irods_executables_controller(image_with_compatible_icommands: str, irods_version: Version) \
+def _build_irods_executables_controller_type(image_with_compatible_icommands: str, irods_version: Version) \
         -> Type[IrodsBaseExecutablesController]:
     """
-    TODO
-    :param image_with_compatible_icommands:
-    :param irods_version:
-    :return:
+    Builds an iRODS executables controller for the given icommands image.
+    :param image_with_compatible_icommands: image with icommands
+    :param irods_version: version of iRODS icommands are for
+    :return: built controller type
     """
     def init(self, *args, **kwargs):
         args = list(args)
@@ -108,10 +114,10 @@ def _build_irods_executables_controller(image_with_compatible_icommands: str, ir
     )
 
 
-Irods3_3_1ExecutablesController = _build_irods_executables_controller("mercury/icat:3.3.1", Version("3.3.1"))
-Irods4_1_8ExecutablesController = _build_irods_executables_controller("mercury/icat:4.1.8", Version("4.1.8"))
-Irods4_1_9ExecutablesController = _build_irods_executables_controller("mercury/icat:4.1.9", Version("4.1.9"))
-Irods4_1_10ExecutablesController = _build_irods_executables_controller("mercury/icat:4.1.10", Version("4.1.10"))
+Irods3_3_1ExecutablesController = _build_irods_executables_controller_type("mercury/icat:3.3.1", Version("3.3.1"))
+Irods4_1_8ExecutablesController = _build_irods_executables_controller_type("mercury/icat:4.1.8", Version("4.1.8"))
+Irods4_1_9ExecutablesController = _build_irods_executables_controller_type("mercury/icat:4.1.9", Version("4.1.9"))
+Irods4_1_10ExecutablesController = _build_irods_executables_controller_type("mercury/icat:4.1.10", Version("4.1.10"))
 IrodsExecutablesController = Irods4_1_10ExecutablesController
 
 irods_executables_controllers_and_versions = {

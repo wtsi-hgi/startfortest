@@ -1,6 +1,7 @@
 from typing import Set, Optional
 
 from hgicommon.models import Model
+from useintest.services.models import DockerisedService
 
 
 class User(Model):
@@ -42,7 +43,7 @@ class ServiceWithUsers(Model):
 
 
 
-class DockerisedServiceWithUsers(ServiceWithUsers):
+class DockerisedServiceWithUsers(ServiceWithUsers, DockerisedService):
     """
     TODO
     """

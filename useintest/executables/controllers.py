@@ -109,10 +109,10 @@ class ExecutablesController:
 
     def create_simple_executable_commands(self, containerised_executable: str, executable_arguments=CLI_ARGUMENTS) -> str:
         """
-        TODO
-        :param containerised_executable:
-        :param executable_arguments:
-        :return:
+        Creates a simple executable command.
+        :param containerised_executable: the code to be executed in the container
+        :param executable_arguments: the arguments passed to the containerised executable
+        :return: the commands required to run the containerised executable from the host machine as a "proxy"
         """
         containerised_executable = containerised_executable.replace('"', '\\"')
         to_execute = CommandsBuilder(executable=containerised_executable, container=self._cached_container_name,
@@ -122,7 +122,8 @@ class ExecutablesController:
 
 class DefinedExecutablesController(ExecutablesController):
     """
-    TODO
+    Controller for proxy executables, where a set of executables have been defined and can be written as executables on
+    the host machine.
     """
     def __init__(self, run_container_commands_builder: Optional[CommandsBuilder]=None,
                  named_executables: Dict[str, Executable]=None):
@@ -132,8 +133,7 @@ class DefinedExecutablesController(ExecutablesController):
 
     def tear_down(self):
         """
-        TOOD
-        :return:
+        Tears down the executables controller.
         """
         super().tear_down()
         self._temp_manager.tear_down()
@@ -158,21 +158,22 @@ class DefinedExecutablesController(ExecutablesController):
 
 class DefinedExecutablesControllerTypeBuilder:
     """
-    TODO
+    Builder of executables controllers that have a predefined set of executables.
     """
     def __init__(self, type_name: str, named_executables: Dict[str, Executable]):
         """
-        TODO
-        :param type_name:
-        :param named_executables:
+        Constructor.
+        :param type_name: the type of the controller to build
+        :param named_executables: dictionary where the key is the name of the executable and the value is a model of the
+        executable code
         """
         self.type_name = type_name
         self.named_executables = named_executables
 
     def build(self) -> Type[DefinedExecutablesController]:
         """
-        TODO
-        :return:
+        Builds the executables controller.
+        :return: the built controller
         """
         named_executables = deepcopy(self.named_executables)
 

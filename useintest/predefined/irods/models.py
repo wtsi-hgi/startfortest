@@ -1,10 +1,8 @@
-from typing import List
-
 import semantic_version
 
 from hgicommon.collections import Metadata as _Metadata
 from hgicommon.models import Model
-from useintest.services.models import DockerisedService
+from useintest.models import DockerisedServiceWithUsers
 
 # Import from semantic version library
 Version = semantic_version.Version
@@ -37,11 +35,10 @@ class IrodsUser(Model):
 
 
 # TODO: Extend ServiceWithUsers in /common
-class IrodsDockerisedService(DockerisedService):
+class IrodsDockerisedService(DockerisedServiceWithUsers):
     """
     Model of a iRODS service running in Docker.
     """
     def __init__(self):
         super().__init__()
-        self.users = []     # type: List[IrodsUser]
         self.version = None

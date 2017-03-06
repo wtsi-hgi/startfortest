@@ -1,4 +1,8 @@
+import hgicommon.collections
 from hgicommon.models import Model
+
+# Use `Metadata` from HGI common library
+Metadata = hgicommon.collections.Metadata
 
 
 class BatonImage(Model):

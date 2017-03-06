@@ -20,6 +20,8 @@ class GitLabBaseServiceController(DockerisedServiceController[ServiceModel], met
     """
     def start_service(self) -> DockerisedServiceWithUsers:
         service = super().start_service()
+        # TODO: The generic does not imply a bound on `DockerisedServiceWithUsers`. Therefore a static compiler will not
+        # be happy at this point because all it knows is that service is bound on `Service`
         service.root_user = User(_ROOT_USERNAME, _ROOT_PASSWORD)
         return service
 
@@ -30,7 +32,8 @@ _common_setup = {
     "start_detector": _start_detector,
     "persistent_error_detector": _persistent_error_detector,
     "ports": _ports,
-    "additional_run_settings": {"environment": _environment_variables}
+    "additional_run_settings": {"environment": _environment_variables},
+    "service_model": DockerisedServiceWithUsers
 }
 
 GitLab8_10_4_ce_0ServiceController = DockerisedServiceControllerTypeBuilder(

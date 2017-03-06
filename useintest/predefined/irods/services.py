@@ -7,6 +7,7 @@ from time import sleep
 from typing import List, Type, Callable, Sequence
 
 from hgicommon.docker.client import create_client
+from useintest.models import ServiceWithUsers
 from useintest.predefined.irods.models import IrodsUser, IrodsDockerisedService, Version
 from useintest.services.controllers import DockerisedServiceController
 from useintest.services.models import DockerisedService
@@ -55,10 +56,12 @@ class IrodsBaseServiceController(DockerisedServiceController, metaclass=ABCMeta)
         self.config_file_name = config_file_name
         self._version = version
         self._users = users
+        self._root_user = [user for user in self._users if user.admin][0]
 
     def start_service(self) -> IrodsDockerisedService:
         service = super().start_service()
         service.users = self._users
+        service.root_user = self._root_user
         service.version = self._version
         return service
 

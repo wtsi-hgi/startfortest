@@ -39,7 +39,7 @@ class CommandsBuilder:
         Builds the commands.
         :return: build comamnds.
         """
-        if self.container is None and self.image is None:
+        if (self.container is None or self.container == "") and (self.image is None or self.image == ""):
             raise ValueError("Must define either the Docker image or container to run commands in")
         if self.container is not None and self.image is not None:
             raise ValueError("Cannot build Docker command to work in for both an image and a running container")
