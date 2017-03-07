@@ -23,8 +23,8 @@ class _TestSetupIrods(TestUsingType[TypeUsedInTest], metaclass=ABCMeta):
 
 # Setup tests
 globals().update(create_tests(_TestSetupIrods, get_classes_to_test(irods_service_controllers, IrodsServiceController),
-                              lambda superclass, test_type: "TestSetupWith%s"
-                                                            % extract_version_number(test_type.__name__).replace(".", "_")))
+                              lambda superclass, test_type: "TestSetupWith%s" % extract_version_number(
+                                  test_type.__name__).replace(".", "_")))
 
 # Fix for stupidity of test runners
 del _TestSetupIrods, TestUsingType, create_tests, get_classes_to_test

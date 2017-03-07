@@ -252,5 +252,10 @@ Irods4_1_9ServiceController = build_irods_service_controller_type(_DOCKER_REPOSI
 Irods4_1_10ServiceController = build_irods_service_controller_type(_DOCKER_REPOSITORY, "4.1.10", Irods4ServiceController)
 IrodsServiceController = Irods4_1_10ServiceController
 
-irods_service_controllers = {Irods3_3_1ServiceController, Irods4_1_8ServiceController, Irods4_1_9ServiceController,
-                             Irods4_1_10ServiceController}
+irods_service_controllers_and_versions = {
+    Version("3.3.1"): Irods3_3_1ServiceController,
+    Version("4.1.8"): Irods4_1_8ServiceController,
+    Version("4.1.9"): Irods4_1_9ServiceController,
+    Version("4.1.10"): Irods4_1_10ServiceController
+}
+irods_service_controllers = list(irods_service_controllers_and_versions.values())

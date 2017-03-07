@@ -84,8 +84,8 @@ def _build_baton_executables_controller(baton_image: str, irods_version: Version
         (BatonBaseExecutablesController,),
         {
             "__init__": init,
-            "irods_version": property(lambda self: irods_version),
-            "baton_version": property(lambda self: baton_version)
+            "irods_version": irods_version,
+            "baton_version": baton_version
         }
     )
 

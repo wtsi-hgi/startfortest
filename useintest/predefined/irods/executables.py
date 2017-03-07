@@ -132,4 +132,4 @@ irods_executables_controllers_and_versions = {
     Version("4.1.9"): Irods4_1_9ExecutablesController,
     Version("4.1.10"): Irods4_1_10ExecutablesController,
 }
-irods_executables_controllers = irods_executables_controllers_and_versions.values()
+irods_executables_controllers = list(irods_executables_controllers_and_versions.values())
