@@ -103,9 +103,9 @@ class TestGetIrodsServerFromEnvironmentIfDefined(unittest.TestCase):
         irods_server = get_irods_server_from_environment_if_defined()
         self.assertEqual(irods_server.host, TestGetIrodsServerFromEnvironmentIfDefined.HOST)
         self.assertEqual(irods_server.port, int(TestGetIrodsServerFromEnvironmentIfDefined.PORT))
-        self.assertEqual(irods_server.users[0].username, TestGetIrodsServerFromEnvironmentIfDefined.USERNAME)
-        self.assertEqual(irods_server.users[0].password, TestGetIrodsServerFromEnvironmentIfDefined.PASSWORD)
-        self.assertEqual(irods_server.users[0].zone, TestGetIrodsServerFromEnvironmentIfDefined.ZONE)
+        self.assertEqual(irods_server.root_user.username, TestGetIrodsServerFromEnvironmentIfDefined.USERNAME)
+        self.assertEqual(irods_server.root_user.password, TestGetIrodsServerFromEnvironmentIfDefined.PASSWORD)
+        self.assertEqual(irods_server.root_user.zone, TestGetIrodsServerFromEnvironmentIfDefined.ZONE)
 
 
 if __name__ == "__main__":

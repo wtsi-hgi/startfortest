@@ -1,11 +1,7 @@
-import semantic_version
-
 from hgicommon.collections import Metadata as _Metadata
 from hgicommon.models import Model
 from useintest.models import DockerisedServiceWithUsers
 
-# Import from semantic version library
-Version = semantic_version.Version
 
 # Import from hgicommon library
 Metadata = _Metadata

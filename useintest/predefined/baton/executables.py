@@ -4,16 +4,16 @@ from typing import Set, Any, List, Type
 
 from useintest.executables.builders import CommandsBuilder
 from useintest.executables.models import Executable
-from useintest.predefined.irods.executables import IrodsAuthenticatedExecutablesController
-from useintest.predefined.irods.models import Version
+from useintest.models import Version
+from useintest.predefined.irods.executables import IrodsAuthenticatiableExecutablesController
 
 
-class BatonBaseExecutablesController(IrodsAuthenticatedExecutablesController, metaclass=ABCMeta):
+class BatonBaseExecutablesController(IrodsAuthenticatiableExecutablesController, metaclass=ABCMeta):
     """
-    Executables (icomands) for use against an iRODS server (iCAT).
+    Base for controllers of baton executables.
     """
     _BATON_BINARIES = {"baton", "baton-metaquery", "baton-get", "baton-chmod", "baton-list", "baton-metamod",
-                       "baton-specificquery", "iinit"}
+                       "baton-specificquery"}
 
     @staticmethod
     @abstractproperty
@@ -31,21 +31,21 @@ class BatonBaseExecutablesController(IrodsAuthenticatedExecutablesController, me
         :return: the compatible version of iRODS
         """
 
-    # TODO: Must be able to work via a port or container!
-    def __init__(self, baton_image: str, irods_container_name: str, irods_settings_directory: str):
-        # """
-        # Constructor.
-        # :param irods_container_name: the name of the container running the iRODS server
-        # :param image_with_compatible_icommands: image containing icommands that are compatible with the iRODS server
-        # :param settings_directory_on_host: directory on the Docker host machine that are used to access iRODS
-        # :param settings_directories_in_container: the directories on the container running the Docker image that need
-        # to contain the settings
-        # """
-        self._run_container_commands_builder = CommandsBuilder(
+    def __init__(self, baton_image: str, irods_container_name: str, settings_directory_on_host: str):
+        """
+        Constructor.
+        :param baton_image: the baton image with the baton executables installed
+        :param irods_container_name: the name of the container running the iRODS server
+        :param settings_directory_on_host: the location on the host with the settings required to connect to the iRODS 
+        server using the baton executables
+        """
+        self._irods_container_name = irods_container_name
+        self._settings_directory_on_host = settings_directory_on_host
+        run_container_commands_builder = CommandsBuilder(
             "sleep", executable_arguments=["infinity"], image=baton_image,
             other_docker="--link %s" % irods_container_name,
-            mounts={irods_settings_directory: "/root/.irods"})
-        super().__init__(run_container_commands_builder=self._run_container_commands_builder)
+            mounts={settings_directory_on_host: "/root/.irods"})
+        super().__init__(run_container_commands_builder=run_container_commands_builder)
         self._register_named_executables()
 
     def _register_named_executables(self):
@@ -70,11 +70,11 @@ class BatonBaseExecutablesController(IrodsAuthenticatedExecutablesController, me
 def _build_baton_executables_controller(baton_image: str, irods_version: Version, baton_version: Version) \
         -> Type[BatonBaseExecutablesController]:
     """
-    TODO
-    :param baton_image:
-    :param irods_version:
-    :param baton_version:
-    :return:
+    Builders controller types of baton executables.
+    :param baton_image: the baton image that contains the baton executables (and must also contain icommands)
+    :param irods_version: the version of iRODS that the baton executables are for
+    :param baton_version: the version of baton
+    :return: the build controller type
     """
     def init(self, *args, **kwargs):
         super(type(self), self).__init__(baton_image, *args, **kwargs)
@@ -84,8 +84,8 @@ def _build_baton_executables_controller(baton_image: str, irods_version: Version
         (BatonBaseExecutablesController,),
         {
             "__init__": init,
-            "irods_version": lambda: irods_version,
-            "baton_version": lambda: baton_version
+            "irods_version": property(lambda self: irods_version),
+            "baton_version": property(lambda self: baton_version)
         }
     )
 

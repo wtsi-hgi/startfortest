@@ -27,15 +27,15 @@ class ExecutablesController:
         which comamnds should be run (can lead to much better performance because new container is not brought up each
         time)
         """
-        self.run_container_command_builder = run_container_commands_builder
+        self.run_container_commands_builder = run_container_commands_builder
 
         if run_container_commands_builder is not None:
             if run_container_commands_builder.image is None:
                 raise ValueError("Run container command builder must define the image the container is to use")
             pull_docker_image(run_container_commands_builder.image)
             self._cached_container_name = create_random_string(prefix="execution-container-")
-            self.run_container_command_builder.name = self._cached_container_name
-            self.run_container_command_builder.detached = True
+            self.run_container_commands_builder.name = self._cached_container_name
+            self.run_container_commands_builder.detached = True
 
         atexit.register(self.tear_down)
 
@@ -43,7 +43,7 @@ class ExecutablesController:
         """
         Tears down the controller.
         """
-        if self.run_container_command_builder is not None:
+        if self.run_container_commands_builder is not None:
             docker_client = create_client()
             try:
                 docker_client.remove_container(self._cached_container_name, force=True)
@@ -57,7 +57,7 @@ class ExecutablesController:
         :return: the created commands
         """
         if executable.uses_running_container:
-            if self.run_container_command_builder is None:
+            if self.run_container_commands_builder is None:
                 raise ValueError("No command to run execution container defined.")
             executable.commands_builder.container = self._cached_container_name
 
@@ -100,14 +100,15 @@ class ExecutablesController:
                 %(to_execute)s
             """ % {
                 "uuid": self._cached_container_name,
-                "container_setup": self.run_container_command_builder.build().rstrip(),
+                "container_setup": self.run_container_commands_builder.build().rstrip(),
                 "to_execute": executable.commands_builder.build()
             })
         else:
             pull_docker_image(executable.commands_builder.image)
             return executable.commands_builder.build()
 
-    def create_simple_executable_commands(self, containerised_executable: str, executable_arguments=CLI_ARGUMENTS) -> str:
+    def create_simple_executable_commands(self, containerised_executable: str, executable_arguments=CLI_ARGUMENTS) \
+            -> str:
         """
         Creates a simple executable command.
         :param containerised_executable: the code to be executed in the container
@@ -149,11 +150,22 @@ class DefinedExecutablesController(ExecutablesController):
             location = self._temp_manager.create_temp_directory(prefix="executables-", dir=MOUNTABLE_TEMP_DIRECTORY)
 
         for name, executable in self.named_executables.items():
-            executable_location = os.path.join(location, name)
-            commands = self.create_executable_commands(executable)
-            write_commands(executable_location, commands)
+            self._write_executable(location, name, executable)
 
         return location
+
+    def _write_executable(self, directory: str, name: str, executable: Executable) -> str:
+        """
+        TODO
+        :param directory: 
+        :param name: 
+        :param executable:
+        :return: 
+        """
+        executable_location = os.path.join(directory, name)
+        commands = self.create_executable_commands(executable)
+        write_commands(executable_location, commands)
+        return executable_location
 
 
 class DefinedExecutablesControllerTypeBuilder:

@@ -1,30 +1,36 @@
-import os
+import shutil
 import subprocess
 from abc import ABCMeta
+
 from typing import Sequence, Type
 
 from useintest.executables.builders import CommandsBuilder, MountedArgumentParserBuilder
 from useintest.executables.controllers import DefinedExecutablesController
 from useintest.executables.models import Executable
-from useintest.predefined.irods.models import Version
+from useintest.models import Version
 
 
-class IrodsAuthenticatedExecutablesController(DefinedExecutablesController, metaclass=ABCMeta):
+class IrodsAuthenticatiableExecutablesController(DefinedExecutablesController, metaclass=ABCMeta):
     """
-    Controller for executables that authenticate with iRODS using an `iinit` binary.
+    Defined executable controller that can authenticate its common executables container against iRODS.
     """
-    def authenticate(self, password: str, executables_directory: str):
+    def authenticate(self, password: str):
         """
-        Authenticate "client" with the iRODS server using `iinit` in the given executables directory and the given
-        password.
-        :param password: the password used to authenticate based on the settings provided to the constructor
-        :param executables_directory: the directory containing the iRODS executables
+        Authenticates the common container against the iCAT server.
+        :param password: password associated with the settings that are being used in the common container
         """
-        process = subprocess.Popen([password, os.path.join(executables_directory, "iinit")], stdout=subprocess.PIPE,
-                                   stderr=subprocess.PIPE)
+        # Assumes all baton containers have icommands installed
+        name = "iinit"
+        executable = Executable(CommandsBuilder(name), True)
+        directory = self._temp_manager.create_temp_directory()
+        location = self._write_executable(directory, name, executable)
+
+        process = subprocess.Popen([location, password], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         out, error = process.communicate()
         if len(error) > 0:
             raise Exception("Error authenticating to iCAT server with password \"%s\": %s" % (password, error))
+
+        shutil.rmtree(directory)
 
     def write_executables_and_authenticate(self, password: str, location: str=None) -> str:
         """
@@ -35,11 +41,11 @@ class IrodsAuthenticatedExecutablesController(DefinedExecutablesController, meta
         :return: the location of the written executables
         """
         location = self.write_executables(location)
-        self.authenticate(password, location)
+        self.authenticate(password)
         return location
 
 
-class IrodsBaseExecutablesController(IrodsAuthenticatedExecutablesController, metaclass=ABCMeta):
+class IrodsBaseExecutablesController(IrodsAuthenticatiableExecutablesController, metaclass=ABCMeta):
     """
     Executables (icomands) for use against an iRODS server (iCAT).
     """
@@ -65,11 +71,11 @@ class IrodsBaseExecutablesController(IrodsAuthenticatedExecutablesController, me
         contain the settings
         """
         self._image_with_compatible_icommands = image_with_compatible_icommands
-        self._run_container_commands_builder = CommandsBuilder(
+        run_container_commands_builder = CommandsBuilder(
             "sleep", executable_arguments=["infinity"], image=image_with_compatible_icommands,
             other_docker="--link %s" % irods_container_name,
             mounts={settings_directory_on_host: set(settings_directories_in_container)})
-        super().__init__(run_container_commands_builder=self._run_container_commands_builder)
+        super().__init__(run_container_commands_builder=run_container_commands_builder)
         self._register_named_executables()
 
     def _register_named_executables(self):
@@ -83,8 +89,8 @@ class IrodsBaseExecutablesController(IrodsAuthenticatedExecutablesController, me
             commands_builder = CommandsBuilder(
                 command, image=self._image_with_compatible_icommands,
                 get_path_arguments_to_mount=IrodsBaseExecutablesController._GET_POSITIONAL_ARGUMENTS_TO_MOUNT,
-                mounts=self._run_container_commands_builder.mounts,
-                other_docker=self._run_container_commands_builder.other_docker)
+                mounts=self.run_container_commands_builder.mounts,
+                other_docker=self.run_container_commands_builder.other_docker)
             return Executable(commands_builder, False)
 
         # Note: if `-` is the second positional argument with `iget`, `-` is suspected as a file, relative to the

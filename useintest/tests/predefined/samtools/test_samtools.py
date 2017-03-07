@@ -3,7 +3,7 @@ import unittest
 from abc import ABCMeta
 
 from hgicommon.testing import create_tests, TestUsingType, TypeUsedInTest
-from useintest.predefined.irods.models import Version
+from useintest.models import Version
 from useintest.predefined.samtools import samtools_executable_controllers
 from useintest.tests.executables.common import run
 

@@ -1,7 +1,12 @@
+import semantic_version
 from typing import Set, Optional
 
 from hgicommon.models import Model
 from useintest.services.models import DockerisedService
+
+
+# Import from semantic version library
+Version = semantic_version.Version
 
 
 class User(Model):
