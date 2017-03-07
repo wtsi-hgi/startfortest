@@ -16,7 +16,7 @@ _environment_variables = {"GITLAB_ROOT_PASSWORD": _ROOT_PASSWORD}
 
 class GitLabBaseServiceController(DockerisedServiceController[ServiceModel], metaclass=ABCMeta):
     """
-    BAse class for GitLab service controllers.
+    Base class for GitLab service controllers.
     """
     def start_service(self) -> DockerisedServiceWithUsers:
         service = super().start_service()
@@ -39,13 +39,20 @@ _common_setup = {
 GitLab8_10_4_ce_0ServiceController = DockerisedServiceControllerTypeBuilder(
     name="GitLab8_10_4_ce_0ServiceController",
     tag="8.10.4-ce.0",
-    **_common_setup).build()   # type: type
+    **_common_setup).build()
 
 GitLab8_13_11_ce_0ServiceController = DockerisedServiceControllerTypeBuilder(
     name="GitLab8_13_11_ce_0ServiceController",
     tag="8.13.11-ce.0",
-    **_common_setup).build()   # type: type
+    **_common_setup).build()
 
-GitLabServiceController = GitLab8_13_11_ce_0ServiceController
+GitLab8_16_6_ce_0ServiceController = DockerisedServiceControllerTypeBuilder(
+    name="GitLab8_16_6_ce_0ServiceController",
+    tag="8.16.6-ce.0",
+    **_common_setup).build()
 
-gitlab_service_controllers = {GitLab8_10_4_ce_0ServiceController, GitLab8_13_11_ce_0ServiceController}
+
+GitLabServiceController = GitLab8_16_6_ce_0ServiceController
+
+gitlab_service_controllers = {GitLab8_10_4_ce_0ServiceController, GitLab8_13_11_ce_0ServiceController,
+                              GitLab8_16_6_ce_0ServiceController}

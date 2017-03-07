@@ -23,7 +23,7 @@ class ServiceWithUsers(Model):
     TODO
     """
     def __init__(self):
-        self.users: Set[User] = {}
+        self.users: Set[User] = set()
         self._root_user: Optional[User] = None
 
     @property
