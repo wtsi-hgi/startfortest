@@ -2,6 +2,7 @@
 ## [Unreleased]
 ### Added
 - Predefined support for GitLab.
+- Predefined support for baton.
 
 ## 2.0.0 - 2017-01-11
 ### Changed

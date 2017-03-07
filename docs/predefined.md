@@ -175,3 +175,43 @@ service: DockerisedServiceWithUsers = controller.start_service()
 run_my_test(my_application, service.host, service.port, service.root_user.username, service.root_user.password)
 controller.stop_service(service)
 ```
+
+
+## baton
+### Module
+`useintest.predefined.baton`
+
+### Contents
+* `BatonExecutablesController`: Latest version of baton available.
+* `Baton0_17_0WithIrods4_1_10ExecutablesController`: baton 0.17.0 compiled for use with iRODS 4.1.10.
+
+### Examples
+To use containerised baton executables in a test:
+```python
+import os
+
+from hgicommon.managers import TempManager
+from useintest.common import MOUNTABLE_TEMP_DIRECTORY
+from useintest.predefined.baton import BatonExecutablesController
+from useintest.predefined.irods.services import irods_service_controllers_and_versions
+
+# First we will start up and iRODS service
+irods_controller = irods_service_controllers_and_versions[BatonExecutablesController.irods_version]()
+irods_service = irods_controller.start_service()
+
+# Then write the configuration required to connect to the iRODS server to a file
+temp_manager = TempManager(default_mkdtemp_kwargs={"dir": MOUNTABLE_TEMP_DIRECTORY})
+settings_directory = temp_manager.create_temp_directory()
+irods_controller.write_connection_settings(
+    os.path.join(settings_directory, irods_controller.config_file_name), irods_service)
+
+# Finally we can create the baton executables and run our tests!
+controller = BatonExecutablesController(irods_service.name, settings_directory)
+directory_with_baton_executables = controller.write_executables_and_authenticate(irods_service.root_user.password)
+run_my_test(my_application, directory_with_baton_executables)
+
+# Clean up afterwards
+irods_controller.stop_service(irods_service)
+temp_manager.tear_down()
+controller.tear_down()
+```

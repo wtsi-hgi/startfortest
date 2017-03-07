@@ -15,5 +15,3 @@ def is_docker_container_running(service: DockerisedService) -> bool:
     :return: whether the container is running
     """
     return _docker_client.inspect_container(service.container)["State"]["Status"] == "running"
-
-

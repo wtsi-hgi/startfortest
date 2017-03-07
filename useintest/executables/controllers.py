@@ -8,7 +8,7 @@ from docker.errors import NotFound
 from hgicommon.docker.client import create_client
 from hgicommon.helpers import create_random_string
 from hgicommon.managers import TempManager
-from useintest._common import reduce_whitespace, MOUNTABLE_TEMP_DIRECTORY
+from useintest.common import reduce_whitespace, MOUNTABLE_TEMP_DIRECTORY
 from useintest.executables.builders import CommandsBuilder
 from useintest.executables.common import CLI_ARGUMENTS, write_commands, pull_docker_image
 from useintest.executables.models import Executable
