@@ -80,7 +80,7 @@ globals().update(create_tests(_TestBatonExecutablesController,
                               get_classes_to_test(baton_executables_controllers, BatonExecutablesController)))
 
 # Fix for stupidity of test runners
-del _TestBatonExecutablesController, TestUsingType, create_tests
+del _TestBatonExecutablesController, TestUsingType, create_tests, get_classes_to_test
 
 
 if __name__ == "__main__":
