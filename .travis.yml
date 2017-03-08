@@ -20,7 +20,7 @@ install:
   - pip install -r test_requirements.txt
   - pip install -r requirements.txt
   - printf "ubuntu:.*\ndebian:.*\nalpine:.*\npython:.*" > no-gc-images.txt
-  - docker run -d -v /var/run/docker.sock:/var/run/docker.sock:ro -v $PWD:/working -e EXCLUDE_FROM_GC=/working/no-gc-images.txt spotify/docker-gc watch -n 600 /docker-gc
+  - docker run -d -v /var/run/docker.sock:/var/run/docker.sock:ro -v $PWD:/working -e EXCLUDE_FROM_GC=/working/no-gc-images.txt spotify/docker-gc watch -n 300 /docker-gc
 
 script:
   - nosetests -v --with-coverage --cover-package=useintest --cover-inclusive --exclude-test=useintest.tests.services._common.TestDockerisedServiceControllerSubclass --exclude-test=useintest.tests.services._common.create_tests
