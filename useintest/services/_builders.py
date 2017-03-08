@@ -1,4 +1,5 @@
 from abc import ABCMeta
+
 from typing import Type, TypeVar
 
 from useintest.services.controllers import DockerisedServiceController, ServiceModel

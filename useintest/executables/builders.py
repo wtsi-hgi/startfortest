@@ -3,9 +3,9 @@ import base64
 import os
 import sys
 from copy import deepcopy
-from typing import List, Iterable, Dict, Set, Callable, Any, Union
 
 from dill import dill
+from typing import List, Iterable, Dict, Set, Callable, Any, Union
 
 from useintest.executables.common import CLI_ARGUMENTS
 

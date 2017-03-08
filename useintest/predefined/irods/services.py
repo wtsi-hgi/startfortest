@@ -4,10 +4,11 @@ import math
 import os
 from abc import abstractmethod, ABCMeta
 from time import sleep
+
 from typing import List, Type, Callable, Sequence
 
 from hgicommon.docker.client import create_client
-from useintest.models import ServiceWithUsers, Version
+from useintest.models import Version
 from useintest.predefined.irods.models import IrodsUser, IrodsDockerisedService
 from useintest.services.controllers import DockerisedServiceController
 from useintest.services.models import DockerisedService

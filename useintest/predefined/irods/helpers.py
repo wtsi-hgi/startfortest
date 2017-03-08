@@ -7,11 +7,12 @@ import shutil
 import subprocess
 from enum import Enum, unique
 from tempfile import mkdtemp
-from typing import List, Union
 from uuid import uuid4
 
-from useintest.predefined.irods.models import IrodsResource, IrodsUser, Metadata
+from typing import List, Union
+
 from useintest.models import Version
+from useintest.predefined.irods.models import IrodsResource, IrodsUser, Metadata
 
 
 @unique

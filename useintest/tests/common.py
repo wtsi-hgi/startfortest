@@ -1,4 +1,4 @@
-from useintest._common import MOUNTABLE_TEMP_DIRECTORY
+from useintest.common import MOUNTABLE_TEMP_DIRECTORY
 
 MOUNTABLE_TEMP_CREATION_KWARGS = {"dir": MOUNTABLE_TEMP_DIRECTORY}
 

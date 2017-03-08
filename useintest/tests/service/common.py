@@ -1,6 +1,7 @@
 from abc import ABCMeta
-from typing import Set
 from unittest import TestCase
+
+from typing import Set
 
 from hgicommon.docker.client import create_client
 from hgicommon.testing import TestUsingType, TypeUsedInTest

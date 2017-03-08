@@ -1,6 +1,6 @@
+import logging
 import os
 
-import logging
 from typing import List, Any, Set
 
 from hgicommon.docker.client import create_client

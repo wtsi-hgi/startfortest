@@ -2,10 +2,10 @@ import atexit
 import logging
 import math
 from abc import ABCMeta, abstractmethod
-from typing import Dict, Iterator, Optional, List, Callable, TypeVar, Generic, Type
 
 from docker.errors import APIError
 from stopit import ThreadingTimeout, TimeoutException
+from typing import Dict, Iterator, Optional, List, Callable, TypeVar, Generic, Type
 
 from hgicommon.docker.client import create_client
 from hgicommon.helpers import create_random_string, get_open_port

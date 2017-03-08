@@ -1,6 +1,6 @@
 from bidict import bidict
-from hgicommon.models import Model
 
+from hgicommon.models import Model
 from useintest.services.exceptions import UnexpectedNumberOfPortsException
 
 

@@ -1,9 +1,9 @@
 import atexit
 import os
 from copy import deepcopy
-from typing import Dict, Optional, Type
 
 from docker.errors import NotFound
+from typing import Dict, Optional, Type
 
 from hgicommon.docker.client import create_client
 from hgicommon.helpers import create_random_string

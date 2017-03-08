@@ -7,8 +7,8 @@ from abc import ABCMeta
 
 from hgicommon.managers import TempManager
 from hgicommon.testing import create_tests, TestUsingType, TypeUsedInTest, get_classes_to_test
-from useintest._common import MOUNTABLE_TEMP_DIRECTORY
-from useintest.predefined.baton.executables import baton_executables_controllers, BatonExecutablesController
+from useintest.common import MOUNTABLE_TEMP_DIRECTORY
+from useintest.predefined.baton import baton_executables_controllers, BatonExecutablesController
 from useintest.predefined.irods import IrodsSetupHelper, irods_executables_controllers_and_versions
 from useintest.predefined.irods.services import irods_service_controllers_and_versions
 

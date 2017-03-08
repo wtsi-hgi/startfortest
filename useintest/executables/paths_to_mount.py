@@ -1,9 +1,9 @@
 import base64
 import os
 import sys
-from typing import Set
 
 from dill import dill
+from typing import Set
 
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), "../../"))
 
