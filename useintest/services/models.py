@@ -1,7 +1,14 @@
 from bidict import bidict
-from hgicommon.models import Model
+from hgicommon.models import Model as HgiCommonModel
+from typing import Set, Optional
 
 from useintest.services.exceptions import UnexpectedNumberOfPortsException
+
+
+class Model(HgiCommonModel):
+    """
+    Model class.
+    """
 
 
 class Service(Model):
@@ -13,6 +20,7 @@ class Service(Model):
         Constructor.
         """
         super().__init__()
+        # FIXME: Assumption about where the Docker machine is accessible (i.e. it could be on a VM)
         self.host = "localhost"
         self.ports = bidict()
 
@@ -44,3 +52,47 @@ class DockerisedService(Service):
         super().__init__()
         self.name = None
         self.container = None
+
+
+class User(Model):
+    """
+    A user with an associated password.
+    """
+    def __init__(self, username: str, password: str=None):
+        self.username = username
+        self.password = password
+
+
+class ServiceWithUsers(Service):
+    """
+    A service with users.
+    """
+    def __init__(self):
+        super().__init__()
+        self.users: Set[User] = set()
+        self._root_user: Optional[User] = None
+
+    @property
+    def root_user(self) -> Optional[User]:
+        """
+        Gets a user of the service that has privileged access. 
+        :return: a user with privilege access
+        """
+        assert self._root_user in self.users
+        return self._root_user
+
+    @root_user.setter
+    def root_user(self, user: Optional[User]):
+        """
+        Sets the user of the service that has privileged access.
+        :param user: the user with privilege access
+        """
+        if user is not None and not user in self.users:
+            self.users.add(user)
+        self._root_user = user
+
+
+class DockerisedServiceWithUsers(DockerisedService, ServiceWithUsers):
+    """
+    Service running on Docker with users.
+    """

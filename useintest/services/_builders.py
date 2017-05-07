@@ -1,7 +1,7 @@
 from abc import ABCMeta
 from typing import Type, TypeVar
 
-from useintest.services.controllers import DockerisedServiceController, ServiceModel
+from useintest.services.controllers import DockerisedServiceController, ServiceType, DockerisedServiceType
 from useintest.services.models import DockerisedService, Service
 
 DockerControllerType = TypeVar("DockerControllerType", bound=DockerisedServiceController)
@@ -12,7 +12,7 @@ class ServiceControllerTypeBuilder(metaclass=ABCMeta):
     Builder for controllers with particular setups (e.g. repositories and tags).
     """
     def __init__(self, name: str, *args, superclass: Type[DockerControllerType],
-                 service_model: Type[ServiceModel]=Service, **kwargs):
+                 service_model: Type[ServiceType]=Service, **kwargs):
         """
         Constructor.
         :param name: name of the type that is to be created
@@ -48,5 +48,5 @@ class DockerisedServiceControllerTypeBuilder(ServiceControllerTypeBuilder):
     Builder for Docker controllers with particular setups (e.g. repositories and tags).
     """
     def __init__(self, name: str, *args, superclass: Type[DockerisedServiceController]=DockerisedServiceController,
-                 **kwargs):
-        super().__init__(name, *args, superclass=superclass, service_model=DockerisedService, **kwargs)
+                 service_model: Type[DockerisedServiceType]=DockerisedService, **kwargs):
+        super().__init__(name, *args, superclass=superclass, service_model=service_model, **kwargs)

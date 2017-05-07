@@ -16,4 +16,3 @@ def reduce_whitespace(string: str) -> str:
     for line in string.split("\n"):
         stripped.append(line.replace(_TAB_AS_SPACES, "", leading_tabs))
     return "\n".join(stripped)
-

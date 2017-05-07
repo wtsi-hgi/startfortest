@@ -1,26 +1,21 @@
 from useintest.services._builders import DockerisedServiceControllerTypeBuilder
 
-_repository = "mongo"
-_ports = [27017]
-_start_detector = lambda log_line: "waiting for connections on port" in log_line
-_persistent_error_detector = lambda log_line: "error creating journal dir" in log_line
-
-_common_setup = {
-    "repository": _repository,
-    "start_detector": _start_detector,
-    "persistent_error_detector": _persistent_error_detector,
-    "ports": _ports
+common_setup = {
+    "repository": "mongo",
+    "start_detector": lambda log_line: "waiting for connections on port" in log_line,
+    "persistent_error_detector": lambda log_line: "error creating journal dir" in log_line,
+    "ports": [27017]
 }
 
 Mongo3DockerisedServiceController = DockerisedServiceControllerTypeBuilder(
     name="Mongo3DockerController",
     tag="3",
-    **_common_setup).build()   # type: type
+    **common_setup).build()   # type: type
 
 MongoLatestDockerisedServiceController = DockerisedServiceControllerTypeBuilder(
     name="MongoLatestDockerController",
     tag="latest",
-    **_common_setup).build()   # type: type
+    **common_setup).build()   # type: type
 
 
 Mongo3ServiceController = Mongo3DockerisedServiceController

@@ -58,4 +58,3 @@ def get_all_path_like_arguments_for_mounting(arguments: List[Any], allow_relativ
         if argument.startswith(os.path.sep):
             mounts.add(os.path.dirname(argument))
     return mounts
-

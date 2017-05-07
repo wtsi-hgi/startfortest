@@ -12,19 +12,20 @@ from hgicommon.helpers import create_random_string, get_open_port
 from useintest._docker_helpers import is_docker_container_running
 from useintest.services.exceptions import ServiceStartException, TransientServiceStartException, \
     PersistentServiceStartException
-from useintest.services.models import Service, DockerisedService
+from useintest.services.models import Service, DockerisedService, DockerisedServiceWithUsers
 
 _logger = logging.getLogger(__name__)
 
-ServiceModel = TypeVar("ServiceModel", bound=Service)
-DockerisedServiceModel = TypeVar("DockerisedServiceModel", bound=DockerisedService)
+ServiceType = TypeVar("ServiceType", bound=Service)
+DockerisedServiceType = TypeVar("DockerisedServiceType", bound=DockerisedService)
+DockerisedServiceWithUsersType = TypeVar("DockerisedServiceWithUsersType", bound=DockerisedServiceWithUsers)
 
 
-class ServiceController(Generic[ServiceModel], metaclass=ABCMeta):
+class ServiceController(Generic[ServiceType], metaclass=ABCMeta):
     """
     Service controller.
     """
-    def __init__(self, service_model: Type[ServiceModel]):
+    def __init__(self, service_model: Type[ServiceType]):
         """
         Constructor.
         :param service_model: the type of model for the service this controller handles
@@ -33,7 +34,7 @@ class ServiceController(Generic[ServiceModel], metaclass=ABCMeta):
         self._service_model = service_model
 
     @abstractmethod
-    def start_service(self) -> ServiceModel:
+    def start_service(self) -> ServiceType:
         """
         Starts a service.
         :raises ServiceStartException: service could not be started (see logs for more information)
@@ -41,14 +42,14 @@ class ServiceController(Generic[ServiceModel], metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def stop_service(self, service: ServiceModel):
+    def stop_service(self, service: ServiceType):
         """
         Stops the given service.
         :param service: model of the service to stop
         """
 
 
-class ContainerisedServiceController(ServiceController[ServiceModel], metaclass=ABCMeta):
+class ContainerisedServiceController(Generic[ServiceType], ServiceController[ServiceType], metaclass=ABCMeta):
     """
     Controller of containers running a service brought up for testing.
     """
@@ -75,7 +76,7 @@ class ContainerisedServiceController(ServiceController[ServiceModel], metaclass=
         :return: `True` if the service has started successfully
         """
 
-    def __init__(self, service_model: Type[ServiceModel], start_timeout: float=math.inf, start_tries: int=10,
+    def __init__(self, service_model: Type[ServiceType], start_timeout: float=math.inf, start_tries: int=10,
                  stop_on_exit: bool=True):
         """
         Constructor.
@@ -90,7 +91,7 @@ class ContainerisedServiceController(ServiceController[ServiceModel], metaclass=
         self.start_tries = start_tries
         self.stop_on_exit = stop_on_exit
 
-    def start_service(self) -> ServiceModel:
+    def start_service(self) -> ServiceType:
         service = self._service_model()
         if self.stop_on_exit:
             atexit.register(self.stop_service, service)
@@ -118,11 +119,12 @@ class ContainerisedServiceController(ServiceController[ServiceModel], metaclass=
         assert service is not None
         return service
 
-    def stop_service(self, service: ServiceModel):
+    def stop_service(self, service: ServiceType):
         self._stop(service)
 
 
-class DockerisedServiceController(ContainerisedServiceController[ServiceModel], metaclass=ABCMeta):
+class DockerisedServiceController(
+    Generic[DockerisedServiceType], ContainerisedServiceController[DockerisedServiceType], metaclass=ABCMeta):
     """
     Controller of Docker containers running a service brought up for testing.
     """
@@ -137,7 +139,7 @@ class DockerisedServiceController(ContainerisedServiceController[ServiceModel], 
         identifiers = create_client().images("%s:%s" % (repository, tag), quiet=True)
         return identifiers[0] if len(identifiers) > 0 else None
 
-    def __init__(self, service_model: Type[ServiceModel], repository: str, tag: str, ports: List[int],
+    def __init__(self, service_model: Type[ServiceType], repository: str, tag: str, ports: List[int],
                  start_detector: Callable[[str], bool],
                  persistent_error_detector: Callable[[str], bool]=None,
                  transient_error_detector: Callable[[str], bool]=None,
@@ -164,7 +166,7 @@ class DockerisedServiceController(ContainerisedServiceController[ServiceModel], 
         self.persistent_error_detector = persistent_error_detector
         self.transient_error_detector = transient_error_detector
         self.run_settings = additional_run_settings if additional_run_settings is not None else {}
-        self._log_iterator = dict()     # type: Dict[Service, Iterator]
+        self._log_iterator: Dict[Service, Iterator] = dict()
 
     def _start(self, service: DockerisedService):
         _docker_client = create_client()

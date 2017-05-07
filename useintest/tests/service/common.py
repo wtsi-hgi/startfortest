@@ -1,5 +1,5 @@
 from abc import ABCMeta
-from typing import Set
+from typing import Set, Generic
 from unittest import TestCase
 
 from hgicommon.docker.client import create_client
@@ -9,7 +9,8 @@ from useintest.services.models import DockerisedService, Service
 
 
 # TODO: These need sorting out - why is there 2 classes here?
-class TestServiceControllerSubclass(TestUsingType[TypeUsedInTest], TestCase, metaclass=ABCMeta):
+class TestServiceControllerSubclass(
+    Generic[TypeUsedInTest], TestUsingType[TypeUsedInTest], TestCase, metaclass=ABCMeta):
     """
     TODO
     """
@@ -28,7 +29,8 @@ class TestServiceControllerSubclass(TestUsingType[TypeUsedInTest], TestCase, met
         return service
 
 
-class TestDockerisedServiceControllerSubclass(TestServiceControllerSubclass[TypeUsedInTest], metaclass=ABCMeta):
+class TestDockerisedServiceControllerSubclass(
+    Generic[TypeUsedInTest], TestServiceControllerSubclass[TypeUsedInTest], metaclass=ABCMeta):
     """
     Superclass for `DockerisedServiceController` tests.
     """

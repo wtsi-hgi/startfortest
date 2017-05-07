@@ -1,30 +1,30 @@
 from abc import ABCMeta
 
-from useintest.models import DockerisedServiceWithUsers, User
+from useintest.services.models import User, DockerisedServiceWithUsers
 from useintest.services._builders import DockerisedServiceControllerTypeBuilder
-from useintest.services.controllers import DockerisedServiceController, ServiceModel
+from useintest.services.controllers import DockerisedServiceController, ServiceType
 
-_ROOT_USERNAME = "root"
-_ROOT_PASSWORD = "gitlab123"
+ROOT_USERNAME = "root"
+ROOT_PASSWORD = "gitlab123"
 
 _repository = "gitlab/gitlab-ce"
 _ports = [80, 433, 22]
 _start_detector = lambda log_line: "==> /var/log/gitlab/redis/current <==" in log_line
 _persistent_error_detector = lambda log_line: "o space left on device" in log_line
-_environment_variables = {"GITLAB_ROOT_PASSWORD": _ROOT_PASSWORD}
+_environment_variables = {"GITLAB_ROOT_PASSWORD": ROOT_PASSWORD}
 
 
-class GitLabBaseServiceController(DockerisedServiceController[ServiceModel], metaclass=ABCMeta):
+class GitLabBaseServiceController(DockerisedServiceController[ServiceType], metaclass=ABCMeta):
     """
     Base class for GitLab service controllers.
     """
     def start_service(self) -> DockerisedServiceWithUsers:
         service = super().start_service()
-        service.root_user = User(_ROOT_USERNAME, _ROOT_PASSWORD)
+        service.root_user = User(ROOT_USERNAME, ROOT_PASSWORD)
         return service
 
 
-_common_setup = {
+common_setup = {
     "superclass": GitLabBaseServiceController,
     "repository": _repository,
     "start_detector": _start_detector,
@@ -36,17 +36,17 @@ _common_setup = {
 GitLab8_10_4_ce_0ServiceController = DockerisedServiceControllerTypeBuilder(
     name="GitLab8_10_4_ce_0ServiceController",
     tag="8.10.4-ce.0",
-    **_common_setup).build()
+    **common_setup).build()
 
 GitLab8_13_11_ce_0ServiceController = DockerisedServiceControllerTypeBuilder(
     name="GitLab8_13_11_ce_0ServiceController",
     tag="8.13.11-ce.0",
-    **_common_setup).build()
+    **common_setup).build()
 
 GitLab8_16_6_ce_0ServiceController = DockerisedServiceControllerTypeBuilder(
     name="GitLab8_16_6_ce_0ServiceController",
     tag="8.16.6-ce.0",
-    **_common_setup).build()
+    **common_setup).build()
 
 
 GitLabServiceController = GitLab8_16_6_ce_0ServiceController
