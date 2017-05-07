@@ -12,7 +12,7 @@ from useintest.services.models import User, DockerisedServiceWithUsers
 from useintest.services._builders import DockerisedServiceControllerTypeBuilder
 from useintest.services.controllers import DockerisedServiceController, DockerisedServiceWithUsersType
 
-_CONFIGURATION_HOST_LOCATION = os.path.join(os.path.dirname(os.path.abspath(__file__)), "resources/data")
+_CONFIGURATION_HOST_LOCATION = os.path.join(os.path.dirname(os.path.abspath(__file__)), "_resources/data")
 _CONFIGURATION_DOCKER_LOCATION = PurePosixPath("/data")
 
 _ROOT_USERNAME = "root"
@@ -51,7 +51,7 @@ class GogsBaseServiceController(Generic[DockerisedServiceWithUsersType],
         return service
 
 # Employing hacky way of getting run sleeping forever with the detector
-_common_setup = {
+common_setup = {
     "superclass": GogsBaseServiceController,
     "service_model": DockerisedServiceWithUsers,
     "repository": "gogs/gogs",
@@ -64,7 +64,7 @@ _common_setup = {
 Gogs0_11_4ServiceController = DockerisedServiceControllerTypeBuilder(
     name="Gogs0_11_4ServiceController",
     tag="0.11.4",
-    **_common_setup).build()
+    **common_setup).build()
 
 GogsServiceController = Gogs0_11_4ServiceController
 
