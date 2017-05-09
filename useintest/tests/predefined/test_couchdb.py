@@ -5,7 +5,7 @@ from couchdb import Server
 
 from hgicommon.testing import TypeUsedInTest, create_tests, get_classes_to_test
 from useintest.predefined.couchdb import couchdb_service_controllers, CouchDBServiceController
-from useintest.tests.service.common import TestDockerisedServiceControllerSubclass
+from useintest.tests.services.common import TestDockerisedServiceControllerSubclass
 
 
 class _TestCouchDBDockerisedServiceController(TestDockerisedServiceControllerSubclass[TypeUsedInTest], metaclass=ABCMeta):

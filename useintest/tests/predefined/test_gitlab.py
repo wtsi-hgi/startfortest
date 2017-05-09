@@ -6,7 +6,7 @@ import requests
 
 from hgicommon.testing import TypeUsedInTest, create_tests, get_classes_to_test
 from useintest.predefined.gitlab import GitLabServiceController, gitlab_service_controllers
-from useintest.tests.service.common import TestServiceControllerSubclass
+from useintest.tests.services.common import TestServiceControllerSubclass
 
 
 class _TestGitLabBaseServiceController(TestServiceControllerSubclass[TypeUsedInTest], metaclass=ABCMeta):

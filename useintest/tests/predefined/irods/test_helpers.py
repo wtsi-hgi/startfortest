@@ -7,7 +7,7 @@ from useintest.predefined.irods.setup_irods import setup_irods
 from useintest.predefined.irods.helpers import IrodsSetupHelper, AccessLevel
 from useintest.predefined.irods.models import Metadata, IrodsUser
 from useintest.predefined.irods.services import IrodsServiceController, irods_service_controllers
-from useintest.tests.service.common import TestServiceControllerSubclass
+from useintest.tests.services.common import TestServiceControllerSubclass
 
 _METADATA = Metadata({
     "attribute_1": ["value_1", "value_2"],
