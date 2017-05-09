@@ -1,4 +1,3 @@
-import logging
 import unittest
 from abc import ABCMeta
 
@@ -6,12 +5,14 @@ from gogs_client import UsernamePassword, GogsApi
 from hgicommon.testing import TypeUsedInTest, create_tests, get_classes_to_test
 
 from useintest.predefined.gogs.gogs import gogs_service_controllers, GogsServiceController
-from useintest.tests.service.common import TestServiceControllerSubclass
+from useintest.services.models import DockerisedServiceWithUsers
+from useintest.tests.services.common import TestServiceControllerSubclass
 
 _REPO_NAME = "test"
 
 
-class _TestGogsBaseServiceController(TestServiceControllerSubclass[TypeUsedInTest], metaclass=ABCMeta):
+class _TestGogsBaseServiceController(
+    TestServiceControllerSubclass[TypeUsedInTest, DockerisedServiceWithUsers], metaclass=ABCMeta):
     """
     Tests for `GogsBaseServiceController`.
     """

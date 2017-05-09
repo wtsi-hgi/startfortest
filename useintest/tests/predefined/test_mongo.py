@@ -6,10 +6,12 @@ from pymongo import MongoClient
 from hgicommon.testing import create_tests, TypeUsedInTest, get_classes_to_test
 from useintest.predefined.mongo import Mongo3DockerisedServiceController, MongoLatestDockerisedServiceController, \
     MongoServiceController, mongo_service_controllers
+from useintest.services.models import DockerisedServiceWithUsers
 from useintest.tests.services.common import TestDockerisedServiceControllerSubclass
 
 
-class _TestMongoDockerisedServiceController(TestDockerisedServiceControllerSubclass[TypeUsedInTest], metaclass=ABCMeta):
+class _TestMongoDockerisedServiceController(
+    TestDockerisedServiceControllerSubclass[TypeUsedInTest, DockerisedServiceWithUsers], metaclass=ABCMeta):
     """
     Tests for Mongo service controllers.
     """
