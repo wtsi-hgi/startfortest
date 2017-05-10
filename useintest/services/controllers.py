@@ -193,11 +193,7 @@ class DockerisedServiceController(
             try:
                 create_client().kill(service.container)
             except Exception as e:
-                ignore = False
-                if isinstance(e, APIError):
-                    ignore = "is not running" in str(e.explanation)
-                if not ignore:
-                    raise e
+                _logger.warning(e)
 
     def _wait_until_started(self, service: DockerisedService) -> bool:
         _docker_client = create_client()
