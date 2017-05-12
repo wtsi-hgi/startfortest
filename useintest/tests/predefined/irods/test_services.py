@@ -5,10 +5,12 @@ from hgicommon.testing import TypeUsedInTest, create_tests, get_classes_to_test
 from useintest.predefined.irods.setup_irods import setup_irods
 from useintest.predefined.irods.helpers import IrodsSetupHelper
 from useintest.predefined.irods.services import irods_service_controllers, IrodsServiceController
+from useintest.services.models import DockerisedServiceWithUsers
 from useintest.tests.services.common import TestDockerisedServiceControllerSubclass
 
 
-class _TestIrodsServiceController(TestDockerisedServiceControllerSubclass[TypeUsedInTest], metaclass=ABCMeta):
+class _TestIrodsServiceController(
+    TestDockerisedServiceControllerSubclass[TypeUsedInTest, DockerisedServiceWithUsers], metaclass=ABCMeta):
     """
     Tests for iRODS controller.
     """

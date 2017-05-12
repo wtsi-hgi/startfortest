@@ -4,7 +4,7 @@
 `useintest.predefined.mongo`
 
 ### Contents
-* `MongoServiceController`: Latest version of Mongo available.
+* `MongoServiceController`: Latest supported version of Mongo available.
 * `Mongo3ServiceController`: Mongo version 3.
 
 ### Examples
@@ -45,14 +45,14 @@ controller.stop_service(service)
 
 ### Contents
 #### Services (i.e. the iRODS server)
-* `IrodsServiceController`: Latest version of iRODS available.  
+* `IrodsServiceController`: Latest supported version of iRODS available.
 * `Irods4_1_10ServiceController`: iRODS version 4.1.10.
 * `Irods4_1_9ServiceController`: iRODS version 4.1.9.
 * `Irods4_1_8ServiceController`: iRODS version 4.1.8.
 * `Irods3_3_1ServiceController`: iRODS version 3.3.1.
 
 #### Executables (i.e. the icommands)
-* `IrodsExecutablesController`: Latest version of iRODS available.  
+* `IrodsExecutablesController`: Latest supported version of iRODS available.
 * `Irods4_1_10ExecutablesController`: iRODS version 4.1.10.
 * `Irods4_1_9ExecutablesController`: iRODS version 4.1.9.
 * `Irods4_1_8ExecutablesController`: iRODS version 4.1.8.
@@ -130,7 +130,7 @@ setup_helper = IrodsSetupHelper(icommands_location)
 `useintest.predefined.samtools`
 
 ### Contents
-* `SamtoolsExecutablesController`: Latest version of samtools available.
+* `SamtoolsExecutablesController`: Latest supported version of samtools available.
 * `Samtools1_3_1ExecutablesController`: Samtools version 1.3.1 (using htslib 1.3.1).
 
 ### Examples
@@ -159,19 +159,38 @@ container - the result would not be pretty.
 `useintest.predefined.gitlab`
 
 ### Contents
-* `GitLabServiceController`: Latest version of GitLab available.
+* `GitLabServiceController`: Latest supported version of GitLab available.
 * `GitLab8_16_6_ce_0ServiceController`: GitLab 8.16.6-ce.0.
 * `GitLab8_13_11_ce_0ServiceController`: GitLab 8.13.11-ce.0.
 * `GitLab8_10_4_ce_0ServiceController`: GitLab 8.10.4-ce.0.
 
 ### Examples
-To use containerised Samtools executable in a test:
+To use containerised GitLab in a test:
 ```python
 from useintest.predefined.gitlab import GitLabServiceController
-from useintest.models import DockerisedServiceWithUsers
 
 controller = GitLabServiceController()
-service: DockerisedServiceWithUsers = controller.start_service()        
+service = controller.start_service()
+run_my_test(my_application, service.host, service.port, service.root_user.username, service.root_user.password)
+controller.stop_service(service)
+```
+
+
+## Gogs
+### Module
+`useintest.predefined.gogs`
+
+### Contents
+* `GogsServiceController`: Latest supported version of Gogs.
+* `Gogs0_11_4ServiceController`: Gogs 0.11.4.
+
+### Examples
+To use containerised Gogs in a test:
+```python
+from useintest.predefined.gogs import GogsServiceController
+
+controller = GogsServiceController()
+service = controller.start_service()
 run_my_test(my_application, service.host, service.port, service.root_user.username, service.root_user.password)
 controller.stop_service(service)
 ```

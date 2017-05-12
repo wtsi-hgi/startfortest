@@ -1,5 +1,5 @@
 from abc import ABCMeta
-from typing import Set, Generic
+from typing import Set, Generic, TypeVar
 from unittest import TestCase
 
 from hgicommon.docker.client import create_client
@@ -7,15 +7,18 @@ from hgicommon.testing import TestUsingType, TypeUsedInTest
 from useintest._docker_helpers import is_docker_container_running
 from useintest.services.models import DockerisedService, Service
 
+ServiceType = TypeVar("ServiceType", bound=Service)
+
 
 # TODO: These need sorting out - why is there 2 classes here?
 class TestServiceControllerSubclass(
-    Generic[TypeUsedInTest], TestUsingType[TypeUsedInTest], TestCase, metaclass=ABCMeta):
+    Generic[TypeUsedInTest, ServiceType], TestUsingType[TypeUsedInTest], TestCase, metaclass=ABCMeta):
     """
     TODO
     """
     def setUp(self):
-        self._started = set()   # type: Set[Service]
+        super().setUp()
+        self._started: Set[ServiceType] = set()
         self._docker_client = create_client()
         self.service_controller = type(self).get_type_to_test()()
 
@@ -23,14 +26,14 @@ class TestServiceControllerSubclass(
         for service in self._started:
             self.service_controller.stop_service(service)
 
-    def _start_service(self) -> Service:
+    def _start_service(self) -> ServiceType:
         service = self.service_controller.start_service()
         self._started.add(service)
         return service
 
 
 class TestDockerisedServiceControllerSubclass(
-    Generic[TypeUsedInTest], TestServiceControllerSubclass[TypeUsedInTest], metaclass=ABCMeta):
+    Generic[TypeUsedInTest, ServiceType], TestServiceControllerSubclass[TypeUsedInTest, ServiceType], metaclass=ABCMeta):
     """
     Superclass for `DockerisedServiceController` tests.
     """

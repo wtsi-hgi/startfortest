@@ -7,6 +7,7 @@ from useintest.predefined.irods.setup_irods import setup_irods
 from useintest.predefined.irods.helpers import IrodsSetupHelper, AccessLevel
 from useintest.predefined.irods.models import Metadata, IrodsUser
 from useintest.predefined.irods.services import IrodsServiceController, irods_service_controllers
+from useintest.services.models import DockerisedServiceWithUsers
 from useintest.tests.services.common import TestServiceControllerSubclass
 
 _METADATA = Metadata({
@@ -17,7 +18,8 @@ _METADATA = Metadata({
 _DATA_OBJECT_NAME = "data-object-name"
 
 
-class _TestIrodsSetupHelper(TestServiceControllerSubclass[TypeUsedInTest], metaclass=ABCMeta):
+class _TestIrodsSetupHelper(
+    TestServiceControllerSubclass[TypeUsedInTest, DockerisedServiceWithUsers], metaclass=ABCMeta):
     """
     Tests for `IrodsSetupHelper`.
     """
