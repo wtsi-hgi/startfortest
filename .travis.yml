@@ -12,7 +12,7 @@ services:
   - docker
 
 before_install:
-  - sudo apt-get update && sudo apt-get --only-upgrade install docker-engine
+  - sudo apt-get update && sudo apt-get --only-upgrade install docker-ce
   - pip install codecov
 
 install:
