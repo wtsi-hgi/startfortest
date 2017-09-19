@@ -23,7 +23,7 @@ class _TestGogsBaseServiceController(
         gogs_connection = GogsApi(f"http://{service.host}:{service.ports[3000]}")
         gogs_connection.create_repo(authentication, _REPO_NAME)
 
-        self.assertEquals(f"{authentication.username}/{_REPO_NAME}",
+        self.assertEqual(f"{authentication.username}/{_REPO_NAME}",
                           gogs_connection.get_repo(authentication, authentication.username, _REPO_NAME).full_name)
 
 
