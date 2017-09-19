@@ -171,7 +171,7 @@ from useintest.predefined.gitlab import GitLabServiceController
 
 controller = GitLabServiceController()
 service = controller.start_service()
-run_my_test(my_application, service.host, service.port, service.root_user.username, service.root_user.password)
+run_my_test(my_application, service.host, service.ports[80], service.root_user.username, service.root_user.password)
 controller.stop_service(service)
 ```
 
