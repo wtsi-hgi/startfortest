@@ -1,5 +1,5 @@
 # Change Log
-## [3.X.X - Unreleased]
+## [3.0.0 - 2017-09-19]
 ### Added
 - Predefined support for GitLab.
 - Predefined support for Gogs.
@@ -15,6 +15,7 @@
 - Allows quicker testing with latest versions of controllers only.
 - Re-branded from `startfortest` to `useintest`.
 - Moved documentation to ReadTheDocs.
+
 
 ## 1.0.0 - 2016-11-23
 ### Added
