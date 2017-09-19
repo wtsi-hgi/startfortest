@@ -1,4 +1,9 @@
 # Change Log
+## [Unreleased]
+### Added
+- SSH key helper for GitLab.
+
+
 ## [3.0.0 - 2017-09-19]
 ### Added
 - Predefined support for GitLab.
