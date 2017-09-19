@@ -22,12 +22,12 @@ class SshKey:
     Wrapper to help use an SSH key.
     """
     @property
-    def private_key(self) -> str:
+    def private_key(self) -> bytes:
         return self._key.exportKey()
 
     @property
-    def public_key(self) -> str:
-        return self._key.publickey()
+    def public_key(self) -> bytes:
+        return self._key.publickey().exportKey()
 
     @property
     def private_key_file(self) -> str:
@@ -53,7 +53,7 @@ class SshKey:
         }
 
     def __enter__(self):
-        pass
+        return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.tear_down()
@@ -71,7 +71,7 @@ class SshKey:
                     except OSError:
                         pass
 
-    def _lazy_get(self, key_type: _KeyType, data_source: Callable[[], str]) -> str:
+    def _lazy_get(self, key_type: _KeyType, data_source: Callable[[], bytes]) -> str:
         """
         Lazily gets the value associated to the given key type, generating it from the given data source and saving it
         to the value cache if it has not been set.
@@ -82,8 +82,8 @@ class SshKey:
         if self._value_cache[key_type] is None:
             with self._locks[key_type]:
                 if self._value_cache[key_type] is None:
-                    temp_file = NamedTemporaryFile()
-                    with open(temp_file, "w") as file:
+                    temp_file = NamedTemporaryFile().name
+                    with open(temp_file, "wb") as file:
                         file.write(data_source())
                     self._value_cache[key_type] = temp_file
         return self._value_cache[key_type]
