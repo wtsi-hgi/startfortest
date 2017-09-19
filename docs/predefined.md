@@ -177,14 +177,14 @@ controller.stop_service(service)
 
 #### Helpers
 - `SshKey`: class to generate temporary files containing private/public SSH keys, which can be used with GitLab.
-  ```python
-  from useintest.predefined.gitlab import SshKey
-  
-  with SshKey() as ssh_key:
-     add_ssh_key(user, public_key_file=ssh_key.public_key_file)
-     push_things(gitlab_url, private_key_file=ssh_key.private_key_file)
-  # The temp files containg the public and private keys have been removed 
-  ```
+```python
+from useintest.predefined.gitlab import SshKey
+
+with SshKey() as ssh_key:
+    add_ssh_key(user, public_key_file=ssh_key.public_key_file)
+    push_things(gitlab_url, private_key_file=ssh_key.private_key_file)
+# The temp files containg the public and private keys have been removed 
+```
    
 
 ## Gogs
