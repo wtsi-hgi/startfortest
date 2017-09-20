@@ -2,13 +2,13 @@ import atexit
 import logging
 import math
 from abc import ABCMeta, abstractmethod
-from typing import Dict, Iterator, Optional, List, Callable, TypeVar, Generic, Type
-
-from docker.errors import APIError
-from stopit import ThreadingTimeout, TimeoutException
+from inspect import signature
 
 from hgicommon.docker.client import create_client
 from hgicommon.helpers import create_random_string, get_open_port
+from stopit import ThreadingTimeout, TimeoutException
+from typing import Dict, Iterator, Optional, List, Callable, TypeVar, Generic, Type
+
 from useintest._docker_helpers import is_docker_container_running
 from useintest.services.exceptions import ServiceStartException, TransientServiceStartException, \
     PersistentServiceStartException
@@ -168,7 +168,7 @@ class DockerisedServiceController(
         self.run_settings = additional_run_settings if additional_run_settings is not None else {}
         self._log_iterator: Dict[Service, Iterator] = dict()
 
-    def _start(self, service: DockerisedService):
+    def _start(self, service: DockerisedServiceType):
         _docker_client = create_client()
 
         if self._get_docker_image(self.repository, self.tag) is None:
@@ -186,7 +186,7 @@ class DockerisedServiceController(
 
         _docker_client.start(service.container)
 
-    def _stop(self, service: DockerisedService):
+    def _stop(self, service: DockerisedServiceType):
         if service in self._log_iterator:
             del self._log_iterator[service]
         if service.container:
@@ -195,19 +195,37 @@ class DockerisedServiceController(
             except Exception as e:
                 _logger.warning(e)
 
-    def _wait_until_started(self, service: DockerisedService) -> bool:
+    def _wait_until_started(self, service: DockerisedServiceType) -> bool:
         _docker_client = create_client()
         for line in _docker_client.logs(service.container, stream=True):
             line = str(line)
             logging.debug(line)
 
-            if self.persistent_error_detector is not None and self.persistent_error_detector(line):
+            if self.persistent_error_detector is not None \
+                    and self._call_detector_with_correct_arguments(self.persistent_error_detector, line, service):
                 raise PersistentServiceStartException(line)
-            elif self.transient_error_detector is not None and self.transient_error_detector(line):
+            elif self.transient_error_detector is not None \
+                    and self._call_detector_with_correct_arguments(self.transient_error_detector, line, service):
                 raise TransientServiceStartException(line)
-            elif self.start_detector(line):
+            elif self._call_detector_with_correct_arguments(self.start_detector, line, service):
                 return True
 
         assert not is_docker_container_running(service)
         raise TransientServiceStartException("No error detected in logs but the container has stopped. Log dump: %s"
                                              % _docker_client.logs(service.container))
+
+    def _call_detector_with_correct_arguments(self, detector: Callable, line: str, service: DockerisedServiceType) \
+            -> bool:
+        """
+        Calls the given detector with either line as the only argument or both line and service, depending on the
+        detector's signature.
+        :param detector: the detector to call
+        :param line: the log line to give to the detector
+        :param service: the service being started
+        :return: the detector's return value
+        """
+        number_of_parameters = len(signature(detector).parameters)
+        if number_of_parameters == 1:
+            return detector(line)
+        else:
+            return detector(line, service)
