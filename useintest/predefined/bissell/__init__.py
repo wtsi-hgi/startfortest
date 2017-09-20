@@ -1,2 +1,1 @@
-from useintest.predefined.bissell.bissell import LatestBissellDockerisedServiceController , BissellServiceController, \
-    bissell_service_controllers
+from useintest.predefined.bissell.bissell import BissellServiceController, bissell_service_controllers

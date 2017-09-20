@@ -205,3 +205,25 @@ service = controller.start_service()
 run_my_test(my_application, service.host, service.port, service.root_user.username, service.root_user.password)
 controller.stop_service(service)
 ```
+
+
+## Bissell
+_[Dummy iRobot server for client testing](https://github.com/wtsi-hgi/bissell)._
+
+### Module
+`useintest.predefined.bissel`
+
+### Contents
+* `BissellServiceController`: Latest supported version of Bissell.
+
+### Examples
+To use containerised Bissell in a test:
+```python
+from useintest.predefined.bissell import BissellServiceController
+import requests
+
+controller = BissellServiceController()
+service = controller.start_service()
+response = requests.head(f"http://{service.host}:{service.port}")
+controller.stop_service(service)
+```
