@@ -3,9 +3,10 @@ from tempfile import NamedTemporaryFile
 from threading import Lock
 
 import os
-from typing import Callable, Optional, Dict
 
-from Crypto.PublicKey import RSA
+from Cryptodome.PublicKey import RSA
+from typing import Callable, Dict
+
 
 _UTF8_ENCODING = "utf-8"
 
@@ -29,7 +30,7 @@ class SshKey:
 
     @property
     def public_key(self) -> str:
-        return self.lazy_get_value(_KeyType.PUBLIC, lambda: self._key.publickey().exportKey().decode(_UTF8_ENCODING))
+        return self.lazy_get_value(_KeyType.PUBLIC, lambda: self._key.publickey().exportKey("OpenSSH").decode(_UTF8_ENCODING))
 
     @property
     def private_key_file(self) -> str:
