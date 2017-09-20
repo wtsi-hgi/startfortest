@@ -25,19 +25,19 @@ class SshKey:
     """
     @property
     def private_key(self) -> str:
-        return self._key.exportKey().decode(_UTF8_ENCODING)
+        return self.lazy_get_value(_KeyType.PRIVATE, lambda: self._key.exportKey().decode(_UTF8_ENCODING))
 
     @property
     def public_key(self) -> str:
-        return self._key.publickey().exportKey().decode(_UTF8_ENCODING)
+        return self.lazy_get_value(_KeyType.PUBLIC, lambda: self._key.publickey().exportKey().decode(_UTF8_ENCODING))
 
     @property
     def private_key_file(self) -> str:
-        return self._lazy_get(_KeyType.PRIVATE, lambda: self.private_key)
+        return self._lazy_get_file(_KeyType.PRIVATE, lambda: self.private_key)
 
     @property
     def public_key_file(self) -> str:
-        return self._lazy_get(_KeyType.PUBLIC, lambda: self.public_key)
+        return self._lazy_get_file(_KeyType.PUBLIC, lambda: self.public_key)
 
     def __init__(self, key_length: int=2048):
         """
@@ -45,13 +45,11 @@ class SshKey:
         :param key_length: length of the RSA key to generate.
         """
         self._key = RSA.generate(key_length)
+        self._values: Dict[_KeyType, str] = {}
+        self._file_locations: Dict[_KeyType: str] = {}
         self._locks = {
             _KeyType.PRIVATE: Lock(),
             _KeyType.PUBLIC: Lock()
-        }
-        self._value_cache: Dict[Optional[str]] = {
-            _KeyType.PRIVATE: None,
-            _KeyType.PUBLIC: None
         }
 
     def __enter__(self):
@@ -66,26 +64,37 @@ class SshKey:
         """
         for key_type, lock in self._locks.items():
             with lock:
-                key_file = self._value_cache[key_type]
-                if key_file is not None:
+                if key_type in self._file_locations:
                     try:
-                        os.remove(key_file)
+                        os.remove(self._file_locations[key_type])
                     except OSError:
                         pass
 
-    def _lazy_get(self, key_type: _KeyType, data_source: Callable[[], str]) -> str:
+    def lazy_get_value(self, key_type: _KeyType, data_source: Callable[[], str]):
         """
-        Lazily gets the value associated to the given key type, generating it from the given data source and saving it
-        to the value cache if it has not been set.
+        Lazily get the value associated to the given key type, generating it from the given data source and saving it to
+        the value cache if it has not been set.
         :param key_type: the type of the key
-        :param data_source: the source to generate the value if not generated
+        :param data_source: the source to generate the value from if not generated
         :return: the value associated to the given key
         """
-        if self._value_cache[key_type] is None:
+        if key_type not in self._values:
+            self._values[key_type] = data_source()
+        return self._values[key_type]
+
+    def _lazy_get_file(self, key_type: _KeyType, data_source: Callable[[], str]) -> str:
+        """
+        Lazily gets the file associated to the given key type, generating it from the given data source and saving it to
+        the file cache if it has not been set.
+        :param key_type: the type of the key
+        :param data_source: the source to generate the file from if not generated
+        :return: the file associated to the given key
+        """
+        if key_type not in self._file_locations:
             with self._locks[key_type]:
-                if self._value_cache[key_type] is None:
+                if key_type not in self._file_locations:
                     temp_file = NamedTemporaryFile().name
                     with open(temp_file, "w") as file:
                         file.write(data_source())
-                    self._value_cache[key_type] = temp_file
-        return self._value_cache[key_type]
+                    self._file_locations[key_type] = temp_file
+        return self._file_locations[key_type]
