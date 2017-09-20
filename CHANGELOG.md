@@ -5,6 +5,7 @@
 - Ability to define detectors that get the model of the service as the second parameter, which they could use to 
 interact with the service directly.
 - Ability to easily override the default, logging based startup monitor via a new `startup_monitor` parameter.
+- Predefined support for [Bissell](https://github.com/wtsi-hgi/bissell).
 
 
 ## [3.0.0 - 2017-09-19]
