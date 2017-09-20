@@ -1,5 +1,5 @@
 # Change Log
-## [Unreleased]
+## [3.1.0 - 2017-09-20]
 ### Added
 - SSH key helper for GitLab.
 - Ability to define detectors that get the model of the service as the second parameter, which they could use to 
