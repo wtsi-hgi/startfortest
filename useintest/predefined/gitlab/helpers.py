@@ -7,6 +7,8 @@ from typing import Callable, Optional, Dict
 
 from Crypto.PublicKey import RSA
 
+_UTF8_ENCODING = "utf-8"
+
 
 @unique
 class _KeyType(Enum):
@@ -22,12 +24,12 @@ class SshKey:
     Wrapper to help use an SSH key.
     """
     @property
-    def private_key(self) -> bytes:
-        return self._key.exportKey()
+    def private_key(self) -> str:
+        return self._key.exportKey().decode(_UTF8_ENCODING)
 
     @property
-    def public_key(self) -> bytes:
-        return self._key.publickey().exportKey()
+    def public_key(self) -> str:
+        return self._key.publickey().exportKey().decode(_UTF8_ENCODING)
 
     @property
     def private_key_file(self) -> str:
@@ -71,7 +73,7 @@ class SshKey:
                     except OSError:
                         pass
 
-    def _lazy_get(self, key_type: _KeyType, data_source: Callable[[], bytes]) -> str:
+    def _lazy_get(self, key_type: _KeyType, data_source: Callable[[], str]) -> str:
         """
         Lazily gets the value associated to the given key type, generating it from the given data source and saving it
         to the value cache if it has not been set.
@@ -83,7 +85,7 @@ class SshKey:
             with self._locks[key_type]:
                 if self._value_cache[key_type] is None:
                     temp_file = NamedTemporaryFile().name
-                    with open(temp_file, "wb") as file:
+                    with open(temp_file, "w") as file:
                         file.write(data_source())
                     self._value_cache[key_type] = temp_file
         return self._value_cache[key_type]

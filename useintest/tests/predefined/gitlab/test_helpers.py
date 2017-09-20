@@ -16,14 +16,14 @@ class TestSshKey(unittest.TestCase):
     def test_private_key_file(self):
         with SshKey() as ssh_key:
             location = ssh_key.private_key_file
-            with open(location, "rb") as file:
+            with open(location, "r") as file:
                 self.assertEqual(ssh_key.private_key, file.read())
         self.assertFalse(os.path.exists(location))
 
     def test_public_key_file(self):
         with SshKey() as ssh_key:
             location = ssh_key.public_key_file
-            with open(location, "rb") as file:
+            with open(location, "r") as file:
                 self.assertEqual(ssh_key.public_key, file.read())
         self.assertFalse(os.path.exists(location))
 
