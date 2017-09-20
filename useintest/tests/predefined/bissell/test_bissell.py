@@ -3,7 +3,7 @@ import requests
 from abc import ABCMeta
 
 from hgicommon.testing import create_tests, TypeUsedInTest, get_classes_to_test
-from useintest.predefined.bissell import LatestBissellDockerisedServiceController, BissellServiceController, \
+from useintest.predefined.bissell.bissell import LatestBissellDockerisedServiceController, BissellServiceController, \
     bissell_service_controllers
 from useintest.services.models import DockerisedServiceWithUsers
 from useintest.tests.services.common import TestDockerisedServiceControllerSubclass
