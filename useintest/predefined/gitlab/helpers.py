@@ -1,4 +1,5 @@
 from enum import Enum, unique
+from pathlib import Path
 from tempfile import NamedTemporaryFile
 from threading import Lock
 
@@ -95,6 +96,8 @@ class SshKey:
             with self._locks[key_type]:
                 if key_type not in self._file_locations:
                     temp_file = NamedTemporaryFile().name
+                    Path(temp_file).touch()
+                    os.chmod(temp_file, 0o600)
                     with open(temp_file, "w") as file:
                         file.write(data_source())
                     self._file_locations[key_type] = temp_file
