@@ -4,6 +4,7 @@ import math
 from abc import ABCMeta, abstractmethod
 from inspect import signature
 
+from docker.errors import NotFound
 from hgicommon.docker.client import create_client
 from hgicommon.helpers import create_random_string, get_open_port
 from stopit import ThreadingTimeout, TimeoutException
@@ -196,8 +197,8 @@ class DockerisedServiceController(
         if service.container:
             try:
                 create_client().remove_container(service.container, force=True)
-            except Exception as e:
-                _logger.warning(e)
+            except NotFound:
+                pass
 
     def _wait_until_started(self, service: DockerisedServiceType) -> bool:
         if self.startup_monitor is not None:
