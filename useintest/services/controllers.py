@@ -195,7 +195,7 @@ class DockerisedServiceController(
             del self._log_iterator[service]
         if service.container:
             try:
-                create_client().kill(service.container)
+                create_client().remove_container(service.container, force=True)
             except Exception as e:
                 _logger.warning(e)
 
