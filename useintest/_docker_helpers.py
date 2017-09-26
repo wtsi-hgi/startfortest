@@ -1,4 +1,6 @@
+from docker.errors import NotFound
 from hgicommon.docker.client import create_client
+
 from useintest.services.models import DockerisedService
 
 try:
@@ -14,6 +16,7 @@ def is_docker_container_running(service: DockerisedService) -> bool:
     :param service: the service model
     :return: whether the container is running
     """
-    return _docker_client.inspect_container(service.container)["State"]["Status"] == "running"
-
-
+    try:
+        return _docker_client.inspect_container(service.container)["State"]["Status"] == "running"
+    except NotFound:
+        return False
