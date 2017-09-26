@@ -1,5 +1,10 @@
 # Change Log
-## [3.1.0 - 2017-09-20]
+## 3.1.1 - 2017-09-26
+### Changed
+- Removes containers once stopped.
+- No longer gives a warning if the library over-cautiously attempts to stop a stopped container.
+
+## 3.1.0 - 2017-09-20
 ### Added
 - SSH key helper for GitLab.
 - Ability to define detectors that get the model of the service as the second parameter, which they could use to 
@@ -8,7 +13,7 @@ interact with the service directly.
 - Predefined support for [Bissell](https://github.com/wtsi-hgi/bissell).
 
 
-## [3.0.0 - 2017-09-19]
+## 3.0.0 - 2017-09-19
 ### Added
 - Predefined support for GitLab.
 - Predefined support for Gogs.
