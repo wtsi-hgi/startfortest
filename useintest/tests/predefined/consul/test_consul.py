@@ -1,6 +1,5 @@
 import unittest
 from abc import ABCMeta
-from time import sleep
 
 from consul import Consul
 from hgicommon.testing import TypeUsedInTest, create_tests, get_classes_to_test
