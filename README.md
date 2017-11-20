@@ -24,6 +24,7 @@ Out of the box support for:
 - GitLab
 - Gogs
 - Bissell
+- Consul
 
 ## Why Use This Library?
 Software no longer works in isolation; with the trend towards microservices over monoliths, modern day applications 

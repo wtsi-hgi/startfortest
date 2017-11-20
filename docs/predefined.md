@@ -227,3 +227,24 @@ service = controller.start_service()
 response = requests.head(f"http://{service.host}:{service.port}")
 controller.stop_service(service)
 ```
+
+
+## Consul
+### Module
+`useintest.predefined.consul`
+
+### Contents
+* `ConsulServiceController`: Latest supported version of Consul available.
+* `Consul1_0_0ServiceController`: Consul 1.0.0.
+* `Consul0_8_4_ServiceController`: Consul 0.8.4.
+
+### Examples
+To use containerised Consul in a test:
+```python
+from useintest.predefined.consul import ConsulServiceController
+
+controller = ConsulServiceController()
+service = controller.start_service()
+run_my_test(my_application, service.host, service.ports[8500])
+controller.stop_service(service)
+```

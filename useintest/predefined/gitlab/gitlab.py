@@ -48,8 +48,13 @@ GitLab8_16_6_ce_0ServiceController = DockerisedServiceControllerTypeBuilder(
     tag="8.16.6-ce.0",
     **common_setup).build()
 
+GitLab10_0_3_ce_0ServiceController = DockerisedServiceControllerTypeBuilder(
+    name="GitLab10_0_3_ce_0ServiceController",
+    tag="10.0.3-ce.0",
+    **common_setup).build()
 
-GitLabServiceController = GitLab8_16_6_ce_0ServiceController
+
+GitLabServiceController = GitLab10_0_3_ce_0ServiceController
 
 gitlab_service_controllers = {GitLab8_10_4_ce_0ServiceController, GitLab8_13_11_ce_0ServiceController,
-                              GitLab8_16_6_ce_0ServiceController}
+                              GitLab8_16_6_ce_0ServiceController, GitLab10_0_3_ce_0ServiceController}
