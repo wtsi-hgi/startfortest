@@ -1,4 +1,9 @@
 # Change Log
+## 3.2.0 - 2017-11-20
+### Added
+- Pre-defined support for Consul.
+- Configured for PyPi. 
+
 ## 3.1.1 - 2017-09-26
 ### Changed
 - Removes containers once stopped.
@@ -10,13 +15,13 @@
 - Ability to define detectors that get the model of the service as the second parameter, which they could use to 
 interact with the service directly.
 - Ability to easily override the default, logging based startup monitor via a new `startup_monitor` parameter.
-- Predefined support for [Bissell](https://github.com/wtsi-hgi/bissell).
+- Pre-defined support for [Bissell](https://github.com/wtsi-hgi/bissell).
 
 
 ## 3.0.0 - 2017-09-19
 ### Added
-- Predefined support for GitLab.
-- Predefined support for Gogs.
+- Pre-defined support for GitLab.
+- Pre-defined support for Gogs.
 
 ### Changed
 - Moved a number of models from `useintest.models` to `useintest.services.models`.

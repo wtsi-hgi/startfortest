@@ -10,7 +10,7 @@ except ImportError:
 
 setup(
     name="useintest",
-    version="3.1.1",
+    version="3.2.0",
     author="Colin Nolan",
     author_email="colin.nolan@sanger.ac.uk",
     packages=find_packages(exclude=["tests"]),
@@ -22,7 +22,7 @@ setup(
     long_description=read_markdown("README.md"),
     test_suite="useintest.tests",
     classifiers=[
-        "Development Status :: 3 - Alpha",
+        "Development Status :: 3 - Beta",
         "Operating System :: OS Independent",
         "Programming Language :: Python :: 3.6",
         "License :: OSI Approved :: MIT License"
