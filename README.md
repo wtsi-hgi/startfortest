@@ -52,9 +52,8 @@ from useintest.predefined.mongo import MongoServiceController
 
 # Starts a containerised version of Mongo
 controller = MongoServiceController()              
-service = controller.start_service()      
-run_my_tests(my_application, service.host, service.port)
-controller.stop_service(service)
+with controller.start_service() as service:      
+    run_my_tests(my_application, service.host, service.port)
 ```
 
 Use samtools in a container from the host machine via "proxy executables":

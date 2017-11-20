@@ -13,9 +13,8 @@ To use a containerised version of Mongo in a test:
 from useintest.predefined.mongo import MongoServiceController
 
 controller = MongoServiceController()              
-service = controller.start_service()      
-run_my_test(my_application, service.host, service.port)
-controller.stop_service(service)
+with controller.start_service() as service:      
+    run_my_test(my_application, service.host, service.port)
 ```
 
 
@@ -33,9 +32,8 @@ To use a containerised version of Couchdb in a test:
 from useintest.predefined.couchdb import CouchDBServiceController
 
 controller = CouchDBServiceController()              
-service = controller.start_service()      
-run_my_test(my_application, service.host, service.port)
-controller.stop_service(service)
+with controller.start_service() as service:      
+    run_my_test(my_application, service.host, service.port)
 ```
 
 
@@ -82,14 +80,9 @@ Alternatively, to just set up an iRODS service ("iCAT"):
 from useintest.predefined.irods import IrodsServiceController
 
 # Setup iRODS server
-icat_controller = IrodsServiceController()
-service = icat_controller.start_service()
-
-# Use the iRODS server in test
-run_my_test(my_application, service.host, service.port)
-
-# Tear down (should be in try-finally)
-icat_controller.stop_service(service)
+controller = IrodsServiceController()
+with controller.start_service() as service:
+    run_my_test(my_application, service.host, service.port)
 ```
 
 To setup corresponding icommands for an iRODS service:
@@ -170,9 +163,8 @@ To use containerised GitLab in a test:
 from useintest.predefined.gitlab import GitLabServiceController
 
 controller = GitLabServiceController()
-service = controller.start_service()
-run_my_test(my_application, service.host, service.ports[80], service.root_user.username, service.root_user.password)
-controller.stop_service(service)
+with controller.start_service() as service:
+    run_my_test(my_application, service.host, service.ports[80], service.root_user.username, service.root_user.password)
 ```
 
 #### Helpers
@@ -201,9 +193,8 @@ To use containerised Gogs in a test:
 from useintest.predefined.gogs import GogsServiceController
 
 controller = GogsServiceController()
-service = controller.start_service()
-run_my_test(my_application, service.host, service.port, service.root_user.username, service.root_user.password)
-controller.stop_service(service)
+with controller.start_service() as service:
+    run_my_test(my_application, service.host, service.port, service.root_user.username, service.root_user.password)
 ```
 
 
@@ -223,9 +214,8 @@ from useintest.predefined.bissell import BissellServiceController
 import requests
 
 controller = BissellServiceController()
-service = controller.start_service()
-response = requests.head(f"http://{service.host}:{service.port}")
-controller.stop_service(service)
+with controller.start_service() as service:
+    response = requests.head(f"http://{service.host}:{service.port}")
 ```
 
 
@@ -244,7 +234,6 @@ To use containerised Consul in a test:
 from useintest.predefined.consul import ConsulServiceController
 
 controller = ConsulServiceController()
-service = controller.start_service()
-run_my_test(my_application, service.host, service.ports[8500])
-controller.stop_service(service)
+with controller.start_service() as service:
+    run_my_test(my_application, service.host, service.ports[8500])
 ```

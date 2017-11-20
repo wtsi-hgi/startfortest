@@ -52,6 +52,13 @@ class DockerisedService(Service):
         super().__init__()
         self.name = None
         self.container = None
+        self.controller = None
+
+    def __enter__(self) -> "DockerisedService":
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.controller.stop_service(self)
 
 
 class User(Model):

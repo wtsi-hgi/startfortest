@@ -188,6 +188,7 @@ class DockerisedServiceController(
             ports=list(service.ports.values()),
             host_config=_docker_client.create_host_config(port_bindings=service.ports),
             **self.run_settings)
+        service.controller = self
 
         _docker_client.start(service.container)
 
