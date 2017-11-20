@@ -22,7 +22,7 @@ setup(
     long_description=read_markdown("README.md"),
     test_suite="useintest.tests",
     classifiers=[
-        "Development Status :: 3 - Beta",
+        "Development Status :: 5 - Production/Stable",
         "Operating System :: OS Independent",
         "Programming Language :: Python :: 3.6",
         "License :: OSI Approved :: MIT License"
