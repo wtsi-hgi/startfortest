@@ -1,4 +1,8 @@
 # Change Log
+## [Unreleased]
+### Added
+- Support for starting/stopping service inside a context manager.
+
 ## 3.2.0 - 2017-11-20
 ### Added
 - Pre-defined support for Consul.
