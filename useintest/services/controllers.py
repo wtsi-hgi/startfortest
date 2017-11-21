@@ -1,9 +1,9 @@
 import atexit
 import logging
-import math
 from abc import ABCMeta, abstractmethod
 from inspect import signature
 
+import math
 from docker.errors import NotFound
 from hgicommon.docker.client import create_client
 from hgicommon.helpers import create_random_string, get_open_port
@@ -125,7 +125,7 @@ class ContainerisedServiceController(Generic[ServiceType], ServiceController[Ser
 
 
 class DockerisedServiceController(
-    Generic[DockerisedServiceType], ContainerisedServiceController[DockerisedServiceType], metaclass=ABCMeta):
+        Generic[DockerisedServiceType], ContainerisedServiceController[DockerisedServiceType], metaclass=ABCMeta):
     """
     Controller of Docker containers running a service brought up for testing.
     """

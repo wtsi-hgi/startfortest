@@ -54,7 +54,8 @@ class DockerisedService(Service):
         self.container = None
         self.controller = None
 
-    def __enter__(self) -> "DockerisedService":
+    # TODO: Not sure of the best way to specify the type as it could be that of a subclass...
+    def __enter__(self):
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):

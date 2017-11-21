@@ -1,14 +1,37 @@
+from useintest._common import MissingOptionalPackageError
 from useintest.services._builders import DockerisedServiceControllerTypeBuilder
+from useintest.services.models import DockerisedService
+
+DEFAULT_HTTP_PORT = 8500
 
 _repository = "consul"
-_ports = [8300, 8301, 8302, 8500, 8600]
+_ports = [8300, 8301, 8302, DEFAULT_HTTP_PORT, 8600]
 _start_detector = lambda log_line: "consul: New leader elected" in log_line
+
+
+class ConsulDockerisedService(DockerisedService):
+    """
+    Consul service.
+    """
+    def create_consul_client(self):
+        """
+        Gets a client for the Consul service.
+
+        Requires consul (not installed with useintest)
+        :return: the consul client
+        """
+        try:
+            from consul import Consul
+        except ImportError as e:
+            raise MissingOptionalPackageError(e, "python-consul") from e
+        return Consul(self.host, self.ports[DEFAULT_HTTP_PORT])
 
 
 common_setup = {
     "repository": _repository,
     "start_detector": _start_detector,
     "ports": _ports,
+    "service_model": ConsulDockerisedService
 }
 
 Consul1_0_0ServiceController = DockerisedServiceControllerTypeBuilder(

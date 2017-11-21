@@ -3,6 +3,10 @@
 ### Added
 - Support for starting/stopping service inside a context manager.
 
+### Changed
+- Consul service controllers now create specialised `ConsulDockerisedService` services.
+
+
 ## 3.2.0 - 2017-11-20
 ### Added
 - Pre-defined support for Consul.

@@ -232,8 +232,11 @@ with controller.start_service() as service:
 To use containerised Consul in a test:
 ```python
 from useintest.predefined.consul import ConsulServiceController
+# Dependency on `python-consul` (https://github.com/cablehead/python-consul) is only required if using 
+# `service.create_consul_client`
+from consul import Consul
 
 controller = ConsulServiceController()
 with controller.start_service() as service:
-    run_my_test(my_application, service.host, service.ports[8500])
+    run_my_test(my_application, service.create_consul_client())
 ```
