@@ -1,5 +1,5 @@
 # Change Log
-## [Unreleased]
+## 4.0.0
 ### Added
 - Support for starting/stopping service inside a context manager.
 

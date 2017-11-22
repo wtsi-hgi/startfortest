@@ -10,7 +10,7 @@ except ImportError:
 
 setup(
     name="useintest",
-    version="3.2.0",
+    version="4.0.0",
     author="Colin Nolan",
     author_email="colin.nolan@sanger.ac.uk",
     packages=find_packages(exclude=["tests"]),
