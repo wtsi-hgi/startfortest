@@ -23,7 +23,7 @@ with controller.start_service() as service:
 `useintest.predefined.couchdb`
 
 ### Contents
-* `CouchDBServiceController`: Latest version of CouchDB available.
+* `CouchDBServiceController`: Latest supported version of CouchDB available.
 * `CouchDB1_6Controller`: CouchDB version 1.6.
 
 ### Examples

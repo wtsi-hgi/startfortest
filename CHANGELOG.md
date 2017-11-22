@@ -6,6 +6,9 @@
 ### Changed
 - Consul service controllers now create specialised `ConsulDockerisedService` services.
 
+### Removed
+- Support for `CouchDBLatestDockerisedServiceController`.
+
 
 ## 3.2.0 - 2017-11-20
 ### Added
