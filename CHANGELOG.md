@@ -1,5 +1,9 @@
 # Change Log
-## 4.0.0
+## 4.0.1 - 2017-12-05
+### Changed
+- Point at which Consul is declared ready to use.
+
+## 4.0.0 - 2017-11-22
 ### Added
 - Support for starting/stopping service inside a context manager.
 
