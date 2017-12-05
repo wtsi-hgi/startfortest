@@ -6,7 +6,7 @@ DEFAULT_HTTP_PORT = 8500
 
 _repository = "consul"
 _ports = [8300, 8301, 8302, DEFAULT_HTTP_PORT, 8600]
-_start_detector = lambda log_line: "consul: New leader elected" in log_line
+_start_detector = lambda log_line: "Node info in sync" in log_line or "Synced node info" in log_line
 
 
 class ConsulDockerisedService(DockerisedService):
