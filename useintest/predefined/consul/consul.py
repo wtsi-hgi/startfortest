@@ -1,3 +1,5 @@
+import os
+
 from useintest._common import MissingOptionalPackageError
 from useintest.services._builders import DockerisedServiceControllerTypeBuilder
 from useintest.services.models import DockerisedService
@@ -13,6 +15,25 @@ class ConsulDockerisedService(DockerisedService):
     """
     Consul service.
     """
+    CONSUL_ADDRESS_ENVIRONMENT_VARIABLE = "CONSUL_HTTP_ADDR"
+    CONSUL_TOKEN_ENVIRONMENT_VARIABLE = "CONSUL_HTTP_TOKEN"
+    CONSUL_SCHEME_ENVIRONMENT_VARIABLE = "CONSUL_SCHEME"
+    CONSUL_DATACENTRE_ENVIRONMENT_VARIABLE = "CONSUL_DC"
+    CONSUL_VERIFY_ENVIRONMENT_VARIABLE = "CONSUL_HTTP_SSL_VERIFY"
+    CONSUL_CERTIFICATE_ENVIRONMENT_VARIABLE = "CONSUL_CLIENT_CERT"
+
+    @staticmethod
+    def _clear_environment():
+        """
+        Clears the environment variables related to Consul.
+        """
+        os.environ.pop(ConsulDockerisedService.CONSUL_ADDRESS_ENVIRONMENT_VARIABLE, None)
+        os.environ.pop(ConsulDockerisedService.CONSUL_TOKEN_ENVIRONMENT_VARIABLE, None)
+        os.environ.pop(ConsulDockerisedService.CONSUL_SCHEME_ENVIRONMENT_VARIABLE, None)
+        os.environ.pop(ConsulDockerisedService.CONSUL_DATACENTRE_ENVIRONMENT_VARIABLE, None)
+        os.environ.pop(ConsulDockerisedService.CONSUL_VERIFY_ENVIRONMENT_VARIABLE, None)
+        os.environ.pop(ConsulDockerisedService.CONSUL_CERTIFICATE_ENVIRONMENT_VARIABLE, None)
+
     def create_consul_client(self):
         """
         Gets a client for the Consul service.
@@ -24,7 +45,16 @@ class ConsulDockerisedService(DockerisedService):
             from consul import Consul
         except ImportError as e:
             raise MissingOptionalPackageError(e, "python-consul") from e
+        ConsulDockerisedService._clear_environment()
         return Consul(self.host, self.ports[DEFAULT_HTTP_PORT])
+
+    def setup_environment(self):
+        """
+        Sets Consul related environment variables.
+        """
+        ConsulDockerisedService._clear_environment()
+        os.environ[ConsulDockerisedService.CONSUL_ADDRESS_ENVIRONMENT_VARIABLE] = \
+            f"{self.host}:{self.ports[DEFAULT_HTTP_PORT]}"
 
 
 common_setup = {
