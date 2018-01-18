@@ -240,3 +240,8 @@ controller = ConsulServiceController()
 with controller.start_service() as service:
     run_my_test(my_application, service.create_consul_client())
 ```
+
+To set the value of environment variables associated to a Consul service, such as `CONSUL_HTTP_ADDR`, use:
+```python
+service.setup_environment()
+```
