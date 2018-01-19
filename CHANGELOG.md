@@ -1,4 +1,8 @@
 # Change Log
+## 4.1.0 - 2018-01-18
+### Added
+- Ability to set environment variables for Consul service.
+
 ## 4.0.1 - 2017-12-05
 ### Changed
 - Point at which Consul is declared ready to use.
