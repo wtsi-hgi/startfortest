@@ -9,7 +9,7 @@ import logging
 from typing import Generic
 
 from useintest.services.models import User, DockerisedServiceWithUsers
-from useintest.services._builders import DockerisedServiceControllerTypeBuilder
+from useintest.services.builders import DockerisedServiceControllerTypeBuilder
 from useintest.services.controllers import DockerisedServiceController, DockerisedServiceWithUsersType
 
 _CONFIGURATION_HOST_LOCATION = os.path.join(os.path.dirname(os.path.abspath(__file__)), "_resources/data")

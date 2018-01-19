@@ -1,7 +1,7 @@
 import os
 
 from useintest._common import MissingOptionalPackageError
-from useintest.services._builders import DockerisedServiceControllerTypeBuilder
+from useintest.services.builders import DockerisedServiceControllerTypeBuilder
 from useintest.services.models import DockerisedService
 
 DEFAULT_HTTP_PORT = 8500

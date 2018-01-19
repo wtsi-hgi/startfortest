@@ -1,7 +1,7 @@
 from abc import ABCMeta
 
 from useintest.services.models import User, DockerisedServiceWithUsers
-from useintest.services._builders import DockerisedServiceControllerTypeBuilder
+from useintest.services.builders import DockerisedServiceControllerTypeBuilder
 from useintest.services.controllers import DockerisedServiceController, ServiceType
 
 ROOT_USERNAME = "root"

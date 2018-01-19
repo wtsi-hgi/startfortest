@@ -3,7 +3,7 @@ from time import sleep
 import requests
 from hgicommon.docker.client import create_client
 
-from useintest.services._builders import DockerisedServiceControllerTypeBuilder
+from useintest.services.builders import DockerisedServiceControllerTypeBuilder
 from useintest.services.exceptions import TransientServiceStartException
 from useintest.services.models import DockerisedService
 

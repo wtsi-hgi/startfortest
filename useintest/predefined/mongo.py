@@ -1,4 +1,4 @@
-from useintest.services._builders import DockerisedServiceControllerTypeBuilder
+from useintest.services.builders import DockerisedServiceControllerTypeBuilder
 
 common_setup = {
     "repository": "mongo",

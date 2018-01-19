@@ -3,7 +3,7 @@ import unittest
 import docker
 from docker.errors import NotFound
 
-from useintest.services._builders import DockerisedServiceControllerTypeBuilder
+from useintest.services.builders import DockerisedServiceControllerTypeBuilder
 
 
 NoopServiceController = DockerisedServiceControllerTypeBuilder(
