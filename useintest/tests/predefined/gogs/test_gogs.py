@@ -4,7 +4,7 @@ from abc import ABCMeta
 from gogs_client import UsernamePassword, GogsApi
 from hgicommon.testing import TypeUsedInTest, create_tests, get_classes_to_test
 
-from useintest.predefined.gogs.gogs import gogs_service_controllers, GogsServiceController
+from useintest.modules.gogs.gogs import gogs_service_controllers, GogsServiceController
 from useintest.services.models import DockerisedServiceWithUsers
 from useintest.tests.services.common import TestServiceControllerSubclass
 

@@ -4,7 +4,7 @@ from abc import ABCMeta
 from consul import Consul
 from hgicommon.testing import TypeUsedInTest, create_tests, get_classes_to_test
 
-from useintest.predefined.consul.consul import ConsulServiceController, consul_service_controllers, \
+from useintest.modules.consul.consul import ConsulServiceController, consul_service_controllers, \
     ConsulDockerisedService
 from useintest.services.models import DockerisedServiceWithUsers
 from useintest.tests.services.common import TestServiceControllerSubclass

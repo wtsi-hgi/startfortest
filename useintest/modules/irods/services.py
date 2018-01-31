@@ -7,7 +7,7 @@ from time import sleep
 from typing import List, Type, Callable, Sequence
 
 from hgicommon.docker.client import create_client
-from useintest.predefined.irods.models import IrodsUser, IrodsDockerisedService, Version
+from useintest.modules.irods.models import IrodsUser, IrodsDockerisedService, Version
 from useintest.services.controllers import DockerisedServiceController
 from useintest.services.models import DockerisedService
 

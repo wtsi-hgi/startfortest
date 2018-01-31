@@ -4,7 +4,7 @@ from abc import ABCMeta
 from pymongo import MongoClient
 
 from hgicommon.testing import create_tests, TypeUsedInTest, get_classes_to_test
-from useintest.predefined.mongo import Mongo3DockerisedServiceController, MongoLatestDockerisedServiceController, \
+from useintest.modules.mongo import Mongo3DockerisedServiceController, MongoLatestDockerisedServiceController, \
     MongoServiceController, mongo_service_controllers
 from useintest.services.models import DockerisedServiceWithUsers
 from useintest.tests.services.common import TestDockerisedServiceControllerSubclass

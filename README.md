@@ -14,7 +14,7 @@
 - Makes it simple to test against multiple versions of the same service or set of executables.
 - Easy to achieve test isolation.
 
-## Predefined Support
+## Modules
 Out of the box support for:
 
 - Mongo
@@ -48,7 +48,7 @@ to those used in production.
 ## Quick Examples
 Start up a containerised instance of Mongo:
 ```python
-from useintest.predefined.mongo import MongoServiceController
+from useintest.modules.mongo import MongoServiceController
 
 # Starts a containerised version of Mongo
 controller = MongoServiceController()              
@@ -58,7 +58,7 @@ with controller.start_service() as service:
 
 Use samtools in a container from the host machine via "proxy executables":
 ```python
-from useintest.predefined.samtools import SamtoolsExecutablesController
+from useintest.modules.samtools import SamtoolsExecutablesController
 
 controller = SamtoolsExecutablesController()  
 executables_directory = controller.write_executables()

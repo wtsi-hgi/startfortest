@@ -1,7 +1,10 @@
-# Predefined Services and Executables
+# Modules
+_Predefined services and executables_
+
+
 ## Mongo
 ### Module
-`useintest.predefined.mongo`
+`useintest.modules.mongo`
 
 ### Contents
 * `MongoServiceController`: Latest supported version of Mongo available.
@@ -10,7 +13,7 @@
 ### Examples
 To use a containerised version of Mongo in a test:
 ```python
-from useintest.predefined.mongo import MongoServiceController
+from useintest.modules.mongo import MongoServiceController
 
 controller = MongoServiceController()              
 with controller.start_service() as service:      
@@ -170,7 +173,7 @@ with controller.start_service() as service:
 #### Helpers
 - `SshKey`: class to generate temporary files containing private/public SSH keys, which can be used with GitLab.
 ```python
-from useintest.predefined.gitlab import SshKey
+from useintest.modules.gitlab import SshKey
 
 with SshKey() as ssh_key:
     add_ssh_key(user, public_key_file=ssh_key.public_key_file)
@@ -181,7 +184,7 @@ with SshKey() as ssh_key:
 
 ## Gogs
 ### Module
-`useintest.predefined.gogs`
+`useintest.modules.gogs`
 
 ### Contents
 * `GogsServiceController`: Latest supported version of Gogs.
@@ -190,7 +193,7 @@ with SshKey() as ssh_key:
 ### Examples
 To use containerised Gogs in a test:
 ```python
-from useintest.predefined.gogs import GogsServiceController
+from useintest.modules.gogs import GogsServiceController
 
 controller = GogsServiceController()
 with controller.start_service() as service:
@@ -202,7 +205,7 @@ with controller.start_service() as service:
 _[Dummy iRobot server for client testing](https://github.com/wtsi-hgi/bissell)._
 
 ### Module
-`useintest.predefined.bissel`
+`useintest.modules.bissel`
 
 ### Contents
 * `BissellServiceController`: Latest supported version of Bissell.
@@ -210,7 +213,7 @@ _[Dummy iRobot server for client testing](https://github.com/wtsi-hgi/bissell)._
 ### Examples
 To use containerised Bissell in a test:
 ```python
-from useintest.predefined.bissell import BissellServiceController
+from useintest.modules.bissell import BissellServiceController
 import requests
 
 controller = BissellServiceController()
@@ -221,7 +224,7 @@ with controller.start_service() as service:
 
 ## Consul
 ### Module
-`useintest.predefined.consul`
+`useintest.modules.consul`
 
 ### Contents
 * `ConsulServiceController`: Latest supported version of Consul available.
@@ -231,7 +234,7 @@ with controller.start_service() as service:
 ### Examples
 To use containerised Consul in a test:
 ```python
-from useintest.predefined.consul import ConsulServiceController
+from useintest.modules.consul import ConsulServiceController
 # Dependency on `python-consul` (https://github.com/cablehead/python-consul) is only required if using 
 # `service.create_consul_client`
 from consul import Consul

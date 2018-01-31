@@ -3,10 +3,10 @@ from typing import Tuple, Type
 
 from hgicommon.managers import TempManager
 from useintest._common import MOUNTABLE_TEMP_DIRECTORY
-from useintest.predefined.irods.services import IrodsServiceController, IrodsBaseServiceController
-from useintest.predefined.irods.executables import IrodsExecutablesController, \
+from useintest.modules.irods.services import IrodsServiceController, IrodsBaseServiceController
+from useintest.modules.irods.executables import IrodsExecutablesController, \
     irods_executables_controllers_and_versions
-from useintest.predefined.irods.models import IrodsDockerisedService
+from useintest.modules.irods.models import IrodsDockerisedService
 
 _temp_manager = TempManager()
 

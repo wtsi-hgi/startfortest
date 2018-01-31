@@ -5,7 +5,7 @@ from typing import Sequence, Type
 from useintest.executables.builders import CommandsBuilder, MountedArgumentParserBuilder
 from useintest.executables.controllers import DefinedExecutablesController
 from useintest.executables.models import Executable
-from useintest.predefined.irods.models import Version
+from useintest.modules.irods.models import Version
 
 
 class IrodsBaseExecutablesController(DefinedExecutablesController):

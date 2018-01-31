@@ -2,7 +2,7 @@ import unittest
 
 import os
 
-from useintest.predefined.gitlab import SshKey
+from useintest.modules.gitlab import SshKey
 
 
 class TestSshKey(unittest.TestCase):

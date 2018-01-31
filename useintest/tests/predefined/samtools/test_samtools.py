@@ -3,8 +3,8 @@ import unittest
 from abc import ABCMeta
 
 from hgicommon.testing import create_tests, TestUsingType, TypeUsedInTest
-from useintest.predefined.irods.models import Version
-from useintest.predefined.samtools import samtools_executable_controllers
+from useintest.modules.irods.models import Version
+from useintest.modules.samtools import samtools_executable_controllers
 from useintest.tests.executables.common import run
 
 EXAMPLE_BAM = os.path.join(os.path.dirname(os.path.realpath(__file__)), "example.bam")

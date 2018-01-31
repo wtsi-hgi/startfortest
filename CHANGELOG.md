@@ -1,4 +1,9 @@
 # Change Log
+## [Unreleased]
+### Changed
+- "predefined" -> "modules".
+- `pycryptodomex` is now an optional requirement that should only be installed if the gitlab module is used.
+
 ## 4.1.0 - 2018-01-18
 ### Added
 - Ability to set environment variables for Consul service.

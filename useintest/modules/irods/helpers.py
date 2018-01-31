@@ -10,7 +10,7 @@ from tempfile import mkdtemp
 from typing import List, Union
 from uuid import uuid4
 
-from useintest.predefined.irods.models import IrodsResource, IrodsUser, Version, Metadata
+from useintest.modules.irods.models import IrodsResource, IrodsUser, Version, Metadata
 
 
 @unique
