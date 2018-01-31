@@ -15,6 +15,7 @@ before_install:
   - sudo apt-get update && sudo apt-get --only-upgrade install docker-ce
   - pip install codecov
   - pip install -r test_requirements.txt
+  - pip install -r useintest/predefined/gitlab/requirements.txt
 
 install:
   - pip install -r requirements.txt

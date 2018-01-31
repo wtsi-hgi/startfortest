@@ -4,4 +4,3 @@ bidict>=0.11.0
 stopit>=1.1.1
 dill>=0.2.5
 semantic_version>=2.6.0
-pycryptodomex>=3.4.7

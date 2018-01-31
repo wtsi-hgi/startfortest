@@ -5,9 +5,9 @@ from threading import Lock
 
 import os
 
-from Cryptodome.PublicKey import RSA
 from typing import Callable, Dict
 
+from useintest.common import MissingDependencyError
 
 _UTF8_ENCODING = "utf-8"
 
@@ -31,7 +31,8 @@ class SshKey:
 
     @property
     def public_key(self) -> str:
-        return self.lazy_get_value(_KeyType.PUBLIC, lambda: self._key.publickey().exportKey("OpenSSH").decode(_UTF8_ENCODING))
+        return self.lazy_get_value(_KeyType.PUBLIC, lambda: self._key.publickey().exportKey("OpenSSH").decode(
+            _UTF8_ENCODING))
 
     @property
     def private_key_file(self) -> str:
@@ -46,6 +47,11 @@ class SshKey:
         Constructor.
         :param key_length: length of the RSA key to generate.
         """
+        try:
+            from Cryptodome.PublicKey import RSA
+        except ImportError as e:
+            raise MissingDependencyError("pycryptodomex") from e
+
         self._key = RSA.generate(key_length)
         self._values: Dict[_KeyType, str] = {}
         self._file_locations: Dict[_KeyType: str] = {}
