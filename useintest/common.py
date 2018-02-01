@@ -1,4 +1,6 @@
 # FIXME: This is not cross platform...
+from abc import ABCMeta
+
 MOUNTABLE_TEMP_DIRECTORY = "/tmp"
 
 
@@ -15,3 +17,9 @@ class MissingDependencyError(UseInTestError):
     def __init__(self, package_name: str):
         super().__init__("Optional Python dependency `{package_name}` must be installed separately to use this "
                          "functionality")
+
+
+class UseInTestModel(metaclass=ABCMeta):
+    """
+    Base which all models in this package should extend.
+    """

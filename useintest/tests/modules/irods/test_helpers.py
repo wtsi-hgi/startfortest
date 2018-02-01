@@ -1,20 +1,22 @@
 import unittest
 from abc import ABCMeta
+from typing import Dict
 
-from hgicommon.helpers import extract_version_number
-from hgicommon.testing import TypeUsedInTest, create_tests, get_classes_to_test
-from useintest.modules.irods.setup_irods import setup_irods
+from testhelpers import TypeUsedInTest, get_classes_to_test, create_tests
+
 from useintest.modules.irods.helpers import IrodsSetupHelper, AccessLevel
-from useintest.modules.irods.models import Metadata, IrodsUser
+from useintest.modules.irods.models import IrodsUser
 from useintest.modules.irods.services import IrodsServiceController, irods_service_controllers
+from useintest.modules.irods.setup_irods import setup_irods
 from useintest.services.models import DockerisedServiceWithUsers
+from useintest.tests.common import extract_version_number
 from useintest.tests.services.common import TestServiceControllerSubclass
 
-_METADATA = Metadata({
+_METADATA = {
     "attribute_1": ["value_1", "value_2"],
     "attribute_2": ["value_3", "value_4"],
     "attribute_3": "value_5"
-})
+}
 _DATA_OBJECT_NAME = "data-object-name"
 
 
@@ -140,7 +142,7 @@ class _TestIrodsSetupHelper(
     def test_get_icat_version(self):
         self.assertEqual(self.service.version, self.setup_helper.get_icat_version())
 
-    def _assert_metadata_in_retrieved(self, metadata: Metadata, retrieved_metadata: str):
+    def _assert_metadata_in_retrieved(self, metadata: Dict, retrieved_metadata: str):
         """
         Assert that the given metadata is in the metadata information retrieved via an `imeta` command.
         :param metadata: the metadata to expect

@@ -2,7 +2,7 @@ from abc import ABCMeta
 from typing import Set, Generic, TypeVar
 from unittest import TestCase
 
-from hgicommon.testing import TestUsingType, TypeUsedInTest
+from testhelpers import TypeUsedInTest, TestUsingType
 
 from useintest.executables.common import docker_client
 from useintest.services.models import DockerisedService, Service

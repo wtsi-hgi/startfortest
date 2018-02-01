@@ -2,18 +2,14 @@ from typing import List
 
 import semantic_version
 
-from hgicommon.collections import Metadata as _Metadata
-from hgicommon.models import Model
+from useintest.common import UseInTestModel
 from useintest.services.models import DockerisedService
 
 # Import from semantic version library
 Version = semantic_version.Version
 
-# Import from hgicommon library
-Metadata = _Metadata
 
-
-class IrodsResource(Model):
+class IrodsResource(UseInTestModel):
     """
     Model of a iRODS server resource.
     """
@@ -24,7 +20,7 @@ class IrodsResource(Model):
 
 
 # TODO: Extend User in /common
-class IrodsUser(Model):
+class IrodsUser(UseInTestModel):
     """
     Model of an iRODS user.
     """
@@ -43,5 +39,5 @@ class IrodsDockerisedService(DockerisedService):
     """
     def __init__(self):
         super().__init__()
-        self.users = []     # type: List[IrodsUser]
-        self.version = None
+        self.users: List[IrodsUser] = []
+        self.version: Version = None

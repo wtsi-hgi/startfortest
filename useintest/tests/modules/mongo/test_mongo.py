@@ -2,8 +2,8 @@ import unittest
 from abc import ABCMeta
 
 from pymongo import MongoClient
+from testhelpers import create_tests, TypeUsedInTest, get_classes_to_test
 
-from hgicommon.testing import create_tests, TypeUsedInTest, get_classes_to_test
 from useintest.modules.mongo import Mongo3DockerisedServiceController, MongoLatestDockerisedServiceController, \
     MongoServiceController, mongo_service_controllers
 from useintest.services.models import DockerisedServiceWithUsers

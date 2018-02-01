@@ -1,14 +1,12 @@
 import json
 import logging
-import math
 import os
 from abc import abstractmethod, ABCMeta
+
+import math
 from time import sleep
 from typing import List, Type, Callable, Sequence
 
-from hgicommon.docker.client import create_client
-
-from useintest.executables.common import docker_client
 from useintest.modules.irods.models import IrodsUser, IrodsDockerisedService, Version
 from useintest.services.controllers import DockerisedServiceController
 from useintest.services.models import DockerisedService

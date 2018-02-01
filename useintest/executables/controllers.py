@@ -1,17 +1,16 @@
 import atexit
 import os
 from copy import deepcopy
+
+from docker.errors import NotFound
+from temphelpers import TempManager
 from typing import Dict, Optional, Type
 from uuid import uuid4
 
-from docker.errors import NotFound
-
-from hgicommon.managers import TempManager
 from useintest.common import MOUNTABLE_TEMP_DIRECTORY
 from useintest.executables.builders import CommandsBuilder
 from useintest.executables.common import CLI_ARGUMENTS, write_commands, pull_docker_image, docker_client
 from useintest.executables.models import Executable
-
 
 _TAB_AS_SPACES = "    "
 

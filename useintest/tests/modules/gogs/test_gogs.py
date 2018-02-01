@@ -2,7 +2,7 @@ import unittest
 from abc import ABCMeta
 
 from gogs_client import UsernamePassword, GogsApi
-from hgicommon.testing import TypeUsedInTest, create_tests, get_classes_to_test
+from testhelpers import TypeUsedInTest, create_tests, get_classes_to_test
 
 from useintest.modules.gogs.gogs import gogs_service_controllers, GogsServiceController
 from useintest.services.models import DockerisedServiceWithUsers

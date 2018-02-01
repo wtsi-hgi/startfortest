@@ -1,7 +1,8 @@
+from useintest.common import UseInTestModel
 from useintest.executables.builders import CommandsBuilder
 
 
-class Executable:
+class Executable(UseInTestModel):
     """
     Model of an executable.
     """

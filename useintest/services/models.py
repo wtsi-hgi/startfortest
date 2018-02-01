@@ -1,14 +1,14 @@
 from bidict import bidict
+from docker.errors import NotFound
+from docker.models.containers import Container
 from typing import Set, Optional
 
-from docker.errors import NotFound
-
+from useintest.common import UseInTestModel
 from useintest.executables.common import docker_client
 from useintest.services.exceptions import UnexpectedNumberOfPortsError
 
-from docker.models.containers import Container
 
-class Service:
+class Service(UseInTestModel):
     """
     Model of a service.
     """
@@ -80,7 +80,7 @@ class DockerisedService(Service):
         self.controller.stop_service(self)
 
 
-class User:
+class User(UseInTestModel):
     """
     A user with an associated password.
     """

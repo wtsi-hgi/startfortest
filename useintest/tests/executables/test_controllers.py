@@ -1,10 +1,11 @@
 import os
 import tempfile
 import unittest
+from uuid import uuid4
+
+from temphelpers import TempManager
 from typing import List, Tuple
 
-from hgicommon.helpers import create_random_string
-from hgicommon.managers import TempManager
 from useintest.executables.builders import CommandsBuilder, MountedArgumentParserBuilder
 from useintest.executables.common import write_commands
 from useintest.executables.controllers import ExecutablesController
@@ -54,7 +55,7 @@ class TestExecutablesController(unittest.TestCase):
 
     def test_create_executable_commands_with_positional_parameter_needing_mounting_for_write(self):
         with tempfile.TemporaryDirectory(dir=MOUNTABLE_TEMP_DIRECTORY) as temp_directory:
-            file_locations = [os.path.join(temp_directory, create_random_string()) for _ in range(5)]
+            file_locations = [os.path.join(temp_directory, str(uuid4())) for _ in range(5)]
             commands_builder = CommandsBuilder(
                 "touch", image=UBUNTU_IMAGE_TO_TEST_WITH, get_path_arguments_to_mount=_TOUCH_MOUNTED_ARGUMENT_PARSER)
             commands = self.controller.create_executable_commands(Executable(commands_builder, False))
