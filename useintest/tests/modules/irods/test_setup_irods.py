@@ -1,12 +1,13 @@
 import unittest
 from abc import ABCMeta
 
-from hgicommon.helpers import extract_version_number
-from hgicommon.testing import create_tests, get_classes_to_test, TypeUsedInTest, TestUsingType
-from useintest.modules.irods.services import irods_service_controllers, IrodsServiceController
+from testhelpers import TestUsingType, create_tests, get_classes_to_test, TypeUsedInTest
+
 from useintest.modules.irods.executables import IrodsBaseExecutablesController
 from useintest.modules.irods.helpers import IrodsSetupHelper
+from useintest.modules.irods.services import irods_service_controllers, IrodsServiceController
 from useintest.modules.irods.setup_irods import setup_irods
+from useintest.tests.common import extract_version_number
 
 
 class _TestSetupIrods(TestUsingType[TypeUsedInTest], metaclass=ABCMeta):

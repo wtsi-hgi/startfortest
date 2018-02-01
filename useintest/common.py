@@ -15,8 +15,8 @@ class MissingDependencyError(UseInTestError):
     Raised when an optional package is not installed.
     """
     def __init__(self, package_name: str):
-        super().__init__("Optional Python dependency `{package_name}` must be installed separately to use this "
-                         "functionality")
+        super().__init__(f"Optional Python dependency `{package_name}` must be installed separately to use this "
+                         f"functionality")
 
 
 class UseInTestModel(metaclass=ABCMeta):
