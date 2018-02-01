@@ -39,7 +39,7 @@ class GogsBaseServiceController(Generic[DockerisedServiceWithUsersType],
         service.root_user = User(_ROOT_USERNAME, _ROOT_PASSWORD)
 
         # Start gogs
-        socket = container.exec_run(container.exec_run(["/app/gogs/docker/start.sh"]), stream=True)
+        socket = container.exec_run(["/app/gogs/docker/start.sh"], stream=True)
         for line in socket:
             logging.debug(line)
             if "Listen: http://0.0.0.0:3000" in str(line):
@@ -47,12 +47,13 @@ class GogsBaseServiceController(Generic[DockerisedServiceWithUsersType],
 
         return service
 
+
 # Employing hacky way of getting run sleeping forever with the detector
 common_setup = {
     "superclass": GogsBaseServiceController,
     "service_model": DockerisedServiceWithUsers,
     "repository": "gogs/gogs",
-    "start_detector": lambda log_line: "127.0.0.1\\tlocalhost" in log_line,
+    "start_detector": lambda log_line: "127.0.0.1\tlocalhost" in log_line,
     "transient_error_detector": lambda log_line: "the container has stopped" in log_line,
     "ports": [3000],
     "additional_run_settings": {"entrypoint": "tail", "command": ["-f", "/etc/hosts"]}

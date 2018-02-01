@@ -228,7 +228,9 @@ class DockerisedServiceController(
         else:
             log_stream = service.container.logs(stream=True)
             for line in log_stream:
-                line = str(line)
+                # XXX: Although non-streamed logs are returned as a string, the generator returns bytes!?
+                # http://docker-py.readthedocs.io/en/stable/containers.html#docker.models.containers.Container.logs
+                line = line.decode("utf-8")
                 logging.debug(line)
 
                 if self.persistent_error_detector is not None \
