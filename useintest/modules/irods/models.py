@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Any
 
 import semantic_version
 
@@ -30,6 +30,13 @@ class IrodsUser(UseInTestModel):
         self.password = password
         self.zone = zone
         self.admin = admin
+
+    def __eq__(self, other: Any) -> bool:
+        return type(other) == type(self) \
+               and other.username == self.username \
+               and other.password == self.password \
+               and other.zone == self.zone \
+               and other.admin == self.admin
 
 
 # TODO: Extend ServiceWithUsers in /common
