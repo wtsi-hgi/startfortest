@@ -12,7 +12,7 @@ from useintest.executables.models import Executable
 from useintest.tests.executables.common import get_builder_for_commands_to_run_persistent_ubuntu, run, \
     UBUNTU_IMAGE_TO_TEST_WITH
 from useintest.tests.common import MOUNTABLE_TEMP_CREATION_KWARGS
-from useintest._common import MOUNTABLE_TEMP_DIRECTORY
+from useintest.common import MOUNTABLE_TEMP_DIRECTORY
 
 _CONTENT = "Hello World!"
 _CAT_MOUNTED_ARGUMENT_PARSER = MountedArgumentParserBuilder(

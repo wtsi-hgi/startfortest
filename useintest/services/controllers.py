@@ -1,18 +1,18 @@
 import atexit
 import logging
+import socket
 from abc import ABCMeta, abstractmethod
 from inspect import signature
+from typing import Dict, Iterator, List, Callable, TypeVar, Generic, Type
+from uuid import uuid4
 
 import math
 from docker.errors import NotFound
-from hgicommon.docker.client import create_client
-from hgicommon.helpers import create_random_string, get_open_port
 from stopit import ThreadingTimeout, TimeoutException
-from typing import Dict, Iterator, Optional, List, Callable, TypeVar, Generic, Type
 
-from useintest._docker_helpers import is_docker_container_running
-from useintest.services.exceptions import ServiceStartException, TransientServiceStartException, \
-    PersistentServiceStartException
+from useintest.executables.common import docker_client, pull_docker_image
+from useintest.services.exceptions import ServiceStartError, TransientServiceStartError, \
+    PersistentServiceStartError
 from useintest.services.models import Service, DockerisedService, DockerisedServiceWithUsers
 
 _logger = logging.getLogger(__name__)
@@ -20,6 +20,21 @@ _logger = logging.getLogger(__name__)
 ServiceType = TypeVar("ServiceType", bound=Service)
 DockerisedServiceType = TypeVar("DockerisedServiceType", bound=DockerisedService)
 DockerisedServiceWithUsersType = TypeVar("DockerisedServiceWithUsersType", bound=DockerisedServiceWithUsers)
+
+
+def _get_open_port() -> int:
+    """
+    Gets a PORT that will (probably) be available on the machine.
+    It is possible that in-between the time in which the open PORT of found and when it is used, another process may
+    bind to it instead.
+    :return: the (probably) available PORT
+    """
+    free_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    free_socket.bind(("", 0))
+    free_socket.listen(1)
+    port = free_socket.getsockname()[1]
+    free_socket.close()
+    return port
 
 
 class ServiceController(Generic[ServiceType], metaclass=ABCMeta):
@@ -94,6 +109,7 @@ class ContainerisedServiceController(Generic[ServiceType], ServiceController[Ser
 
     def start_service(self) -> ServiceType:
         service = self._service_model()
+        assert service is not None
         if self.stop_on_exit:
             atexit.register(self.stop_service, service)
 
@@ -101,7 +117,7 @@ class ContainerisedServiceController(Generic[ServiceType], ServiceController[Ser
         tries = 0
         while not started:
             if tries >= self.start_tries:
-                raise ServiceStartException()
+                raise ServiceStartError()
             if tries > 0:
                 self._stop(service)
             self._start(service)
@@ -113,11 +129,10 @@ class ContainerisedServiceController(Generic[ServiceType], ServiceController[Ser
                     started = self._wait_until_started(service)
             except TimeoutException as e:
                 _logger.warning(e)
-            except TransientServiceStartException as e:
+            except TransientServiceStartError as e:
                 _logger.warning(e)
 
             tries += 1
-        assert service is not None
         return service
 
     def stop_service(self, service: ServiceType):
@@ -130,15 +145,21 @@ class DockerisedServiceController(
     Controller of Docker containers running a service brought up for testing.
     """
     @staticmethod
-    def _get_docker_image(repository: str, tag: str) -> Optional[str]:
+    def _call_detector_with_correct_arguments(detector: Callable, line: str, service: DockerisedServiceType) \
+            -> bool:
         """
-        Gets the identifier of the docker image from the given repository with the given tag.
-        :param repository: the Dockerhub repository
-        :param tag: the image tag
-        :return: image identifier or `None` if it has not been pulled
+        Calls the given detector with either line as the only argument or both line and service, depending on the
+        detector's signature.
+        :param detector: the detector to call
+        :param line: the log line to give to the detector
+        :param service: the service being started
+        :return: the detector's return value
         """
-        identifiers = create_client().images("%s:%s" % (repository, tag), quiet=True)
-        return identifiers[0] if len(identifiers) > 0 else None
+        number_of_parameters = len(signature(detector).parameters)
+        if number_of_parameters == 1:
+            return detector(line)
+        else:
+            return detector(line, service)
 
     def __init__(self, service_model: Type[ServiceType], repository: str, tag: str, ports: List[int],
                  start_detector: Callable[..., bool]=None,
@@ -174,30 +195,30 @@ class DockerisedServiceController(
         self._log_iterator: Dict[Service, Iterator] = dict()
 
     def _start(self, service: DockerisedServiceType):
-        _docker_client = create_client()
+        pull_docker_image(self.repository, self.tag)
+        image = docker_client.images.pull(self.repository, tag=self.tag)
 
-        if self._get_docker_image(self.repository, self.tag) is None:
-            # Docker image doesn't exist locally: getting from DockerHub
-            _docker_client.pull(self.repository, self.tag)
-
-        service.name = create_random_string(prefix="%s-" % self.repository.split("/")[-1])
-        service.ports = {port: get_open_port() for port in self.ports}
-        service.container = _docker_client.create_container(
-            image=self._get_docker_image(self.repository, self.tag),
-            name=service.name,
-            ports=list(service.ports.values()),
-            host_config=_docker_client.create_host_config(port_bindings=service.ports),
-            **self.run_settings)
+        service.name = f"{self.repository.split('/')[-1]}-{uuid4()}"
+        service.ports = {port: _get_open_port() for port in self.ports}
         service.controller = self
 
-        _docker_client.start(service.container)
+        container = docker_client.containers.create(
+            image=image.id,
+            name=service.name,
+            ports=service.ports,
+            detach=True,
+            **self.run_settings)
+        service.container = container
+
+        container.start()
 
     def _stop(self, service: DockerisedServiceType):
         if service in self._log_iterator:
             del self._log_iterator[service]
         if service.container:
             try:
-                create_client().remove_container(service.container, force=True)
+                service.container.stop()
+                service.container.remove(force=True)
             except NotFound:
                 pass
 
@@ -205,36 +226,21 @@ class DockerisedServiceController(
         if self.startup_monitor is not None:
             return self.startup_monitor(service)
         else:
-            _docker_client = create_client()
-            for line in _docker_client.logs(service.container, stream=True):
+            log_stream = service.container.logs(stream=True)
+            for line in log_stream:
                 line = str(line)
                 logging.debug(line)
 
                 if self.persistent_error_detector is not None \
                         and self._call_detector_with_correct_arguments(self.persistent_error_detector, line, service):
-                    raise PersistentServiceStartException(line)
+                    raise PersistentServiceStartError(line)
                 elif self.transient_error_detector is not None \
                         and self._call_detector_with_correct_arguments(self.transient_error_detector, line, service):
-                    raise TransientServiceStartException(line)
+                    raise TransientServiceStartError(line)
                 elif self._call_detector_with_correct_arguments(self.start_detector, line, service):
                     return True
 
-            assert not is_docker_container_running(service)
-            raise TransientServiceStartException("No error detected in logs but the container has stopped. Log dump: %s"
-                                                 % _docker_client.logs(service.container))
-
-    def _call_detector_with_correct_arguments(self, detector: Callable, line: str, service: DockerisedServiceType) \
-            -> bool:
-        """
-        Calls the given detector with either line as the only argument or both line and service, depending on the
-        detector's signature.
-        :param detector: the detector to call
-        :param line: the log line to give to the detector
-        :param service: the service being started
-        :return: the detector's return value
-        """
-        number_of_parameters = len(signature(detector).parameters)
-        if number_of_parameters == 1:
-            return detector(line)
-        else:
-            return detector(line, service)
+            assert len(docker_client.containers.list(filters=dict(name=service.name))) == 0
+            logs = service.container.logs()
+            raise TransientServiceStartError(
+                f"No error detected in logs but the container has stopped. Log dump: {logs}")

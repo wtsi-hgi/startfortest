@@ -2,16 +2,32 @@ import atexit
 import os
 from copy import deepcopy
 from typing import Dict, Optional, Type
+from uuid import uuid4
 
 from docker.errors import NotFound
 
-from hgicommon.docker.client import create_client
-from hgicommon.helpers import create_random_string
 from hgicommon.managers import TempManager
-from useintest._common import reduce_whitespace, MOUNTABLE_TEMP_DIRECTORY
+from useintest.common import MOUNTABLE_TEMP_DIRECTORY
 from useintest.executables.builders import CommandsBuilder
-from useintest.executables.common import CLI_ARGUMENTS, write_commands, pull_docker_image
+from useintest.executables.common import CLI_ARGUMENTS, write_commands, pull_docker_image, docker_client
 from useintest.executables.models import Executable
+
+
+_TAB_AS_SPACES = "    "
+
+
+def _reduce_whitespace(string: str) -> str:
+    """
+    Reduces the whitespace in the given command.
+    :param string: the command to reduce whitespace from
+    :return: command with reduced whitespace
+    """
+    leading_tabs = int(min({(len(line) - len(line.lstrip(_TAB_AS_SPACES))) / len(_TAB_AS_SPACES)
+                            for line in string.split("\n") if len(line.strip()) > 0}))
+    stripped = []
+    for line in string.split("\n"):
+        stripped.append(line.replace(_TAB_AS_SPACES, "", leading_tabs))
+    return "\n".join(stripped)
 
 
 class ExecutablesController:
@@ -24,7 +40,7 @@ class ExecutablesController:
         :param image_with_real_binaries: the name (docker-py's "tag") of the Docker image that the proxied binaries are
         executed within
         :param run_container_commands_builder: (optional) builder for commands used to start up persistent container in
-        which comamnds should be run (can lead to much better performance because new container is not brought up each
+        which commands should be run (can lead to much better performance because new container is not brought up each
         time)
         """
         self.run_container_command_builder = run_container_commands_builder
@@ -33,7 +49,7 @@ class ExecutablesController:
             if run_container_commands_builder.image is None:
                 raise ValueError("Run container command builder must define the image the container is to use")
             pull_docker_image(run_container_commands_builder.image)
-            self._cached_container_name = create_random_string(prefix="execution-container-")
+            self._cached_container_name = f"execution-container-{uuid4()}"
             self.run_container_command_builder.name = self._cached_container_name
             self.run_container_command_builder.detached = True
 
@@ -44,9 +60,10 @@ class ExecutablesController:
         Tears down the controller.
         """
         if self.run_container_command_builder is not None:
-            docker_client = create_client()
             try:
-                docker_client.remove_container(self._cached_container_name, force=True)
+                container = docker_client.containers.get(self._cached_container_name)
+                container.stop()
+                container.remove(force=True)
             except NotFound:
                 """ Not concerned if the container had not yet been created """
 
@@ -61,7 +78,7 @@ class ExecutablesController:
                 raise ValueError("No command to run execution container defined.")
             executable.commands_builder.container = self._cached_container_name
 
-            return reduce_whitespace("""
+            return _reduce_whitespace("""
                 isRunning() {
                     [ $(docker ps -f name=%(uuid)s | wc -l | awk '{print $1}') -eq 2 ]
                 }

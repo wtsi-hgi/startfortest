@@ -1,10 +1,9 @@
 from time import sleep
 
 import requests
-from hgicommon.docker.client import create_client
 
 from useintest.services.builders import DockerisedServiceControllerTypeBuilder
-from useintest.services.exceptions import TransientServiceStartException
+from useintest.services.exceptions import TransientServiceStartError
 from useintest.services.models import DockerisedService
 
 
@@ -16,12 +15,10 @@ def startup_monitor(service: DockerisedService):
     :param service: the Bissell service
     :return: `True`
     """
-    _docker_client = create_client()
-
     while True:
-        logs = _docker_client.logs(service.container)
+        logs = service.container.logs()
         if len(logs) > 0:
-            TransientServiceStartException(f"Bissell output detected in logs indicates a startup failure: {logs}")
+            TransientServiceStartError(f"Bissell output detected in logs indicates a startup failure: {logs}")
         try:
             response = requests.head(f"http://{service.host}:{service.port}")
             if response.status_code == 401:

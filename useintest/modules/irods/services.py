@@ -7,6 +7,8 @@ from time import sleep
 from typing import List, Type, Callable, Sequence
 
 from hgicommon.docker.client import create_client
+
+from useintest.executables.common import docker_client
 from useintest.modules.irods.models import IrodsUser, IrodsDockerisedService, Version
 from useintest.services.controllers import DockerisedServiceController
 from useintest.services.models import DockerisedService
@@ -132,15 +134,14 @@ class Irods3ServiceController(IrodsBaseServiceController, metaclass=ABCMeta):
                          persistent_error_detector=IrodsBaseServiceController._persistent_error_detector,
                          start_timeout=start_timeout, start_tries=start_tries)
 
-    def _wait_until_started(self, container: DockerisedService) -> bool:
-        if super()._wait_until_started(container) is False:
+    def _wait_until_started(self, service: DockerisedService) -> bool:
+        if not super()._wait_until_started(service):
             return False
 
         # Just because iRODS says it has started, it does not mean it is ready to do queries!
-        docker_client = create_client()
-        status_query = docker_client.exec_create(
-            container.name, "su - irods -c \"/home/irods/iRODS/irodsctl --verbose status\"", stdout=True)
-        while "No servers running" in docker_client.exec_start(status_query).decode("utf8"):
+        output = service.container.exec_run(
+            "su - irods -c \"/home/irods/iRODS/irodsctl --verbose status\"", stdout=True)
+        while "No servers running" in output.decode("utf-8"):
             # Nothing else to check on - just sleep it out
             _logger.info("Still waiting on iRODS setup")
             sleep(0.1)
@@ -160,9 +161,7 @@ class Irods4ServiceController(IrodsBaseServiceController, metaclass=ABCMeta):
     _USERNAME_PARAMETER_NAME = "irods_user_name"
     _ZONE_PARAMETER_NAME = "irods_zone_name"
 
-    _USERS = [
-        IrodsUser("rods", "testZone", "irods123", admin=True)
-    ]
+    _USERS = [IrodsUser("rods", "testZone", "irods123", admin=True)]
 
     # TODO: These connection settings will not work with port-mapping to localhost
     @staticmethod

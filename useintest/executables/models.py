@@ -1,8 +1,7 @@
 from useintest.executables.builders import CommandsBuilder
-from useintest.services.models import Model
 
 
-class Executable(Model):
+class Executable:
     """
     Model of an executable.
     """

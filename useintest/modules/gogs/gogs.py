@@ -1,16 +1,14 @@
+import logging
 import os
 import tarfile
 from abc import ABCMeta
 from io import BytesIO
 from pathlib import PurePosixPath
-
-import docker
-import logging
 from typing import Generic
 
-from useintest.services.models import User, DockerisedServiceWithUsers
 from useintest.services.builders import DockerisedServiceControllerTypeBuilder
 from useintest.services.controllers import DockerisedServiceController, DockerisedServiceWithUsersType
+from useintest.services.models import User, DockerisedServiceWithUsers
 
 _CONFIGURATION_HOST_LOCATION = os.path.join(os.path.dirname(os.path.abspath(__file__)), "_resources/data")
 _CONFIGURATION_DOCKER_LOCATION = PurePosixPath("/data")
@@ -26,7 +24,7 @@ class GogsBaseServiceController(Generic[DockerisedServiceWithUsersType],
     """
     def start_service(self) -> DockerisedServiceWithUsersType:
         service = super().start_service()
-        container_id = service.container["Id"]
+        container = service.container
 
         # Painful conversion required due to limitation of the Docker client:
         # https://github.com/docker/docker-py/issues/1027#issuecomment-299654299
@@ -37,12 +35,11 @@ class GogsBaseServiceController(Generic[DockerisedServiceWithUsersType],
         archive_as_bytes = bytes(archive_container.getbuffer())
 
         # Add configuration
-        client = docker.APIClient()
-        client.put_archive(container_id, _CONFIGURATION_DOCKER_LOCATION.parent.as_posix(), archive_as_bytes)
+        container.put_archive(_CONFIGURATION_DOCKER_LOCATION.parent.as_posix(), archive_as_bytes)
         service.root_user = User(_ROOT_USERNAME, _ROOT_PASSWORD)
 
         # Start gogs
-        socket = client.exec_start(client.exec_create(container_id, ["/app/gogs/docker/start.sh"]), stream=True)
+        socket = container.exec_run(container.exec_run(["/app/gogs/docker/start.sh"]), stream=True)
         for line in socket:
             logging.debug(line)
             if "Listen: http://0.0.0.0:3000" in str(line):

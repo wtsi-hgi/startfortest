@@ -11,7 +11,7 @@ from useintest.tests.services.common import TestDockerisedServiceControllerSubcl
 
 
 class _TestMongoDockerisedServiceController(
-    TestDockerisedServiceControllerSubclass[TypeUsedInTest, DockerisedServiceWithUsers], metaclass=ABCMeta):
+        TestDockerisedServiceControllerSubclass[TypeUsedInTest, DockerisedServiceWithUsers], metaclass=ABCMeta):
     """
     Tests for Mongo service controllers.
     """
