@@ -5,8 +5,6 @@ python:
 
 env:
   matrix:
-    - TEST_PACAKGE=executables
-    - TEST_PACAKGE=services
     - TEST_PACAKGE=modules/bissell
     - TEST_PACAKGE=modules/consul
     - TEST_PACAKGE=modules/couchdb
@@ -22,19 +20,37 @@ services:
   - docker
 
 before_install:
-  - export TESTED_PACKAGE_DIRECTORY="useintest/${TEST_PACAKGE}"
   - pip install codecov
   - pip install --disable-pip-version-check -r test_requirements.txt
 
 install:
   - pip install --disable-pip-version-check -r requirements.txt
-  - pip install --disable-pip-version-check -r ${TESTED_PACKAGE_DIRECTORY}/requirements.txt || true
 
-script:
-  - PYTHONPATH=. coverage run -m unittest discover -v -s "useintest/tests/${TEST_PACAKGE}"
-  - coverage run setup.py -q install
-  - coverage combine -a
-  - coverage report
+jobs:
+  include:
+    - stage: test_common
+      script:
+        - PYTHONPATH=. coverage run -m unittest discover -v -s useintest/tests/executables
+        - PYTHONPATH=. coverage run -m unittest discover -v -s useintest/tests/services
+        - coverage run setup.py -q install
+        - coverage combine -a
+        - coverage report
+      env: []
 
-after_success:
-  - codecov
+    - stage: test_modules:
+      install:
+        - pip install --disable-pip-version-check -r "${TESTED_PACKAGE_DIRECTORY}/requirements.txt" || true
+      script:
+        - PYTHONPATH=. coverage run -m unittest discover -v -s "useintest/tests/${TEST_PACAKGE}"
+        - coverage run setup.py -q install
+        - coverage combine -a
+        - coverage report
+
+#    - stage: test_all:
+
+
+
+
+
+#  after_success:
+#    - codecov
