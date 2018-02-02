@@ -1,7 +1,8 @@
 import unittest
 from abc import ABCMeta
 
-from hgicommon.testing import TypeUsedInTest, create_tests, get_classes_to_test
+from testhelpers import TypeUsedInTest, get_classes_to_test, create_tests
+
 from useintest.modules.irods.setup_irods import setup_irods
 from useintest.modules.irods.helpers import IrodsSetupHelper
 from useintest.modules.irods.services import irods_service_controllers, IrodsServiceController

@@ -1,9 +1,10 @@
-import os
-
 import logging
+import os
 from typing import List, Any, Set
 
-from hgicommon.docker.client import create_client
+from docker.errors import ImageNotFound
+
+from useintest.common import docker_client
 
 CLI_ARGUMENTS = "\"$@\""
 
@@ -24,21 +25,26 @@ def write_commands(location: str, commands: str):
     os.chmod(location, 0o700)
 
 
-def pull_docker_image(image: str):
+def pull_docker_image(image: str, tag: str=None):
     """
     TODO
     :param image:
+    :param tag:
     :return:
     """
     # Ensure the image with the real binaries have been pulled to stop it polluting the output
     if ":" in image:
+        if tag is not None:
+            raise ValueError("Cannot specify tag when tag has been passed in the image parameter")
         repository, tag = image.split(":")
     else:
-        repository, tag = image, None
-    docker_client = create_client()
-    docker_image = docker_client.images("%s:%s" % (repository, tag), quiet=True)
-    if len(docker_image) == 0:
-        for line in docker_client.pull(image, stream=True):
+        repository, tag = image, tag
+
+    try:
+        docker_client.images.get(f"{repository}:{tag}")
+    except ImageNotFound:
+        pull_stream = docker_client.api.pull(repository, tag=tag, stream=True)
+        for line in pull_stream:
             # TODO: Remove logging to root logger
             logging.debug(line)
 

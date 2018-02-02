@@ -1,19 +1,15 @@
-from typing import List
+from typing import List, Any
 
 import semantic_version
 
-from hgicommon.collections import Metadata as _Metadata
-from hgicommon.models import Model
+from useintest.common import UseInTestModel
 from useintest.services.models import DockerisedService
 
 # Import from semantic version library
 Version = semantic_version.Version
 
-# Import from hgicommon library
-Metadata = _Metadata
 
-
-class IrodsResource(Model):
+class IrodsResource(UseInTestModel):
     """
     Model of a iRODS server resource.
     """
@@ -24,16 +20,23 @@ class IrodsResource(Model):
 
 
 # TODO: Extend User in /common
-class IrodsUser(Model):
+class IrodsUser(UseInTestModel):
     """
     Model of an iRODS user.
     """
-    def __init__(self, username: str, zone: str, password: str=None, admin=False):
+    def __init__(self, username: str, zone: str, password: str=None, admin: bool=False):
         super().__init__()
         self.username = username
         self.password = password
         self.zone = zone
         self.admin = admin
+
+    def __eq__(self, other: Any) -> bool:
+        return type(other) == type(self) \
+               and other.username == self.username \
+               and other.password == self.password \
+               and other.zone == self.zone \
+               and other.admin == self.admin
 
 
 # TODO: Extend ServiceWithUsers in /common
@@ -43,5 +46,5 @@ class IrodsDockerisedService(DockerisedService):
     """
     def __init__(self):
         super().__init__()
-        self.users = []     # type: List[IrodsUser]
-        self.version = None
+        self.users: List[IrodsUser] = []
+        self.version: Version = None

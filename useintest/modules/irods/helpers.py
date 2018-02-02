@@ -2,15 +2,16 @@ import atexit
 import logging
 import os
 import platform
-import re
-import shutil
 import subprocess
 from enum import Enum, unique
 from tempfile import mkdtemp
-from typing import List, Union
+
+import re
+import shutil
+from typing import List, Union, Dict, Set
 from uuid import uuid4
 
-from useintest.modules.irods.models import IrodsResource, IrodsUser, Version, Metadata
+from useintest.modules.irods.models import IrodsResource, IrodsUser, Version
 
 
 @unique
@@ -106,7 +107,7 @@ class IrodsSetupHelper:
 
         return "%s/%s" % (self.run_icommand(["ipwd"]), name)
 
-    def add_metadata_to(self, path: str, metadata: Metadata):
+    def add_metadata_to(self, path: str, metadata: Dict):
         """
         Adds the given metadata to the entity at the given path in iRODS.
         :param path: the path to add metadata to (could correspond to a collection or data object)
@@ -116,7 +117,7 @@ class IrodsSetupHelper:
             type_flag = "-c" if self.is_collection(path) else "-d"
 
             for key, values in metadata.items():
-                if not isinstance(values, list) and not isinstance(values, set):
+                if not isinstance(values, List) and not isinstance(values, Set):
                     values = [values]
                 assert type(values) != str
                 for value in values:

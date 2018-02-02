@@ -2,11 +2,11 @@ import unittest
 from abc import ABCMeta
 
 from consul import Consul
-from hgicommon.testing import TypeUsedInTest, create_tests, get_classes_to_test
 
 from useintest.modules.consul.consul import ConsulServiceController, consul_service_controllers, \
     ConsulDockerisedService
 from useintest.services.models import DockerisedServiceWithUsers
+from testhelpers import TypeUsedInTest, create_tests, get_classes_to_test
 from useintest.tests.services.common import TestServiceControllerSubclass
 
 _TEST_KEY = "hello"

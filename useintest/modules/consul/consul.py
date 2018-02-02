@@ -1,6 +1,6 @@
 import os
 
-from useintest._common import MissingOptionalPackageError
+from useintest.common import MissingDependencyError
 from useintest.services.builders import DockerisedServiceControllerTypeBuilder
 from useintest.services.models import DockerisedService
 
@@ -44,7 +44,7 @@ class ConsulDockerisedService(DockerisedService):
         try:
             from consul import Consul
         except ImportError as e:
-            raise MissingOptionalPackageError(e, "python-consul") from e
+            raise MissingDependencyError("python-consul") from e
         ConsulDockerisedService._clear_environment()
         return Consul(self.host, self.ports[DEFAULT_HTTP_PORT])
 

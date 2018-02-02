@@ -3,9 +3,9 @@ from abc import ABCMeta
 
 from couchdb import Server
 
-from hgicommon.testing import TypeUsedInTest, create_tests, get_classes_to_test
 from useintest.modules.couchdb import couchdb_service_controllers, CouchDBServiceController
 from useintest.services.models import DockerisedServiceWithUsers
+from testhelpers import TypeUsedInTest, create_tests, get_classes_to_test
 from useintest.tests.services.common import TestDockerisedServiceControllerSubclass
 
 

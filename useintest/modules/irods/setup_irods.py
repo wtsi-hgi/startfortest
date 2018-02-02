@@ -1,12 +1,13 @@
 import os
+
+from temphelpers import TempManager
 from typing import Tuple, Type
 
-from hgicommon.managers import TempManager
-from useintest._common import MOUNTABLE_TEMP_DIRECTORY
-from useintest.modules.irods.services import IrodsServiceController, IrodsBaseServiceController
+from useintest.common import MOUNTABLE_TEMP_DIRECTORY
 from useintest.modules.irods.executables import IrodsExecutablesController, \
     irods_executables_controllers_and_versions
 from useintest.modules.irods.models import IrodsDockerisedService
+from useintest.modules.irods.services import IrodsServiceController, IrodsBaseServiceController
 
 _temp_manager = TempManager()
 

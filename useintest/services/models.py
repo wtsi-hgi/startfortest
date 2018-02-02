@@ -1,17 +1,13 @@
 from bidict import bidict
-from hgicommon.models import Model as HgiCommonModel
+from docker.errors import NotFound
+from docker.models.containers import Container
 from typing import Set, Optional
 
-from useintest.services.exceptions import UnexpectedNumberOfPortsException
+from useintest.common import UseInTestModel, docker_client
+from useintest.services.exceptions import UnexpectedNumberOfPortsError
 
 
-class Model(HgiCommonModel):
-    """
-    Model class.
-    """
-
-
-class Service(Model):
+class Service(UseInTestModel):
     """
     Model of a service.
     """
@@ -32,7 +28,7 @@ class Service(Model):
         :return: the exposed port
         """
         if len(self.ports) != 1:
-            raise UnexpectedNumberOfPortsException("%d ports are exposed (cannot use `port`)" % len(self.ports))
+            raise UnexpectedNumberOfPortsError("%d ports are exposed (cannot use `port`)" % len(self.ports))
         return list(self.ports.values())[0]
 
     def get_external_port_mapping_to(self, port: int) -> int:
@@ -48,10 +44,31 @@ class DockerisedService(Service):
     """
     Model of a service running in a Docker container.
     """
+    @property
+    def container(self) -> Optional[Container]:
+        if self.container_id is None:
+            return None
+        try:
+            return docker_client.containers.get(self.container_id)
+        except NotFound:
+            return None
+
+    @container.setter
+    def container(self, container: Container):
+        self.container_id = container.id
+
+    @property
+    def container_id(self) -> Optional[str]:
+        return self._container_id
+
+    @container_id.setter
+    def container_id(self, container_id: str):
+        self._container_id = container_id
+
     def __init__(self):
         super().__init__()
         self.name = None
-        self.container = None
+        self._container_id: str = None
         self.controller = None
 
     # TODO: Not sure of the best way to specify the type as it could be that of a subclass...
@@ -62,7 +79,7 @@ class DockerisedService(Service):
         self.controller.stop_service(self)
 
 
-class User(Model):
+class User(UseInTestModel):
     """
     A user with an associated password.
     """
