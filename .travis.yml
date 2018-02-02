@@ -31,7 +31,7 @@ install:
   - pip install --disable-pip-version-check -r ${TESTED_PACKAGE_DIRECTORY}/requirements.txt || true
 
 script:
-  - PYTHONPATH=. coverage run -m unittest discover -v -s "${TEST_PACAKGE}"
+  - PYTHONPATH=. coverage run -m unittest discover -v -s "useintest/tests/${TEST_PACAKGE}"
   - coverage run setup.py -q install
   - coverage combine -a
   - coverage report
