@@ -39,8 +39,8 @@ class GogsBaseServiceController(Generic[DockerisedServiceWithUsersType],
         service.root_user = User(_ROOT_USERNAME, _ROOT_PASSWORD)
 
         # Start gogs
-        socket = container.exec_run(["/app/gogs/docker/start.sh"], stream=True)
-        for line in socket:
+        _, output_generator = container.exec_run(["/app/gogs/docker/start.sh"], stream=True)
+        for line in output_generator:
             logging.debug(line)
             if "Listen: http://0.0.0.0:3000" in str(line):
                 break

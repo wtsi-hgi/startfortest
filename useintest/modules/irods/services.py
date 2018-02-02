@@ -137,9 +137,9 @@ class Irods3ServiceController(IrodsBaseServiceController, metaclass=ABCMeta):
             return False
 
         # Just because iRODS says it has started, it does not mean it is ready to do queries!
-        output = service.container.exec_run(
+        _, output = service.container.exec_run(
             "su - irods -c \"/home/irods/iRODS/irodsctl --verbose status\"", stdout=True)
-        while "No servers running" in output.decode("utf-8"):
+        while b"No servers running" in output:
             # Nothing else to check on - just sleep it out
             _logger.info("Still waiting on iRODS setup")
             sleep(0.1)
