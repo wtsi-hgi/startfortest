@@ -15,8 +15,7 @@ env:
     - TEST_PACAKGE=modules/irods
     - TEST_PACAKGE=modules/mongo
     - TEST_PACAKGE=modules/samtools
-#    - TEST_LATEST_ONLY=0
-#    - TEST_LATEST_ONLY=1
+    - TEST_PACAKGE=
 
 services:
   - docker
@@ -25,6 +24,14 @@ before_install:
   - export TESTED_PACKAGE_DIRECTORY="useintest/${TEST_PACAKGE}"
   - pip install codecov
   - pip install --disable-pip-version-check -r test_requirements.txt
+  - |
+      if [[ "${TEST_PACAKGE}" -eq "" ]]
+      then
+        sudo apt-get update && sudo apt-get --only-upgrade install docker-ce
+        printf "ubuntu:.*\ndebian:.*\nalpine:.*\npython:.*" > no-gc-images.txt
+        docker run -d -v /var/run/docker.sock:/var/run/docker.sock:ro -v $PWD:/working -e EXCLUDE_FROM_GC=/working/no-gc-images.txt spotify/docker-gc watch -n 300 /docker-gc
+        docker run --privileged -d -v /var/run/docker.sock:/var/run/docker.sock:ro docker watch -n 300 docker system prune -f
+      fi
 
 install:
   - pip install --disable-pip-version-check -r requirements.txt
@@ -37,4 +44,8 @@ script:
   - coverage report
 
 after_success:
-  - codecov
+  - |
+      if [[ "${TEST_PACAKGE}" -eq "" ]]
+      then
+        codecov
+      fi
