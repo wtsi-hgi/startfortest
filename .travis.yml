@@ -38,10 +38,12 @@ install:
       if [[ "${TEST_PACAKGE}" == "" ]]
       then
         find . -name requirements.txt -exec pip install --disable-pip-version-check -r "{}" \;
-      elif [[ -e ${TESTED_PACKAGE_DIRECTORY}/requirements.txt ]]
-      then
+      else
         pip install --disable-pip-version-check -r requirements.txt
-        pip install --disable-pip-version-check -r ${TESTED_PACKAGE_DIRECTORY}/requirements.txt
+        if [[ -e ${TESTED_PACKAGE_DIRECTORY}/requirements.txt ]]
+        then
+          pip install --disable-pip-version-check -r ${TESTED_PACKAGE_DIRECTORY}/requirements.txt
+        fi
       fi
 
 script:
