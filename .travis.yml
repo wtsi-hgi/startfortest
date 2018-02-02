@@ -37,7 +37,7 @@ jobs:
         - coverage report
       env: []
 
-    - stage: test_modules:
+    - stage: test_modules
       install:
         - pip install --disable-pip-version-check -r "${TESTED_PACKAGE_DIRECTORY}/requirements.txt" || true
       script:
