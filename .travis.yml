@@ -4,8 +4,6 @@ python:
   - 3.6
 
 env:
-  global:
-    - TESTED_PACKAGE_DIRECTORY="useintest/modules/${TEST_PACAKGE}"
   matrix:
     - TEST_PACAKGE=executables
     - TEST_PACAKGE=services
@@ -24,6 +22,7 @@ services:
   - docker
 
 before_install:
+  - export TESTED_PACKAGE_DIRECTORY="useintest/modules/${TEST_PACAKGE}"
   - pip install codecov
   - pip install --disable-pip-version-check -r test_requirements.txt
 
