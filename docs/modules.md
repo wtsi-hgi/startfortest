@@ -48,16 +48,10 @@ with controller.start_service() as service:
 #### Services (i.e. the iRODS server)
 * `IrodsServiceController`: Latest supported version of iRODS available.
 * `Irods4_1_10ServiceController`: iRODS version 4.1.10.
-* `Irods4_1_9ServiceController`: iRODS version 4.1.9.
-* `Irods4_1_8ServiceController`: iRODS version 4.1.8.
-* `Irods3_3_1ServiceController`: iRODS version 3.3.1.
 
 #### Executables (i.e. the icommands)
 * `IrodsExecutablesController`: Latest supported version of iRODS available.
 * `Irods4_1_10ExecutablesController`: iRODS version 4.1.10.
-* `Irods4_1_9ExecutablesController`: iRODS version 4.1.9.
-* `Irods4_1_8ExecutablesController`: iRODS version 4.1.8.
-* `Irods3_3_1ExecutablesController`: iRODS version 3.3.1.
 
 #### Helpers
 - `IrodsSetupHelper`: class to help with setup of tests with iRODS (works with any supported version of iRODS).
