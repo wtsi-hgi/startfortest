@@ -4,7 +4,7 @@ from unittest import TestCase
 
 from testhelpers import TypeUsedInTest, TestUsingType
 
-from useintest.executables.common import docker_client
+from useintest.common import docker_client
 from useintest.services.models import DockerisedService, Service
 
 ServiceType = TypeVar("ServiceType", bound=Service)

@@ -1,17 +1,15 @@
-import os
-
 import logging
+import os
 from typing import List, Any, Set
 
-import docker
 from docker.errors import ImageNotFound
+
+from useintest.common import docker_client
 
 CLI_ARGUMENTS = "\"$@\""
 
 SHEBANG = "#!/usr/bin/env bash"
 FAIL_SETTINGS = "set -eu -o pipefail"
-
-docker_client = docker.from_env()
 
 
 def write_commands(location: str, commands: str):

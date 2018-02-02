@@ -4,6 +4,7 @@ import tarfile
 from abc import ABCMeta
 from io import BytesIO
 from pathlib import PurePosixPath
+from time import sleep
 from typing import Generic
 
 from useintest.services.builders import DockerisedServiceControllerTypeBuilder
@@ -29,9 +30,8 @@ class GogsBaseServiceController(Generic[DockerisedServiceWithUsersType],
         # Painful conversion required due to limitation of the Docker client:
         # https://github.com/docker/docker-py/issues/1027#issuecomment-299654299
         archive_container = BytesIO()
-        archive = tarfile.open(mode="w", fileobj=archive_container)
-        archive.add(_CONFIGURATION_HOST_LOCATION, arcname=_CONFIGURATION_DOCKER_LOCATION.name)
-        archive.close()
+        with tarfile.open(mode="w", fileobj=archive_container) as archive:
+            archive.add(_CONFIGURATION_HOST_LOCATION, arcname=_CONFIGURATION_DOCKER_LOCATION.name)
         archive_as_bytes = bytes(archive_container.getbuffer())
 
         # Add configuration

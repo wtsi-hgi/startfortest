@@ -1,7 +1,11 @@
 # FIXME: This is not cross platform...
 from abc import ABCMeta
 
+import docker
+
 MOUNTABLE_TEMP_DIRECTORY = "/tmp"
+
+docker_client = docker.from_env()
 
 
 class UseInTestError(Exception):
@@ -23,3 +27,5 @@ class UseInTestModel(metaclass=ABCMeta):
     """
     Base which all models in this package should extend.
     """
+
+

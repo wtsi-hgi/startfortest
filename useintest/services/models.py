@@ -3,8 +3,7 @@ from docker.errors import NotFound
 from docker.models.containers import Container
 from typing import Set, Optional
 
-from useintest.common import UseInTestModel
-from useintest.executables.common import docker_client
+from useintest.common import UseInTestModel, docker_client
 from useintest.services.exceptions import UnexpectedNumberOfPortsError
 
 

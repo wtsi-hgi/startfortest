@@ -1,16 +1,17 @@
 import atexit
 import logging
+import math
 import socket
 from abc import ABCMeta, abstractmethod
 from inspect import signature
 from typing import Dict, Iterator, List, Callable, TypeVar, Generic, Type
 from uuid import uuid4
 
-import math
 from docker.errors import NotFound
 from stopit import ThreadingTimeout, TimeoutException
 
-from useintest.executables.common import docker_client, pull_docker_image
+from useintest.executables.common import pull_docker_image
+from useintest.common import docker_client
 from useintest.services.exceptions import ServiceStartError, TransientServiceStartError, \
     PersistentServiceStartError
 from useintest.services.models import Service, DockerisedService, DockerisedServiceWithUsers

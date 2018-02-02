@@ -3,6 +3,10 @@
 ### Changed
 - "predefined" -> "modules".
 - `pycryptodomex` is now an optional requirement that should only be installed if the gitlab module is used.
+- Irods module no longer uses special `Metadata` class - it uses a normal dictionary instead.
+
+### Removed
+- Removed reliance on deprecated, `hgicommon` library.
 
 ## 4.1.0 - 2018-01-18
 ### Added
