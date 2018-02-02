@@ -45,12 +45,12 @@ jobs:
       install:
         - pip install --disable-pip-version-check -r "${TESTED_PACKAGE_DIRECTORY}/requirements.txt" || true
       script:
+        # XXX: If it becomes possible to persist coverage data between stage jobs, change this
+        - export TEST_LATEST_ONLY=1
         - PYTHONPATH=. coverage run -m unittest discover -v -s "useintest/tests/${TEST_PACAKGE}"
         - coverage run setup.py -q install
         - coverage combine -a
         - coverage report
-      env:
-        - TEST_LATEST_ONLY=1
 
     # XXX: There is no data persistence between stages therefore it's not possible to combine the code-coverage for
     # all of the previous jobs :(
@@ -72,10 +72,3 @@ jobs:
         - codecov
       env:
         - TEST_LATEST_ONLY=0
-
-
-
-
-
-#  after_success:
-#    - codecov
