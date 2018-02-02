@@ -5,30 +5,56 @@ python:
 
 env:
   matrix:
-    - TEST_LATEST_ONLY=0
-    - TEST_LATEST_ONLY=1
+    - TEST_PACAKGE=executables
+    - TEST_PACAKGE=services
+    - TEST_PACAKGE=modules/bissell
+    - TEST_PACAKGE=modules/consul
+    - TEST_PACAKGE=modules/couchdb
+    - TEST_PACAKGE=modules/gitlab
+    - TEST_PACAKGE=modules/gogs
+    - TEST_PACAKGE=modules/irods
+    - TEST_PACAKGE=modules/mongo
+    - TEST_PACAKGE=modules/samtools
+    - TEST_PACAKGE=
 
 services:
   - docker
 
 before_install:
-  - sudo apt-get update && sudo apt-get --only-upgrade install docker-ce
+  - export TESTED_PACKAGE_DIRECTORY="useintest/${TEST_PACAKGE}"
   - pip install codecov
-  - pip install -r test_requirements.txt
-  - pip install -r useintest/modules/consul/requirements.txt
-  - pip install -r useintest/modules/gitlab/requirements.txt
+  - pip install --disable-pip-version-check -r test_requirements.txt
+  - |
+      if [[ "${TEST_PACAKGE}" == "" ]]
+      then
+        sudo apt-get update && sudo apt-get --only-upgrade install docker-ce
+        printf "ubuntu:.*\ndebian:.*\nalpine:.*\npython:.*" > no-gc-images.txt
+        docker run -d -v /var/run/docker.sock:/var/run/docker.sock:ro -v $PWD:/working -e EXCLUDE_FROM_GC=/working/no-gc-images.txt spotify/docker-gc watch -n 300 /docker-gc
+        docker run --privileged -d -v /var/run/docker.sock:/var/run/docker.sock:ro docker watch -n 300 docker system prune -f
+      fi
 
 install:
-  - pip install -r requirements.txt
-  - printf "ubuntu:.*\ndebian:.*\nalpine:.*\npython:.*" > no-gc-images.txt
-  - docker run -d -v /var/run/docker.sock:/var/run/docker.sock:ro -v $PWD:/working -e EXCLUDE_FROM_GC=/working/no-gc-images.txt spotify/docker-gc watch -n 300 /docker-gc
-  - docker run --privileged -d -v /var/run/docker.sock:/var/run/docker.sock:ro docker watch -n 300 docker system prune -f
+  - |
+      if [[ "${TEST_PACAKGE}" == "" ]]
+      then
+        find . -name requirements.txt -exec pip install --disable-pip-version-check -r "{}" \;
+      else
+        pip install --disable-pip-version-check -r requirements.txt
+        if [[ -e ${TESTED_PACKAGE_DIRECTORY}/requirements.txt ]]
+        then
+          pip install --disable-pip-version-check -r ${TESTED_PACKAGE_DIRECTORY}/requirements.txt
+        fi
+      fi
 
 script:
-  - PYTHONPATH=. coverage run -m unittest discover -v -s useintest/tests
+  - PYTHONPATH=. coverage run -m unittest discover -v -s "useintest/tests/${TEST_PACAKGE}"
   - coverage run setup.py -q install
   - coverage combine -a
   - coverage report
 
 after_success:
-  - codecov
+  - |
+      if [[ "${TEST_PACAKGE}" == "" ]]
+      then
+        codecov
+      fi
