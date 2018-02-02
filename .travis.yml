@@ -3,7 +3,18 @@ language: python
 python:
   - 3.6
 
-
+env:
+  matrix:
+    - TEST_PACAKGE=modules/bissell
+    - TEST_PACAKGE=modules/consul
+    - TEST_PACAKGE=modules/couchdb
+    - TEST_PACAKGE=modules/gitlab
+    - TEST_PACAKGE=modules/gogs
+    - TEST_PACAKGE=modules/irods
+    - TEST_PACAKGE=modules/mongo
+    - TEST_PACAKGE=modules/samtools
+#    - TEST_LATEST_ONLY=0
+#    - TEST_LATEST_ONLY=1
 
 services:
   - docker
@@ -30,7 +41,7 @@ jobs:
         - coverage report
       env: []
 
-    - stage: test_modules
+    - stage: test
       install:
         - pip install --disable-pip-version-check -r "${TESTED_PACKAGE_DIRECTORY}/requirements.txt" || true
       script:
@@ -38,20 +49,6 @@ jobs:
         - coverage run setup.py -q install
         - coverage combine -a
         - coverage report
-      env:
-        - TEST_PACAKGE=modules/bissell
-        - TEST_PACAKGE=modules/consul
-        - TEST_PACAKGE=modules/couchdb
-        - TEST_PACAKGE=modules/gitlab
-        - TEST_PACAKGE=modules/gogs
-        - TEST_PACAKGE=modules/irods
-        - TEST_PACAKGE=modules/mongo
-        - TEST_PACAKGE=modules/samtools
-
-
-
-#    - TEST_LATEST_ONLY=0
-#    - TEST_LATEST_ONLY=1
 
 #    - stage: test_all:
 
