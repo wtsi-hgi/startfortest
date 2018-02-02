@@ -63,90 +63,6 @@ class IrodsBaseServiceController(DockerisedServiceController, metaclass=ABCMeta)
         return service
 
 
-class Irods3ServiceController(IrodsBaseServiceController, metaclass=ABCMeta):
-    """
-    iRODS 3 service controller.
-    """
-    _PORT = 1247
-    _CONFIG_FILE_NAME = ".irodsEnv"
-
-    _HOST_PARAMETER_NAME = "irodsHost"
-    _PORT_PARAMETER_NAME = "irodsPort"
-    _USERNAME_PARAMETER_NAME = "irodsUserName"
-    _ZONE_PARAMETER_NAME = "irodsZone"
-
-    _USERS = [IrodsUser("rods", "iplant", "rods", admin=True)]
-
-    @staticmethod
-    def write_connection_settings(file_location: str, service: IrodsDockerisedService) -> str:
-        if os.path.isfile(file_location):
-            raise ValueError("Settings cannot be written to a file that already exists")
-
-        user = service.users[0]
-        config = [
-            (Irods3ServiceController._USERNAME_PARAMETER_NAME, user.username),
-            (Irods3ServiceController._HOST_PARAMETER_NAME, service.name),
-            (Irods3ServiceController._PORT_PARAMETER_NAME, Irods3ServiceController._PORT),
-            (Irods3ServiceController._ZONE_PARAMETER_NAME, user.zone)
-        ]
-        _logger.debug("Writing iRODS connection config to: %s" % file_location)
-        with open(file_location, "w") as settings_file:
-            settings_file.write("\n".join(["%s %s" % x for x in config]))
-
-        return user.password
-
-    @staticmethod
-    def _start_detector(log_line: str) -> bool:
-        """
-        TODO
-        :param log_line:
-        :return:
-        """
-        return "exited: irods" in log_line
-
-    @staticmethod
-    def _transient_error_detector(log_line: str) -> bool:
-        """
-        TODO
-        :param log_line:
-        :return:
-        """
-        return "failed to start" in log_line or "exited: irods" in log_line and "not expected" in log_line
-
-    # TODO: Use default `start_timeout` and `start_tries` values from superclass
-    def __init__(self, docker_repository: str, docker_tag: str, start_timeout: int=math.inf, start_tries: int=10,
-                 version: Version=None):
-        """
-        Constructor.
-        :param docker_repository: name of the Docker repository
-        :param docker_tag: tag of the Docker image that will run the iRODS 4 server
-        :param start_timeout: see `ContainerisedServiceController.__init__`
-        :param start_tries: see `ContainerisedServiceController.__init__`
-        :param version: exact version of the iRODS 4 sever (will use `docker_tag` if not supplied)
-        """
-        version = version if version is not None else Version(docker_tag)
-        super().__init__(version, Irods3ServiceController._USERS, Irods3ServiceController._CONFIG_FILE_NAME,
-                         docker_repository, docker_tag, [Irods3ServiceController._PORT],
-                         Irods3ServiceController._start_detector,
-                         transient_error_detector=Irods3ServiceController._transient_error_detector,
-                         persistent_error_detector=IrodsBaseServiceController._persistent_error_detector,
-                         start_timeout=start_timeout, start_tries=start_tries)
-
-    def _wait_until_started(self, service: DockerisedService) -> bool:
-        if not super()._wait_until_started(service):
-            return False
-
-        # Just because iRODS says it has started, it does not mean it is ready to do queries!
-        _, output = service.container.exec_run(
-            "su - irods -c \"/home/irods/iRODS/irodsctl --verbose status\"", stdout=True)
-        while b"No servers running" in output:
-            # Nothing else to check on - just sleep it out
-            _logger.info("Still waiting on iRODS setup")
-            sleep(0.1)
-
-        return True
-
-
 class Irods4ServiceController(IrodsBaseServiceController, metaclass=ABCMeta):
     """
     iRODS 4 service controller.
@@ -240,11 +156,7 @@ def build_irods_service_controller_type(docker_repository: str, docker_tag: str,
 
 
 # Concrete service controller definitions
-Irods3_3_1ServiceController = build_irods_service_controller_type(_DOCKER_REPOSITORY, "3.3.1", Irods3ServiceController)
-Irods4_1_8ServiceController = build_irods_service_controller_type(_DOCKER_REPOSITORY, "4.1.8", Irods4ServiceController)
-Irods4_1_9ServiceController = build_irods_service_controller_type(_DOCKER_REPOSITORY, "4.1.9", Irods4ServiceController)
 Irods4_1_10ServiceController = build_irods_service_controller_type(_DOCKER_REPOSITORY, "4.1.10", Irods4ServiceController)
 IrodsServiceController = Irods4_1_10ServiceController
 
-irods_service_controllers = {Irods3_3_1ServiceController, Irods4_1_8ServiceController, Irods4_1_9ServiceController,
-                             Irods4_1_10ServiceController}
+irods_service_controllers = {Irods4_1_10ServiceController}

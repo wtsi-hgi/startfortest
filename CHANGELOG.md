@@ -7,6 +7,7 @@
 
 ### Removed
 - Removed reliance on deprecated, `hgicommon` library.
+- Support for iRODS 3.3.1, 4.1.8, 4.1.9.
 
 ## 4.1.0 - 2018-01-18
 ### Added

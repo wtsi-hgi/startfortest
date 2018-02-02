@@ -11,7 +11,7 @@ from useintest.tests.services.common import TestDockerisedServiceControllerSubcl
 
 
 class _TestIrodsServiceController(
-    TestDockerisedServiceControllerSubclass[TypeUsedInTest, DockerisedServiceWithUsers], metaclass=ABCMeta):
+        TestDockerisedServiceControllerSubclass[TypeUsedInTest, DockerisedServiceWithUsers], metaclass=ABCMeta):
     """
     Tests for iRODS controller.
     """
