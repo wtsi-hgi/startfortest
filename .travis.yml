@@ -13,8 +13,6 @@ env:
     - TEST_PACAKGE=modules/irods
     - TEST_PACAKGE=modules/mongo
     - TEST_PACAKGE=modules/samtools
-#    - TEST_LATEST_ONLY=0
-#    - TEST_LATEST_ONLY=1
 
 services:
   - docker
@@ -51,6 +49,8 @@ jobs:
         - coverage run setup.py -q install
         - coverage combine -a
         - coverage report
+      env:
+        - TEST_LATEST_ONLY=1
 
     # XXX: There is no data persistence between stages therefore it's not possible to combine the code-coverage for
     # all of the previous jobs :(
@@ -70,6 +70,8 @@ jobs:
         - coverage report
       after_success:
         - codecov
+      env:
+        - TEST_LATEST_ONLY=0
 
 
 
