@@ -26,6 +26,10 @@ before_install:
 install:
   - pip install --disable-pip-version-check -r requirements.txt
 
+stages:
+  - test_common
+  - test_modules
+
 jobs:
   include:
     - stage: test_common
