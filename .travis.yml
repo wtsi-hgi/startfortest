@@ -37,7 +37,7 @@ install:
   - |
       if [[ "${TEST_PACAKGE}" == "" ]]
       then
-        find . -name requirements.txt -exec pip install --disable-pip-version-check -r "{}"
+        find . -name requirements.txt -exec pip install --disable-pip-version-check -r "{}" \;
       elif [[ -e ${TESTED_PACKAGE_DIRECTORY}/requirements.txt ]]
       then
         pip install --disable-pip-version-check -r requirements.txt
