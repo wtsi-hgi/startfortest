@@ -4,14 +4,14 @@ import math
 import socket
 from abc import ABCMeta, abstractmethod
 from inspect import signature
+
+from docker.errors import NotFound
+from timeout_decorator import timeout_decorator
 from typing import Dict, Iterator, List, Callable, TypeVar, Generic, Type
 from uuid import uuid4
 
-from docker.errors import NotFound
-from stopit import ThreadingTimeout, TimeoutException
-
-from useintest.executables.common import pull_docker_image
 from useintest.common import docker_client
+from useintest.executables.common import pull_docker_image
 from useintest.services.exceptions import ServiceStartError, TransientServiceStartError, \
     PersistentServiceStartError
 from useintest.services.models import Service, DockerisedService, DockerisedServiceWithUsers
@@ -114,27 +114,31 @@ class ContainerisedServiceController(Generic[ServiceType], ServiceController[Ser
         if self.stop_on_exit:
             atexit.register(self.stop_service, service)
 
-        started = False
         tries = 0
-        while not started:
-            if tries >= self.start_tries:
-                raise ServiceStartError()
+        while tries < self.start_tries:
             if tries > 0:
                 self._stop(service)
             self._start(service)
+            started = False
             try:
                 if self.start_timeout is not math.inf:
-                    with ThreadingTimeout(self.start_timeout, swallow_exc=False):
-                        started = self._wait_until_started(service)
+                    @timeout_decorator.timeout(self.start_timeout, timeout_exception=TimeoutError)
+                    def _wrapped_wait_until_started(service: ServiceType) -> bool:
+                        return self._wait_until_started(service)
+                    started = _wrapped_wait_until_started(service)
                 else:
                     started = self._wait_until_started(service)
-            except TimeoutException as e:
+            except TimeoutError as e:
                 _logger.warning(e)
             except TransientServiceStartError as e:
                 _logger.warning(e)
 
-            tries += 1
-        return service
+            if started:
+                return service
+            else:
+                tries += 1
+
+        raise ServiceStartError()
 
     def stop_service(self, service: ServiceType):
         self._stop(service)
