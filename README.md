@@ -1,6 +1,6 @@
 [![Build Status](https://travis-ci.org/wtsi-hgi/useintest.svg)](https://travis-ci.org/wtsi-hgi/useintest)
 [![codecov.io](https://codecov.io/gh/wtsi-hgi/useintest/graph/badge.svg)](https://codecov.io/github/wtsi-hgi/useintest)
-[![Documentation Status](https://readthedocs.org/projects/useintest/badge/?version=latest)](http://useintest.readthedocs.io/en/latest/?badge=latest)
+[![Documentation Status](https://readthedocs.org/projects/useintest/badge/?version=develop)](http://useintest.readthedocs.io/en/develop/?badge=develop)
 # Use In Test
 *I don't care how it's done, I just want to use it in my tests!*
 
