@@ -108,16 +108,10 @@ def _build_irods_executables_controller(image_with_compatible_icommands: str, ir
     )
 
 
-Irods3_3_1ExecutablesController = _build_irods_executables_controller("mercury/icat:3.3.1", Version("3.3.1"))
-Irods4_1_8ExecutablesController = _build_irods_executables_controller("mercury/icat:4.1.8", Version("4.1.8"))
-Irods4_1_9ExecutablesController = _build_irods_executables_controller("mercury/icat:4.1.9", Version("4.1.9"))
 Irods4_1_10ExecutablesController = _build_irods_executables_controller("mercury/icat:4.1.10", Version("4.1.10"))
 IrodsExecutablesController = Irods4_1_10ExecutablesController
 
 irods_executables_controllers_and_versions = {
-    Version("3.3.1"): Irods3_3_1ExecutablesController,
-    Version("4.1.8"): Irods4_1_8ExecutablesController,
-    Version("4.1.9"): Irods4_1_9ExecutablesController,
     Version("4.1.10"): Irods4_1_10ExecutablesController,
 }
 irods_executables_controllers = irods_executables_controllers_and_versions.values()
