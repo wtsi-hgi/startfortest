@@ -1,5 +1,5 @@
 # Change Log
-## [Unreleased]
+## 5.0.0 - 2017-02-02
 ### Changed
 - "predefined" -> "modules".
 - `pycryptodomex` is now an optional requirement that should only be installed if the gitlab module is used.
