@@ -23,7 +23,7 @@ with controller.start_service() as service:
 
 ## CouchDB
 ### Module
-`useintest.predefined.couchdb`
+`useintest.modules.couchdb`
 
 ### Contents
 * `CouchDBServiceController`: Latest supported version of CouchDB available.
@@ -32,7 +32,7 @@ with controller.start_service() as service:
 ### Examples
 To use a containerised version of Couchdb in a test:
 ```python
-from useintest.predefined.couchdb import CouchDBServiceController
+from useintest.modules.couchdb import CouchDBServiceController
 
 controller = CouchDBServiceController()              
 with controller.start_service() as service:      
@@ -42,7 +42,7 @@ with controller.start_service() as service:
 
 ## iRODS
 ### Module
-`useintest.predefined.irods`
+`useintest.modules.irods`
 
 ### Contents
 #### Services (i.e. the iRODS server)
@@ -61,7 +61,7 @@ The easiest way to use iRODS in your test is to use the `setup` method, which st
 icommands on the host machine and then deals with authentication. The end result is a set of icommands that are ready to 
 use against a clean iRODS server:
 ```python
-from useintest.predefined.irods import setup_irods
+from useintest.modules.irods import setup_irods
 
 # Optionally define the service controller (i.e. the version of iRODS) with the `irods_service_controller` parameter
 icommands_location, service, icommands_controller, icat_controller = setup_irods()
@@ -74,7 +74,7 @@ icommands_controller.tear_down()
 
 Alternatively, to just set up an iRODS service ("iCAT"):
 ```python
-from useintest.predefined.irods import IrodsServiceController
+from useintest.modules.irods import IrodsServiceController
 
 # Setup iRODS server
 controller = IrodsServiceController()
@@ -86,7 +86,7 @@ To setup corresponding icommands for an iRODS service:
 ```python
 import os
 import shutil
-from useintest.predefined.irods import IrodsServiceController, IrodsExecutablesController
+from useintest.modules.irods import IrodsServiceController, IrodsExecutablesController
 
 # Write iRODS connection settings for the server
 settings_directory = "/tmp/irods"
@@ -108,7 +108,7 @@ shutil.rmtree(settings_directory)
 
 For help in setting up tests there is `IrodsSetupHelper`:
 ```python
-from useintest.predefined.irods import IrodsSetupHelper
+from useintest.modules.irods import IrodsSetupHelper
 
 setup_irods
 setup_helper = IrodsSetupHelper(icommands_location)
@@ -117,7 +117,7 @@ setup_helper = IrodsSetupHelper(icommands_location)
 
 ## Samtools
 ### Module
-`useintest.predefined.samtools`
+`useintest.modules.samtools`
 
 ### Contents
 * `SamtoolsExecutablesController`: Latest supported version of samtools available.
@@ -126,7 +126,7 @@ setup_helper = IrodsSetupHelper(icommands_location)
 ### Examples
 To use containerised Samtools executable in a test:
 ```python
-from useintest.predefined.samtools import SamtoolsExecutablesController
+from useintest.modules.samtools import SamtoolsExecutablesController
 
 controller = SamtoolsExecutablesController()
 executables_directory = controller.write_executables()
@@ -146,7 +146,7 @@ container - the result would not be pretty.
 
 ## GitLab
 ### Module
-`useintest.predefined.gitlab`
+`useintest.modules.gitlab`
 
 ### Contents
 * `GitLabServiceController`: Latest supported version of GitLab available.
@@ -157,7 +157,7 @@ container - the result would not be pretty.
 ### Examples
 To use containerised GitLab in a test:
 ```python
-from useintest.predefined.gitlab import GitLabServiceController
+from useintest.modules.gitlab import GitLabServiceController
 
 controller = GitLabServiceController()
 with controller.start_service() as service:
