@@ -13,7 +13,7 @@ _logger = logging.getLogger(__name__)
 _DOCKER_REPOSITORY = "mercury/icat"
 
 
-class IrodsBaseServiceController(DockerisedServiceController, metaclass=ABCMeta):
+class IrodsBaseServiceController(DockerisedServiceController[IrodsDockerisedService], metaclass=ABCMeta):
     """
     TODO
     """

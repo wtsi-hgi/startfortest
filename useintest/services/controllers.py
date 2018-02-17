@@ -12,8 +12,7 @@ from uuid import uuid4
 
 from useintest.common import docker_client
 from useintest.executables.common import pull_docker_image
-from useintest.services.exceptions import ServiceStartError, TransientServiceStartError, \
-    PersistentServiceStartError
+from useintest.services.exceptions import ServiceStartError, TransientServiceStartError, PersistentServiceStartError
 from useintest.services.models import Service, DockerisedService, DockerisedServiceWithUsers
 
 _logger = logging.getLogger(__name__)
@@ -171,7 +170,7 @@ class DockerisedServiceController(
                  persistent_error_detector: Callable[..., bool]=None,
                  transient_error_detector: Callable[..., bool]=None,
                  start_timeout: int=math.inf, start_tries: int=math.inf, additional_run_settings: dict=None,
-                 startup_monitor: Callable[[DockerisedServiceType], bool]=None):
+                 startup_monitor: Callable[[DockerisedServiceType], bool]=None, pull: bool=True):
         """
         Constructor.
         :param service_model: see `ServiceController.__init__`
@@ -187,6 +186,7 @@ class DockerisedServiceController(
         :param additional_run_settings: other run settings (see https://docker-py.readthedocs.io/en/1.2.3/api/#create_container)
         :param startup_monitor: override the default, log based code that waits for the service to start, with a custom
         monitor that should return `True` when the service has started or raise an exception if it is not going to start
+        :param pull: whether to always pull from source repository
         """
         super().__init__(service_model, start_timeout, start_tries)
         self.repository = repository
@@ -197,11 +197,16 @@ class DockerisedServiceController(
         self.transient_error_detector = transient_error_detector
         self.run_settings = additional_run_settings if additional_run_settings is not None else {}
         self.startup_monitor = startup_monitor
+        self.pull = pull
         self._log_iterator: Dict[Service, Iterator] = dict()
 
     def _start(self, service: DockerisedServiceType):
         pull_docker_image(self.repository, self.tag)
-        image = docker_client.images.pull(self.repository, tag=self.tag)
+
+        if self.pull:
+            image = docker_client.images.pull(self.repository, tag=self.tag)
+        else:
+            image = docker_client.images.get(f"{self.repository}:{self.tag}")
 
         service.name = f"{self.repository.split('/')[-1]}-{uuid4()}"
         service.ports = {port: _get_open_port() for port in self.ports}

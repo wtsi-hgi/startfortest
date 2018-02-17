@@ -1,4 +1,12 @@
 # Change Log
+## [Unreleasd]
+### Added
+- Optionally `pull` images from source repository (allows use of local only images).
+
+## 5.0.1 - 2017-02-06
+### Changed
+- Fixed iRODS service imports.
+
 ## 5.0.0 - 2017-02-02
 ### Changed
 - "predefined" -> "modules".
