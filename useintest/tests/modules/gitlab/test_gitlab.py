@@ -5,13 +5,13 @@ from abc import ABCMeta
 import requests
 
 from useintest.modules.gitlab.gitlab import GitLabServiceController, gitlab_service_controllers
-from useintest.services.models import DockerisedServiceWithUsers
+from useintest.services.models import DockerisedServiceWithUsers, User
 from testhelpers import TypeUsedInTest, create_tests, get_classes_to_test
 from useintest.tests.services.common import TestServiceControllerSubclass
 
 
 class _TestGitLabBaseServiceController(
-    TestServiceControllerSubclass[TypeUsedInTest, DockerisedServiceWithUsers], metaclass=ABCMeta):
+        TestServiceControllerSubclass[TypeUsedInTest, DockerisedServiceWithUsers[User]], metaclass=ABCMeta):
     """
     Tests for `GitLabBaseServiceController`.
     """

@@ -18,7 +18,7 @@ class GitLabBaseServiceController(DockerisedServiceController[ServiceType], meta
     """
     Base class for GitLab service controllers.
     """
-    def start_service(self) -> DockerisedServiceWithUsers:
+    def start_service(self) -> DockerisedServiceWithUsers[User]:
         service = super().start_service()
         service.root_user = User(ROOT_USERNAME, ROOT_PASSWORD)
         return service

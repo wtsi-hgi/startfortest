@@ -37,7 +37,7 @@ class IrodsUser(User):
         return hash(str(super().__hash__()) + self.zone + str(self.admin))
 
 
-class IrodsDockerisedService(DockerisedServiceWithUsers):
+class IrodsDockerisedService(DockerisedServiceWithUsers[IrodsUser]):
     """
     An iRODS service running in Docker.
     """

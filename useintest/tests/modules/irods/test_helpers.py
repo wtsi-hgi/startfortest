@@ -116,11 +116,11 @@ class _TestIrodsSetupHelper(
         self.assertIn("resc_def_path: %s" % resource.location, resource_info)
 
     def test_create_user_with_existing_username(self):
-        existing_user = self.service.users[0]
+        existing_user = list(self.service.users)[0]
         self.assertRaises(ValueError, self.setup_helper.create_user, existing_user.username, existing_user.zone)
 
     def test_create_user(self):
-        expected_user = IrodsUser("user_1", self.service.users[0].zone)
+        expected_user = IrodsUser("user_1", self.service.root_user.zone)
         user = self.setup_helper.create_user(expected_user.username, expected_user.zone)
         self.assertEqual(expected_user, user)
         user_list = self.setup_helper.run_icommand(["iadmin", "lu"])
@@ -128,7 +128,7 @@ class _TestIrodsSetupHelper(
 
     def test_set_access(self):
         path = self.setup_helper.create_data_object(_DATA_OBJECT_NAME)
-        zone = self.service.users[0].zone
+        zone = self.service.root_user.zone
         user_1 = self.setup_helper.create_user("user_1", zone)
         user_2 = self.setup_helper.create_user("user_2", zone)
 

@@ -51,7 +51,7 @@ class GogsBaseServiceController(Generic[DockerisedServiceWithUsersType],
 # Employing hacky way of getting run sleeping forever with the detector
 common_setup = {
     "superclass": GogsBaseServiceController,
-    "service_model": DockerisedServiceWithUsers,
+    "service_model": DockerisedServiceWithUsers[User],
     "repository": "gogs/gogs",
     "start_log_detector": lambda log_line: "127.0.0.1\tlocalhost" in log_line,
     "transient_error_log_detector": lambda log_line: "the container has stopped" in log_line,

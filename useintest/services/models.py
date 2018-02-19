@@ -1,10 +1,13 @@
+from typing import Set, Optional, Generic, TypeVar
+
 from bidict import bidict
 from docker.errors import NotFound
 from docker.models.containers import Container
-from typing import Set, Optional
 
 from useintest.common import UseInTestModel, docker_client
 from useintest.services.exceptions import UnexpectedNumberOfPortsError
+
+UserType = TypeVar("UserType", bound="User")
 
 
 class Service(UseInTestModel):
@@ -96,17 +99,17 @@ class User(UseInTestModel):
         return hash(self.username + self.password)
 
 
-class ServiceWithUsers(Service):
+class ServiceWithUsers(Generic[UserType], Service):
     """
     A service with users.
     """
     def __init__(self):
         super().__init__()
-        self.users: Set[User] = set()
-        self._root_user: Optional[User] = None
+        self.users: Set[UserType] = set()
+        self._root_user: Optional[UserType] = None
 
     @property
-    def root_user(self) -> Optional[User]:
+    def root_user(self) -> Optional[UserType]:
         """
         Gets a user of the service that has privileged access. 
         :return: a user with privilege access
@@ -115,7 +118,7 @@ class ServiceWithUsers(Service):
         return self._root_user
 
     @root_user.setter
-    def root_user(self, user: Optional[User]):
+    def root_user(self, user: Optional[UserType]):
         """
         Sets the user of the service that has privileged access.
         :param user: the user with privilege access
@@ -125,7 +128,7 @@ class ServiceWithUsers(Service):
         self._root_user = user
 
 
-class DockerisedServiceWithUsers(DockerisedService, ServiceWithUsers):
+class DockerisedServiceWithUsers(Generic[UserType], DockerisedService, ServiceWithUsers[UserType]):
     """
     Service running on Docker with users.
     """
