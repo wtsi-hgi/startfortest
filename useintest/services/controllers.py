@@ -176,8 +176,8 @@ class DockerisedServiceController(
                  persistent_error_log_detector: LogListener=None,
                  transient_error_log_detector: LogListener=None,
                  startup_monitor: Callable[[ServiceType], bool]=None,
-                 start_http_detector: Callable[[Response], Tuple[str, str]]=None,
-                 start_http_detection_endpoint: str=None):
+                 start_http_detector: Callable[[Response], bool]=None,
+                 start_http_detection_endpoint: str=""):
         """
         Constructor.
         :param service_model: see `ServiceController.__init__`
@@ -191,15 +191,12 @@ class DockerisedServiceController(
         :param start_log_detector: callable that detects if the service is ready for use from the logs
         :param persistent_error_log_detector: callable that detects if the service is unable to start
         :param transient_error_log_detector: callable that detects if the service encountered a transient error
-        :param start_http_detector: callable that detects if the service is ready for use based on
+        :param start_http_detector: callable that detects if the service is ready for use based on given HTTP response
         :param start_http_detection_endpoint: endpoint to call that should respond if the service has started
         """
         if startup_monitor and (start_log_detector or persistent_error_log_detector or transient_error_log_detector or
                                 start_http_detector):
             raise ValueError("Cannot set `startup_monitor` in conjunction with any other detector")
-        if (start_http_detector is None and start_http_detection_endpoint is not None) or \
-                (start_http_detector is not None and start_http_detection_endpoint is None):
-            raise ValueError("Must specify both `start_http_detector` and `start_http_detection_endpoint`")
 
         super().__init__(service_model, start_timeout, start_tries, startup_monitor=startup_monitor)
         self.repository = repository
@@ -290,7 +287,10 @@ class DockerisedServiceController(
         """
         started = False
         while not started:
-            response = requests.head(f"http://{service.host}:{service.port}/{self.start_http_detection_endpoint}")
-            started = self.start_http_detector(response)
+            try:
+                response = requests.head(f"http://{service.host}:{service.port}/{self.start_http_detection_endpoint}")
+                started = self.start_http_detector(response)
+            except requests.exceptions.ConnectionError:
+                pass
             if not started:
                 sleep(0.1)
