@@ -113,24 +113,20 @@ class ContainerisedServiceController(Generic[ServiceType], ServiceController[Ser
             if tries > 0:
                 self._stop(service)
             self._start(service)
-            started = False
             try:
                 if self.start_timeout is not math.inf:
                     @timeout_decorator.timeout(self.start_timeout, timeout_exception=TimeoutError)
                     def _wrapped_wait_until_started(service: ServiceType) -> bool:
                         return self._wait_until_started(service)
-                    started = _wrapped_wait_until_started(service)
+                    _wrapped_wait_until_started(service)
                 else:
-                    started = self._wait_until_started(service)
+                    self._wait_until_started(service)
+                return service
             except TimeoutError as e:
                 logger.warning(e)
             except TransientServiceStartError as e:
                 logger.warning(e)
-
-            if started:
-                return service
-            else:
-                tries += 1
+            tries += 1
 
         raise ServiceStartError()
 
