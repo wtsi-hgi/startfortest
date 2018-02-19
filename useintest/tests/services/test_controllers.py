@@ -41,7 +41,7 @@ class TestDockerisedServiceController(unittest.TestCase):
             repository="alpine",
             ports=[],
             tag="3.6",
-            start_detector=lambda line: False,
+            start_log_detector=lambda line: False,
             start_tries=1
         ).build()
         self.assertRaises(ServiceStartError, ExitingController().start_service)
