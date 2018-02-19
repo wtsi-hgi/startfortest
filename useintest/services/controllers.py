@@ -1,25 +1,26 @@
 import atexit
-import logging
 import math
 import socket
 from abc import ABCMeta, abstractmethod
 from inspect import signature
+from typing import Dict, Iterator, List, Callable, TypeVar, Generic, Type, Union
+from uuid import uuid4
 
 from docker.errors import NotFound
 from timeout_decorator import timeout_decorator
-from typing import Dict, Iterator, List, Callable, TypeVar, Generic, Type
-from uuid import uuid4
 
+from useintest._logging import create_logger
 from useintest.common import docker_client
 from useintest.executables.common import pull_docker_image
 from useintest.services.exceptions import ServiceStartError, TransientServiceStartError, PersistentServiceStartError
 from useintest.services.models import Service, DockerisedService, DockerisedServiceWithUsers
 
-_logger = logging.getLogger(__name__)
-
 ServiceType = TypeVar("ServiceType", bound=Service)
 DockerisedServiceType = TypeVar("DockerisedServiceType", bound=DockerisedService)
 DockerisedServiceWithUsersType = TypeVar("DockerisedServiceWithUsersType", bound=DockerisedServiceWithUsers)
+LogListener = Union[Callable[[str, DockerisedService], bool], Callable[[str], bool]]
+
+logger = create_logger(__name__)
 
 
 def _get_open_port() -> int:
@@ -83,17 +84,8 @@ class ContainerisedServiceController(Generic[ServiceType], ServiceController[Ser
         :param service: model of the service to stop
         """
 
-    @abstractmethod
-    def _wait_until_started(self, service: Service) -> bool:
-        """
-        Blocks until the given container has started.
-        :raises ServiceStartException: raised if service cannot be started
-        :param service: the service
-        :return: `True` if the service has started successfully
-        """
-
     def __init__(self, service_model: Type[ServiceType], start_timeout: float=math.inf, start_tries: int=10,
-                 stop_on_exit: bool=True):
+                 stop_on_exit: bool=True, startup_monitor: Callable[[ServiceType], bool]=None):
         """
         Constructor.
         :param stop_on_exit: see `Container.__init__`
@@ -101,11 +93,14 @@ class ContainerisedServiceController(Generic[ServiceType], ServiceController[Ser
         :param start_tries: number of times to try to start the container before giving up (will only try once if a
         `PersistentServiceStartException` is raised
         :param stop_on_exit: whether to stop all started containers on exit
+        :param startup_monitor: callable that should block until the service, given as the first parameter is known to
+        have started and is ready for use. Should raise a `ServiceStartException` if service is not going to start
         """
         super().__init__(service_model)
         self.start_timeout = start_timeout
         self.start_tries = start_tries
         self.stop_on_exit = stop_on_exit
+        self.startup_monitor = startup_monitor
 
     def start_service(self) -> ServiceType:
         service = self._service_model()
@@ -128,9 +123,9 @@ class ContainerisedServiceController(Generic[ServiceType], ServiceController[Ser
                 else:
                     started = self._wait_until_started(service)
             except TimeoutError as e:
-                _logger.warning(e)
+                logger.warning(e)
             except TransientServiceStartError as e:
-                _logger.warning(e)
+                logger.warning(e)
 
             if started:
                 return service
@@ -142,6 +137,16 @@ class ContainerisedServiceController(Generic[ServiceType], ServiceController[Ser
     def stop_service(self, service: ServiceType):
         self._stop(service)
 
+    def _wait_until_started(self, service: ServiceType):
+        """
+        Blocks until the given container has started.
+        :raises ServiceStartException: raised if service cannot be started
+        :param service: the service
+        """
+        if self.startup_monitor is None:
+            raise ValueError("No startup monitor set")
+        return self.startup_monitor(service)
+
 
 class DockerisedServiceController(
         Generic[DockerisedServiceType], ContainerisedServiceController[DockerisedServiceType], metaclass=ABCMeta):
@@ -149,8 +154,7 @@ class DockerisedServiceController(
     Controller of Docker containers running a service brought up for testing.
     """
     @staticmethod
-    def _call_detector_with_correct_arguments(detector: Callable, line: str, service: DockerisedServiceType) \
-            -> bool:
+    def _call_detector_with_correct_arguments(detector: Callable, line: str, service: DockerisedServiceType) -> bool:
         """
         Calls the given detector with either line as the only argument or both line and service, depending on the
         detector's signature.
@@ -165,38 +169,53 @@ class DockerisedServiceController(
         else:
             return detector(line, service)
 
+    @property
+    def start_detector(self) -> LogListener:
+        """
+        TODO
+        :return:
+        """
+        return self.start_log_detector
+
     def __init__(self, service_model: Type[ServiceType], repository: str, tag: str, ports: List[int],
-                 start_detector: Callable[..., bool]=None,
-                 persistent_error_detector: Callable[..., bool]=None,
-                 transient_error_detector: Callable[..., bool]=None,
                  start_timeout: int=math.inf, start_tries: int=math.inf, additional_run_settings: dict=None,
-                 startup_monitor: Callable[[DockerisedServiceType], bool]=None, pull: bool=True):
+                 pull: bool=True,
+                 start_detector: LogListener=None, start_log_detector: LogListener=None,
+                 persistent_error_detector: LogListener=None,
+                 transient_error_detector: LogListener=None,
+                 startup_monitor: Callable[[ServiceType], bool]=None):
         """
         Constructor.
         :param service_model: see `ServiceController.__init__`
-        :param repository: the Dockerhub repository of the service to start
-        :param tag: the Dockerhub repository tag of the service to start
+        :param repository: the repository of the service to start
+        :param tag: the repository tag of the service to start
         :param ports: the ports the service exposes
-        :param start_detector: function that detects if the service is ready to use from the logs
-        :param persistent_error_detector: function that detects if the service is unable to start
-        :param transient_error_detector: function that detects if the service encountered a transient error when
-        starting
         :param start_timeout: timeout for starting containers
         :param start_tries: number of times to try starting the containerised service
         :param additional_run_settings: other run settings (see https://docker-py.readthedocs.io/en/1.2.3/api/#create_container)
-        :param startup_monitor: override the default, log based code that waits for the service to start, with a custom
-        monitor that should return `True` when the service has started or raise an exception if it is not going to start
         :param pull: whether to always pull from source repository
+        :param start_log_detector: callable that detects if the service is ready for use from the logs
+        :param persistent_error_detector: callable that detects if the service is unable to start
+        :param transient_error_detector: callable that detects if the service encountered a transient error when
+        starting
         """
-        super().__init__(service_model, start_timeout, start_tries)
+        if start_detector is not None:
+            logger.warning("Use of `start_detector` is deprecated - use `start_log_detector` instead")
+        if start_detector is not None:
+            if start_log_detector is not None:
+                raise ValueError("Cannot specify both `start_detector` and `start_log_detector` (use latter only)")
+            start_log_detector = start_detector
+        if startup_monitor and (start_log_detector or persistent_error_detector or transient_error_detector):
+            raise ValueError("Cannot set `startup_monitor` in conjunction with any other detector")
+
+        super().__init__(service_model, start_timeout, start_tries, startup_monitor=startup_monitor)
         self.repository = repository
         self.tag = tag
         self.ports = ports
-        self.start_detector = start_detector
+        self.start_log_detector = start_log_detector
         self.persistent_error_detector = persistent_error_detector
         self.transient_error_detector = transient_error_detector
         self.run_settings = additional_run_settings if additional_run_settings is not None else {}
-        self.startup_monitor = startup_monitor
         self.pull = pull
         self._log_iterator: Dict[Service, Iterator] = dict()
 
@@ -232,27 +251,36 @@ class DockerisedServiceController(
             except NotFound:
                 pass
 
-    def _wait_until_started(self, service: DockerisedServiceType) -> bool:
+    def _wait_until_started(self, service: DockerisedServiceType):
         if self.startup_monitor is not None:
             return self.startup_monitor(service)
         else:
-            log_stream = service.container.logs(stream=True)
-            for line in log_stream:
-                # XXX: Although non-streamed logs are returned as a string, the generator returns bytes!?
-                # http://docker-py.readthedocs.io/en/stable/containers.html#docker.models.containers.Container.logs
-                line = line.decode("utf-8")
-                logging.debug(line)
+            if self.start_log_detector:
+                self._wait_until_logs_indicate_start(service)
 
-                if self.persistent_error_detector is not None \
-                        and self._call_detector_with_correct_arguments(self.persistent_error_detector, line, service):
-                    raise PersistentServiceStartError(line)
-                elif self.transient_error_detector is not None \
-                        and self._call_detector_with_correct_arguments(self.transient_error_detector, line, service):
-                    raise TransientServiceStartError(line)
-                elif self._call_detector_with_correct_arguments(self.start_detector, line, service):
-                    return True
+    def _wait_until_logs_indicate_start(self, service: DockerisedServiceType):
+        """
+        Blocks until logs indicate that the service has started.
+        :param service: starting service
+        :raises ServiceStartException: raised if service cannot be started
+        """
+        log_stream = service.container.logs(stream=True)
+        for line in log_stream:
+            # XXX: Although non-streamed logs are returned as a string, the generator returns bytes!?
+            # http://docker-py.readthedocs.io/en/stable/containers.html#docker.models.containers.Container.logs
+            line = line.decode("utf-8")
+            logger.debug(line)
 
-            assert len(docker_client.containers.list(filters=dict(name=service.name))) == 0
-            logs = service.container.logs()
-            raise TransientServiceStartError(
-                f"No error detected in logs but the container has stopped. Log dump: {logs}")
+            if self.persistent_error_detector is not None \
+                    and self._call_detector_with_correct_arguments(self.persistent_error_detector, line, service):
+                raise PersistentServiceStartError(line)
+            elif self.transient_error_detector is not None \
+                    and self._call_detector_with_correct_arguments(self.transient_error_detector, line, service):
+                raise TransientServiceStartError(line)
+            elif self._call_detector_with_correct_arguments(self.start_detector, line, service):
+                return
+
+        assert len(docker_client.containers.list(filters=dict(name=service.name))) == 0
+        logs = service.container.logs()
+        raise TransientServiceStartError(
+            f"No error detected in logs but the container has stopped. Log dump: {logs}")
