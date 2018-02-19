@@ -176,7 +176,7 @@ class DockerisedServiceController(
     def __init__(self, service_model: Type[ServiceType], repository: str, tag: str, ports: List[int],
                  start_timeout: int=math.inf, start_tries: int=math.inf, additional_run_settings: dict=None,
                  pull: bool=True,
-                 start_detector: LogListener=None, start_log_detector: LogListener=None,
+                 start_log_detector: LogListener=None,
                  persistent_error_log_detector: LogListener=None,
                  transient_error_log_detector: LogListener=None,
                  startup_monitor: Callable[[ServiceType], bool]=None,
@@ -198,12 +198,6 @@ class DockerisedServiceController(
         :param start_http_detector: callable that detects if the service is ready for use based on
         :param start_http_detection_endpoint: endpoint to call that should respond if the service has started
         """
-        if start_detector is not None:
-            logger.warning("Use of `start_detector` is deprecated - use `start_log_detector` instead")
-        if start_detector is not None:
-            if start_log_detector is not None:
-                raise ValueError("Cannot specify both `start_detector` and `start_log_detector` (use latter only)")
-            start_log_detector = start_detector
         if startup_monitor and (start_log_detector or persistent_error_log_detector or transient_error_log_detector or
                                 start_http_detector):
             raise ValueError("Cannot set `startup_monitor` in conjunction with any other detector")
