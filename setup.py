@@ -26,5 +26,6 @@ setup(
         "Operating System :: OS Independent",
         "Programming Language :: Python :: 3.6",
         "License :: OSI Approved :: MIT License"
-    ]
+    ],
+    zip_safe=True
 )
