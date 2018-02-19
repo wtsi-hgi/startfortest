@@ -2,11 +2,13 @@
 ## [Unreleased]
 ### Added
 - Optionally `pull` images from source repository (allows use of local only images).
-- Ability to easily specify http endpoint based service start detector.
+- HTTP endpoint based service start detector.
+- Runtime service start configuration.
 
 ### Changed
 - Changes to `DockerisedServiceController` constructor: `start_detector => start_log_detector`, 
-`persistent_error_detector => persistent_error_log_detector`, `transient_error_detector => transient_error_log_detector`
+`persistent_error_detector => persistent_error_log_detector`,
+`transient_error_detector => transient_error_log_detector`.
 
 ## 5.0.1 - 2017-02-06
 ### Changed

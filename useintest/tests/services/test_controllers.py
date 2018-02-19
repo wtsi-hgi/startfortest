@@ -45,3 +45,9 @@ class TestDockerisedServiceController(unittest.TestCase):
             start_tries=1
         ).build()
         self.assertRaises(ServiceStartError, ExitingController().start_service)
+
+    def test_runtime_configuration(self):
+        echoed = "Hello World"
+        runtime_configuration = dict(entrypoint=None, command=["echo", echoed])
+        with self._service_controller.start_service(runtime_configuration) as service:
+            self.assertEqual(echoed, service.container.logs().decode("utf-8").strip())

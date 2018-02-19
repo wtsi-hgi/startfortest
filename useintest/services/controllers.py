@@ -3,14 +3,13 @@ import math
 import socket
 from abc import ABCMeta, abstractmethod
 from inspect import signature
-
-import requests
-from time import sleep
-from typing import Dict, Iterator, List, Callable, TypeVar, Generic, Type, Union, Tuple
+from typing import Dict, Iterator, List, Callable, TypeVar, Generic, Type, Union, Any
 from uuid import uuid4
 
+import requests
 from docker.errors import NotFound
 from requests import Response
+from time import sleep
 from timeout_decorator import timeout_decorator
 
 from useintest._logging import create_logger
@@ -57,9 +56,10 @@ class ServiceController(Generic[ServiceType], metaclass=ABCMeta):
         self._service_model = service_model
 
     @abstractmethod
-    def start_service(self) -> ServiceType:
+    def start_service(self, runtime_configuration: Dict=None) -> ServiceType:
         """
         Starts a service.
+        :param runtime_configuration: additional runtime configuration
         :raises ServiceStartException: service could not be started (see logs for more information)
         :return: model of the started service
         """
@@ -77,10 +77,11 @@ class ContainerisedServiceController(Generic[ServiceType], ServiceController[Ser
     Controller of containers running a service brought up for testing.
     """
     @abstractmethod
-    def _start(self, service: Service):
+    def _start(self, service: Service, runtime_configuration: Dict):
         """
         Starts a container.
         :param service: model of the service to start
+        :param runtime_configuration: additional runtime configuration
         """
 
     @abstractmethod
@@ -108,7 +109,7 @@ class ContainerisedServiceController(Generic[ServiceType], ServiceController[Ser
         self.stop_on_exit = stop_on_exit
         self.startup_monitor = startup_monitor
 
-    def start_service(self) -> ServiceType:
+    def start_service(self, runtime_configuration: Dict=None) -> ServiceType:
         service = self._service_model()
         assert service is not None
         if self.stop_on_exit:
@@ -118,7 +119,7 @@ class ContainerisedServiceController(Generic[ServiceType], ServiceController[Ser
         while tries < self.start_tries:
             if tries > 0:
                 self._stop(service)
-            self._start(service)
+            self._start(service, runtime_configuration if runtime_configuration is not None else {})
             try:
                 if self.start_timeout is not math.inf:
                     @timeout_decorator.timeout(self.start_timeout, timeout_exception=TimeoutError)
@@ -172,7 +173,7 @@ class DockerisedServiceController(
             return detector(line, service)
 
     def __init__(self, service_model: Type[ServiceType], repository: str, tag: str, ports: List[int], *,
-                 start_timeout: int=math.inf, start_tries: int=math.inf, additional_run_settings: dict=None,
+                 start_timeout: int=math.inf, start_tries: int=math.inf, additional_run_settings: Dict[str, Any]=None,
                  pull: bool=True,
                  start_log_detector: LogListener=None,
                  persistent_error_log_detector: LogListener=None,
@@ -214,7 +215,7 @@ class DockerisedServiceController(
 
         self._log_iterator: Dict[Service, Iterator] = dict()
 
-    def _start(self, service: DockerisedServiceType):
+    def _start(self, service: DockerisedServiceType, runtime_configuration: Dict):
         pull_docker_image(self.repository, self.tag)
 
         if self.pull:
@@ -226,12 +227,14 @@ class DockerisedServiceController(
         service.ports = {port: _get_open_port() for port in self.ports}
         service.controller = self
 
+        create_kwargs = dict(self.run_settings)
+        create_kwargs.update(runtime_configuration)
         container = docker_client.containers.create(
             image=image.id,
             name=service.name,
             ports=service.ports,
             detach=True,
-            **self.run_settings)
+            **create_kwargs)
         service.container = container
 
         container.start()
