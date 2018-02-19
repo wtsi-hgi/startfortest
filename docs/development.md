@@ -1,21 +1,18 @@
 # Development
 ## Setup
-Install both library dependencies and the dependencies needed for testing:
+Install both the library's dependencies (for all modules) and the dependencies needed for testing:
 ```bash
-$ pip3 install -q -r requirements.txt
-$ pip3 install -q -r test_requirements.txt
+find . -name requirements.txt -exec pip install --disable-pip-version-check -r "{}" \;
+pip install -q -r test_requirements.txt
 ```
 
 ## Testing
-Using nosetests, in the project directory, run:
+In the project directory, run:
 ```bash
-$ nosetests -v --exclude-test=useintest.tests.services._common.TestDockerisedServiceControllerSubclass --exclude-test=useintest.tests.services._common.create_tests
+PYTHONPATH=. python -m unittest discover -v -s useintest/tests
 ```
+To test only the latest configuration of each module set: `TEST_LATEST_ONLY=1`.
 
-To generate a test coverage report with nosetests, add the flags:
-```
---with-coverage --cover-package=useintest --cover-inclusive 
-```
 
 ## Documentation
 The documentation can be served using [mkdocs](http://www.mkdocs.org/) and then viewed through a web browser. After 
