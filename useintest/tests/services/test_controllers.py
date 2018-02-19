@@ -1,10 +1,10 @@
 import unittest
-from copy import copy
 
 from docker.errors import NotFound
 
 from useintest.common import docker_client
 from useintest.services.builders import DockerisedServiceControllerTypeBuilder
+from useintest.services.exceptions import ServiceStartError
 
 NoopServiceController = DockerisedServiceControllerTypeBuilder(
     name="NoopController",
@@ -42,6 +42,7 @@ class TestDockerisedServiceController(unittest.TestCase):
             ports=[],
             tag="3.6",
             start_detector=lambda line: False,
+            start_tries=1
         ).build()
-        ExitingController().start_service()
+        self.assertRaises(ServiceStartError, ExitingController().start_service)
 

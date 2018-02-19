@@ -21,6 +21,8 @@ ServiceType = TypeVar("ServiceType", bound=Service)
 DockerisedServiceType = TypeVar("DockerisedServiceType", bound=DockerisedService)
 DockerisedServiceWithUsersType = TypeVar("DockerisedServiceWithUsersType", bound=DockerisedServiceWithUsers)
 
+_DOCKER_LOG_ENCODING = "utf-8"
+
 
 def _get_open_port() -> int:
     """
@@ -240,7 +242,7 @@ class DockerisedServiceController(
             for line in log_stream:
                 # XXX: Although non-streamed logs are returned as a string, the generator returns bytes!?
                 # http://docker-py.readthedocs.io/en/stable/containers.html#docker.models.containers.Container.logs
-                line = line.decode("utf-8")
+                line = line.decode(_DOCKER_LOG_ENCODING)
                 logging.debug(line)
 
                 if self.persistent_error_detector is not None \
@@ -252,7 +254,6 @@ class DockerisedServiceController(
                 elif self._call_detector_with_correct_arguments(self.start_detector, line, service):
                     return True
 
-            assert len(docker_client.containers.list(filters=dict(name=service.name))) == 0
             logs = service.container.logs()
-            raise TransientServiceStartError(
-                f"No error detected in logs but the container has stopped. Log dump: {logs}")
+            raise TransientServiceStartError(f"No error detected in logs but the container has stopped. Log dump: "
+                                             f"{logs.decode(_DOCKER_LOG_ENCODING)}")
