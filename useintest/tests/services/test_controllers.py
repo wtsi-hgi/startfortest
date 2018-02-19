@@ -12,7 +12,7 @@ NoopServiceController = DockerisedServiceControllerTypeBuilder(
     ports=[],
     tag="3.6",
     additional_run_settings={"entrypoint": "tail", "command": ["-f", "/etc/hosts"]},
-    start_detector=lambda log_line: log_line.strip() != "",
+    start_log_detector=lambda log_line: log_line.strip() != "",
 ).build()
 
 
@@ -45,4 +45,3 @@ class TestDockerisedServiceController(unittest.TestCase):
             start_tries=1
         ).build()
         self.assertRaises(ServiceStartError, ExitingController().start_service)
-

@@ -1,5 +1,7 @@
 from setuptools import setup, find_packages
 
+from useintest._meta import PACKAGE_NAME
+
 try:
     from pypandoc import convert
     def read_markdown(file: str) -> str:
@@ -9,7 +11,7 @@ except ImportError:
         return open(file, "r").read()
 
 setup(
-    name="useintest",
+    name=PACKAGE_NAME,
     version="5.0.0",
     author="Colin Nolan",
     author_email="colin.nolan@sanger.ac.uk",
