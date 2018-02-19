@@ -67,11 +67,13 @@ class Irods4ServiceController(IrodsBaseServiceController, metaclass=ABCMeta):
     """
     _PORT = 1247
     _CONFIG_FILE_NAME = "irods_environment.json"
+    _NATIVE_AUTHENTICATION_SCHEME = "native"
 
     _HOST_PARAMETER_NAME = "irods_host"
     _PORT_PARAMETER_NAME = "irods_port"
     _USERNAME_PARAMETER_NAME = "irods_user_name"
     _ZONE_PARAMETER_NAME = "irods_zone_name"
+    _AUTHENTICATION_SCHEME_PARAMETER_NAME = "irods_authentication_scheme"
 
     _USERS = [IrodsUser("rods", "testZone", "irods123", admin=True)]
 
@@ -86,7 +88,9 @@ class Irods4ServiceController(IrodsBaseServiceController, metaclass=ABCMeta):
             Irods4ServiceController._USERNAME_PARAMETER_NAME: user.username,
             Irods4ServiceController._HOST_PARAMETER_NAME: service.name,
             Irods4ServiceController._PORT_PARAMETER_NAME: Irods4ServiceController._PORT,
-            Irods4ServiceController._ZONE_PARAMETER_NAME: user.zone
+            Irods4ServiceController._ZONE_PARAMETER_NAME: user.zone,
+            Irods4ServiceController._AUTHENTICATION_SCHEME_PARAMETER_NAME:
+                Irods4ServiceController._NATIVE_AUTHENTICATION_SCHEME
         }
         config_as_json = json.dumps(config)
         logging.debug("Writing iRODS connection config to: %s" % file_location)

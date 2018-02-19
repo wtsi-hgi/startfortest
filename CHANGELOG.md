@@ -4,6 +4,7 @@
 - Optionally `pull` images from source repository (allows use of local only images).
 - HTTP endpoint based service start detector.
 - Runtime service start configuration.
+- `irods_authentication_scheme` to generated "irods_environment.json" files.
 
 ### Changed
 - Changes to `DockerisedServiceController` constructor: `start_detector => start_log_detector`, 
