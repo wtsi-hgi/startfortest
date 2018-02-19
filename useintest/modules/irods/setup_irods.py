@@ -29,11 +29,11 @@ def setup_irods(irods_service_controller: Type[IrodsBaseServiceController]=Irods
     # Write iRODS connection settings for the server
     settings_directory = _temp_manager.create_temp_directory(dir=MOUNTABLE_TEMP_DIRECTORY)
     config_file = os.path.join(settings_directory, icat_controller.config_file_name)
-    password = irods_service_controller.write_connection_settings(config_file, service)
+    irods_service_controller.write_connection_settings(config_file, service)
 
     # Setup iRODS executables
     ExecutablesController = irods_executables_controllers_and_versions[service.version]
     icommands_controller = ExecutablesController(service.name, settings_directory)
-    icommands_location = icommands_controller.write_executables_and_authenticate(password)
+    icommands_location = icommands_controller.write_executables_and_authenticate(service.root_user.password)
 
     return icommands_location, service, icommands_controller, icat_controller

@@ -87,6 +87,14 @@ class User(UseInTestModel):
         self.username = username
         self.password = password
 
+    def __eq__(self, other) -> bool:
+        return type(other) == type(self) \
+               and other.username == self.username \
+               and other.password == self.password
+
+    def __hash__(self) -> hash:
+        return hash(self.username + self.password)
+
 
 class ServiceWithUsers(Service):
     """

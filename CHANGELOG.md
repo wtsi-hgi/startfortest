@@ -10,6 +10,8 @@
 - Changes to `DockerisedServiceController` constructor: `start_detector => start_log_detector`, 
 `persistent_error_detector => persistent_error_log_detector`,
 `transient_error_detector => transient_error_log_detector`.
+- `Irods4ServiceController.write_connection_settings` no longer returns a password (use `service.root_user.password` 
+instead).
 
 ## 5.0.1 - 2017-02-06
 ### Changed
