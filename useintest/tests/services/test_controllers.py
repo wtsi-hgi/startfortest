@@ -1,4 +1,5 @@
 import unittest
+from copy import copy
 
 from docker.errors import NotFound
 
@@ -33,4 +34,14 @@ class TestDockerisedServiceController(unittest.TestCase):
         with self._service_controller.start_service() as service:
             self._service_controller.stop_service(service)
             self.assertIsNone(service.container)
+
+    def test_service_stopped_on_start_detection(self):
+        ExitingController = DockerisedServiceControllerTypeBuilder(
+            name="ExitingController",
+            repository="alpine",
+            ports=[],
+            tag="3.6",
+            start_detector=lambda line: False,
+        ).build()
+        ExitingController().start_service()
 
