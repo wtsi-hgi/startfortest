@@ -2,8 +2,8 @@ from useintest.services.builders import DockerisedServiceControllerTypeBuilder
 
 common_setup = {
     "repository": "couchdb",
-    "start_detector": lambda log_line: "Apache CouchDB has started" in log_line,
-    "persistent_error_detector": lambda log_line: "no space left on device" in log_line,
+    "start_log_detector": lambda log_line: "Apache CouchDB has started" in log_line,
+    "persistent_error_log_detector": lambda log_line: "no space left on device" in log_line,
     "ports": [5984]
 }
 

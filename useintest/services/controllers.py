@@ -169,7 +169,7 @@ class DockerisedServiceController(
         else:
             return detector(line, service)
 
-    def __init__(self, service_model: Type[ServiceType], repository: str, tag: str, ports: List[int],
+    def __init__(self, service_model: Type[ServiceType], repository: str, tag: str, ports: List[int], *,
                  start_timeout: int=math.inf, start_tries: int=math.inf, additional_run_settings: dict=None,
                  pull: bool=True,
                  start_log_detector: LogListener=None,

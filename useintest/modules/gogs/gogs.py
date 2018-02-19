@@ -53,8 +53,8 @@ common_setup = {
     "superclass": GogsBaseServiceController,
     "service_model": DockerisedServiceWithUsers,
     "repository": "gogs/gogs",
-    "start_detector": lambda log_line: "127.0.0.1\tlocalhost" in log_line,
-    "transient_error_detector": lambda log_line: "the container has stopped" in log_line,
+    "start_log_detector": lambda log_line: "127.0.0.1\tlocalhost" in log_line,
+    "transient_error_log_detector": lambda log_line: "the container has stopped" in log_line,
     "ports": [3000],
     "additional_run_settings": {"entrypoint": "tail", "command": ["-f", "/etc/hosts"]}
 }

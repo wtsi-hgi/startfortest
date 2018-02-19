@@ -36,7 +36,7 @@ class IrodsBaseServiceController(DockerisedServiceController[IrodsDockerisedServ
         return "No space left on device" in log_line
 
     def __init__(self, version: Version, users: Sequence[IrodsUser], config_file_name: str,
-                 repository: str, tag: str, ports: List[int], start_detector: Callable[[str], bool], **kwargs):
+                 repository: str, tag: str, ports: List[int], start_log_detector: Callable[[str], bool], **kwargs):
         """
         Constructor.
         :param version:
@@ -45,10 +45,11 @@ class IrodsBaseServiceController(DockerisedServiceController[IrodsDockerisedServ
         :param repository:
         :param tag:
         :param ports:
-        :param start_detector:
+        :param start_log_detector:
         :param kwargs:
         """
-        super().__init__(IrodsDockerisedService, repository, tag, ports, start_detector, **kwargs)
+        super().__init__(
+            IrodsDockerisedService, repository, tag, ports, start_log_detector=start_log_detector, **kwargs)
         self.config_file_name = config_file_name
         self._version = version
         self._users = users
@@ -126,9 +127,9 @@ class Irods4ServiceController(IrodsBaseServiceController, metaclass=ABCMeta):
         version = version if version is not None else Version(docker_tag)
         super().__init__(version, Irods4ServiceController._USERS, Irods4ServiceController._CONFIG_FILE_NAME,
                          docker_repository, docker_tag, [Irods4ServiceController._PORT],
-                         Irods4ServiceController._start_detector,
-                         transient_error_detector=Irods4ServiceController._transient_error_detector,
-                         persistent_error_detector=IrodsBaseServiceController._persistent_error_detector,
+                         start_log_detector=Irods4ServiceController._start_detector,
+                         transient_error_log_detector=Irods4ServiceController._transient_error_detector,
+                         persistent_error_log_detector=IrodsBaseServiceController._persistent_error_detector,
                          start_timeout=start_timeout, start_tries=start_tries)
 
 

@@ -27,8 +27,8 @@ class GitLabBaseServiceController(DockerisedServiceController[ServiceType], meta
 common_setup = {
     "superclass": GitLabBaseServiceController,
     "repository": _repository,
-    "start_detector": _start_detector,
-    "persistent_error_detector": _persistent_error_detector,
+    "start_log_detector": _start_detector,
+    "persistent_error_log_detector": _persistent_error_detector,
     "ports": _ports,
     "additional_run_settings": {"environment": _environment_variables}
 }

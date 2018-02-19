@@ -59,7 +59,7 @@ class ConsulDockerisedService(DockerisedService):
 
 common_setup = {
     "repository": _repository,
-    "start_detector": _start_detector,
+    "start_log_detector": _start_detector,
     "ports": _ports,
     "service_model": ConsulDockerisedService
 }
