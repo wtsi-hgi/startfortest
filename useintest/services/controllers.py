@@ -207,7 +207,8 @@ class DockerisedServiceController(
         if startup_monitor and (start_log_detector or persistent_error_log_detector or transient_error_log_detector or
                                 start_http_detector):
             raise ValueError("Cannot set `startup_monitor` in conjunction with any other detector")
-        if not(start_http_detector and start_http_detection_endpoint):
+        if (start_http_detector is None and start_http_detection_endpoint is not None) or \
+                (start_http_detector is not None and start_http_detection_endpoint is None):
             raise ValueError("Must specify both `start_http_detector` and `start_http_detection_endpoint`")
 
         super().__init__(service_model, start_timeout, start_tries, startup_monitor=startup_monitor)
