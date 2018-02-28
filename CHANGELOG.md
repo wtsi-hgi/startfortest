@@ -5,6 +5,7 @@
 - HTTP endpoint based service start detector.
 - Runtime service start configuration.
 - `irods_authentication_scheme` to generated "irods_environment.json" files.
+- `url` property to `Service`.
 
 ### Changed
 - Changes to `DockerisedServiceController` constructor: `start_detector => start_log_detector`, 

@@ -12,8 +12,28 @@ UserType = TypeVar("UserType", bound="User")
 
 class Service(UseInTestModel):
     """
-    Model of a service.
+    A service.
     """
+    @property
+    def port(self) -> int:
+        """
+        Gets the port on the host machine.
+        :return: the exposed port
+        :raises UnexpectedNumberOfPortsException: if there is more than one port exposed
+        """
+        if len(self.ports) != 1:
+            raise UnexpectedNumberOfPortsError(f"{len(self.ports)} ports are exposed (cannot use `port`)")
+        return list(self.ports.values())[0]
+
+    @property
+    def url(self) -> str:
+        """
+        Gets base URL.
+        :return: the base url (without trailing slash)
+        :raises UnexpectedNumberOfPortsException: if there is more than one port exposed
+        """
+        return f"http://{self.host}:{self.port}"
+
     def __init__(self):
         """
         Constructor.
@@ -22,17 +42,6 @@ class Service(UseInTestModel):
         # FIXME: Assumption about where the Docker machine is accessible (i.e. it could be on a VM)
         self.host = "localhost"
         self.ports = bidict()
-
-    @property
-    def port(self) -> int:
-        """
-        Gets the port on the localhost. If there is more than one port exposed, an
-        `UnexpectedNumberOfPortsException` will be raised.
-        :return: the exposed port
-        """
-        if len(self.ports) != 1:
-            raise UnexpectedNumberOfPortsError("%d ports are exposed (cannot use `port`)" % len(self.ports))
-        return list(self.ports.values())[0]
 
     def get_external_port_mapping_to(self, port: int) -> int:
         """
@@ -45,7 +54,7 @@ class Service(UseInTestModel):
 
 class DockerisedService(Service):
     """
-    Model of a service running in a Docker container.
+    A service running in a Docker container.
     """
     @property
     def container(self) -> Optional[Container]:
