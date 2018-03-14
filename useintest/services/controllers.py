@@ -216,8 +216,6 @@ class DockerisedServiceController(
         self._log_iterator: Dict[Service, Iterator] = dict()
 
     def _start(self, service: DockerisedServiceType, runtime_configuration: Dict):
-        pull_docker_image(self.repository, self.tag)
-
         if self.pull:
             image = docker_client.images.pull(self.repository, tag=self.tag)
         else:
